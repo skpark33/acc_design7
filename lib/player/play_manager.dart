@@ -121,9 +121,20 @@ class PlayManager {
     return mute;
   }
 
+  Future<bool> getCurrentAutoStart() async {
+    bool autoStart = false;
+    await _lock.synchronized(() async {
+      if (_currentIndex >= 0 && _currentIndex < playList.value.length) {
+        autoStart = playList.value[_currentIndex].autoStart;
+      }
+    });
+    return autoStart;
+  }
+
   Future<void> _timerExpired(Timer timer) async {
     ContentsModel? currentModel;
     await _lock.synchronized(() async {
+      //if (baseWidget.isAnime()) return;
       if (playList.value.isEmpty) return;
 
       // 아무것도 돌고 있지 않다면,
@@ -152,7 +163,10 @@ class PlayManager {
         return;
       }
       if (currentModel!.isVideo()) {
+        //if (currentModel!.prevState != PlayState.end &&
+        //   currentModel!.state == PlayState.end) {
         if (currentModel!.state == PlayState.end) {
+          currentModel!.setState(PlayState.none);
           next();
           // 비디오가 마무리 작업을 할 시간을 준다.
           Future.delayed(Duration(milliseconds: (_timeGap / 4).round()));
@@ -274,13 +288,15 @@ class PlayManager {
     });
   }
 
-  Future<void> next() async {
+  Future<void> next({bool pause = false}) async {
     await _lock.synchronized(() async {
       if (playList.value.isNotEmpty) {
         int prevIndex = _currentIndex;
         if (_currentIndex >= 0) {
-          //logHolder.log('pause($_currentIndex)--');
-          //await playList.value[_currentIndex].pause();
+          if (pause) {
+            logHolder.log('pause($_currentIndex)--');
+            await playList.value[_currentIndex].pause();
+          }
         }
         _currentIndex++;
         if (_currentIndex >= playList.value.length) {
@@ -289,26 +305,27 @@ class PlayManager {
         //logHolder.log('play($_currentIndex)--');
         _currentPlaySec = 0;
 
-        if (!baseWidget.isAnime()) {
-          //await playList.value[_currentIndex].play();
-        }
-        if (/*doInvalidate || */ prevIndex != _currentIndex) {
+        //if (!baseWidget.isAnime()) {
+        if (prevIndex != _currentIndex) {
           baseWidget.invalidate();
         } else {
           await playList.value[_currentIndex].play();
         }
+        //}
         accManagerHolder!.resizeMenu(playList.value[_currentIndex].model!.type);
       }
     });
   }
 
-  Future<void> prev() async {
+  Future<void> prev({bool pause = false}) async {
     await _lock.synchronized(() async {
       if (playList.value.isNotEmpty) {
         int prevIndex = _currentIndex;
         if (_currentIndex >= 0) {
-          // logHolder.log('pause($_currentIndex)');
-          // await playList.value[_currentIndex].pause();
+          if (pause) {
+            logHolder.log('pause($_currentIndex)');
+            await playList.value[_currentIndex].pause();
+          }
         }
         _currentIndex--;
         if (_currentIndex < 0) {

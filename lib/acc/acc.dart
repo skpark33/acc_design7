@@ -376,6 +376,11 @@ class ACC with ACCProperty {
     accChild.invalidate();
   }
 
+  Future<void> pauseAllExceptCurrent() async {
+    //logHolder.log('invalidateContents');
+    await accChild.pauseAllExceptCurrent();
+  }
+
   bool resizeWidget(
       DragUpdateDetails details, Size widgetSize, List<bool> isCornerHover) {
     if (details.delta.dx == 0 && details.delta.dy == 0) return false;
@@ -660,12 +665,12 @@ class ACC with ACCProperty {
     return accChild.playManager!.getCurrentMute();
   }
 
-  Future<void> next() async {
-    await accChild.playManager!.next();
+  Future<void> next({bool pause = false}) async {
+    await accChild.playManager!.next(pause: pause);
   }
 
-  Future<void> prev() async {
-    await accChild.playManager!.prev();
+  Future<void> prev({bool pause = false}) async {
+    await accChild.playManager!.prev(pause: pause);
   }
 
   void pause() {

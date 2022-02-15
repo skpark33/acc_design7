@@ -468,7 +468,7 @@ class WidgetPropertyState extends State<WidgetProperty>
           angle: acc.rotate.value,
           size: Size(200, 200),
           onValueChanged: (value) {
-            logHolder.log('onValueChanged: $value');
+            //logHolder.log('onValueChanged: $value');
             acc.rotate.set(value);
             acc.setState();
             setState(() {});
@@ -558,8 +558,10 @@ class WidgetPropertyState extends State<WidgetProperty>
                 IconButton(
                   onPressed: () {
                     acc.animeType.set(AnimeType.none);
+                    // acc.pauseAllExceptCurrent().then((_) {
                     acc.invalidateContents();
                     setState(() {});
+                    //});
                   },
                   icon: Icon(Icons.not_interested),
                   iconSize: acc.animeType.value == AnimeType.none ? 36 : 24,
@@ -573,9 +575,11 @@ class WidgetPropertyState extends State<WidgetProperty>
                       await Future.delayed(Duration(seconds: 1));
                       _aniIconController.reverse();
                     });
+                    //acc.pauseAllExceptCurrent().then((_) {
                     acc.animeType.set(AnimeType.carousel);
                     acc.invalidateContents();
                     setState(() {});
+                    //});
                   },
                   iconSize: acc.animeType.value == AnimeType.carousel ? 36 : 24,
                   icon: Icon(Icons.view_carousel_outlined),
@@ -589,9 +593,11 @@ class WidgetPropertyState extends State<WidgetProperty>
                       await Future.delayed(Duration(seconds: 1));
                       _aniIconController.reverse();
                     });
+                    //acc.pauseAllExceptCurrent().then((_) {
                     acc.animeType.set(AnimeType.flip);
                     acc.invalidateContents();
                     setState(() {});
+                    //});
                   },
                   iconSize: acc.animeType.value == AnimeType.flip ? 36 : 24,
                   icon: Icon(Icons.flip_outlined),

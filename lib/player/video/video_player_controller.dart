@@ -405,11 +405,11 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
           value = value.copyWith(buffered: event.buffered);
           break;
         case VideoEventType.bufferingStart:
-          logHolder.log('bufferingStart');
+          //logHolder.log('bufferingStart');
           value = value.copyWith(isBuffering: true);
           break;
         case VideoEventType.bufferingEnd:
-          logHolder.log('bufferingEnd');
+          //logHolder.log('bufferingEnd');
           value = value.copyWith(isBuffering: false);
           break;
         case VideoEventType.unknown:
@@ -485,7 +485,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
     logHolder.log('pause');
     value = value.copyWith(isPlaying: false);
     await _applyPlayPause();
-    logHolder.log('pause end');
+    //logHolder.log('pause end');
   }
 
   Future<void> _applyLooping() async {
@@ -672,7 +672,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
     // Prevent VideoPlayer from causing an exception to be thrown when attempting to
     // remove its own listener after the controller has already been disposed.
     if (!_isDisposed) {
-      logHolder.log('removeListener($dataSource)');
+      //logHolder.log('removeListener($dataSource)');
       super.removeListener(listener);
     }
   }
@@ -761,7 +761,7 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
   @override
   void deactivate() {
-    logHolder.log('deactivate()');
+    //logHolder.log('deactivate()');
     super.deactivate();
     widget.controller.removeListener(_listener);
   }

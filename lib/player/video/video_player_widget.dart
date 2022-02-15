@@ -134,10 +134,10 @@ class VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     super.initState();
 
     WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-      if (widget.autoStart) {
-        logHolder.log('initState play');
-        widget.play();
-      }
+      logHolder.log('initState video');
+      //   if (autoStart) {
+      //     logHolder.log('initState play');
+      //     widget.play();
     });
   }
 
@@ -151,7 +151,13 @@ class VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    logHolder.log('VideoPlayerWidgetState');
+    logHolder.log('VideoPlayerWidgetState', level: 5);
+
+    if (widget.autoStart) {
+      logHolder.log('initState play', level: 5);
+      widget.play();
+    }
+
     return ClipRRect(
       borderRadius: BorderRadius.only(
         topRight: Radius.circular(widget.acc.radiusTopRight.value),

@@ -8,12 +8,13 @@ CarouselSlider carouselWidget(
     BuildContext context,
     double height,
     List<AbsPlayWidget> widgetList,
+    dynamic Function(int, CarouselPageChangedReason)? onPageChanged,
     int playSec, // millisec
     //CarouselController carouselController,
     int indexNo) {
   return CarouselSlider(
     options: CarouselOptions(
-        height: height * 0.9,
+        height: height * 0.8,
         initialPage: indexNo,
         enlargeCenterPage: true,
         autoPlay: false,
@@ -24,6 +25,9 @@ CarouselSlider carouselWidget(
         scrollDirection: Axis.horizontal,
         onPageChanged: (index, reason) {
           logHolder.log('Carousel onPageChanged(index=$index)');
+          if (onPageChanged != null) {
+            onPageChanged.call(index, reason);
+          }
           //setState(() {});
         }),
     //carouselController: carouselController,

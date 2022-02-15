@@ -37,6 +37,16 @@ class BaseWidget extends StatefulWidget {
     playManager!.invalidate();
   }
 
+  Future<void> pauseAllExceptCurrent() async {
+    int len = playManager!.playList.value.length;
+    for (int i = 0; i < len; i++) {
+      if (i == playManager!.currentIndex) {
+        continue;
+      }
+      await playManager!.playList.value[i].pause();
+    }
+  }
+
   AnimeType getAnimeType() {
     if (acc != null) {
       return acc!.animeType.value;
@@ -56,19 +66,30 @@ class BaseWidget extends StatefulWidget {
     return true;
   }
 
-  void resetCarousel() {
+  int resetCarousel() {
     _carouselList.clear();
     int limit = playManager!.playList.value.length - 1;
-    int second = playManager!.currentIndex;
+    int first = playManager!.currentIndex;
 
-    if (second < 0 || second > limit) return;
+    if (first < 0 || first > limit) return 5000;
 
-    int first = (second == 0 ? limit : second - 1);
+    int second = (first == limit ? 0 : first + 1);
     int third = (second == limit ? 0 : second + 1);
+
+    // playManager!.playList.value[first].pause();
+    // playManager!.playList.value[second].pause();
+    // playManager!.playList.value[third].pause();
+    logHolder.log('reset resetCarousel', level: 5);
+
+    playManager!.playList.value[first].autoStart = true;
+    playManager!.playList.value[second].autoStart = false;
+    playManager!.playList.value[third].autoStart = false;
 
     _carouselList.add(playManager!.playList.value[first]);
     _carouselList.add(playManager!.playList.value[second]);
     _carouselList.add(playManager!.playList.value[third]);
+
+    return playManager!.playList.value[first].model!.playTime;
   }
 }
 
@@ -88,7 +109,10 @@ class BaseWidgetState extends State<BaseWidget> {
   @override
   Widget build(BuildContext context) {
     logHolder.log('baseWidget build');
-
+    int playTime = 5000;
+    if (widget.getAnimeType() == AnimeType.carousel) {
+      playTime = widget.resetCarousel();
+    }
     return Container(
       color: Colors.transparent,
       child: FutureBuilder(
@@ -113,13 +137,14 @@ class BaseWidgetState extends State<BaseWidget> {
                 if (widget.playManager!.playList.value.length < 2) {
                   return snapshot.data!;
                 }
-                widget.resetCarousel();
+
                 return carouselWidget(
                     context,
                     widget.acc!.containerSize.value.height,
                     widget._carouselList,
-                    4000,
-                    1);
+                    (index, reason) {}, // onPageChanged
+                    playTime,
+                    0); // 0은 첫번째 index(즉 0번째)가 가운데로 들어오라는 뜻이다.
               //carouselController!,
               //widget.playManager!.currentIndex);
 

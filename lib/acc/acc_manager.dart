@@ -185,7 +185,7 @@ class ACCManager extends ChangeNotifier {
     if (acc == null) {
       return;
     }
-    acc.next();
+    acc.next(pause: true);
   }
 
   void pause(BuildContext context) {
@@ -212,7 +212,7 @@ class ACCManager extends ChangeNotifier {
     if (acc == null) {
       return;
     }
-    acc.prev();
+    acc.prev(pause: true);
   }
 
   void mute(BuildContext context) {
