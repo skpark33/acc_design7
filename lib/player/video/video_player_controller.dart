@@ -11,7 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:video_player_platform_interface/video_player_platform_interface.dart';
-
+import 'package:synchronized/synchronized.dart'; //skpark add
 export 'package:video_player_platform_interface/video_player_platform_interface.dart'
     show DurationRange, DataSourceType, VideoFormat, VideoPlayerOptions;
 
@@ -306,7 +306,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   late _VideoAppLifeCycleObserver _lifeCycleObserver;
 
   //skpark
-  //int _completeCounter = 0;
+  final Lock _playLock = Lock();
 
   /// The id of a texture that hasn't been initialized.
   @visibleForTesting
@@ -427,6 +427,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
     void errorListener(Object obj) {
       final PlatformException e = obj as PlatformException;
       value = VideoPlayerValue.erroneous(e.message!);
+      logHolder.log('errorListener=${e.message!}', level: 6);
       _timer?.cancel();
       if (!initializingCompleter.isCompleted) {
         initializingCompleter.completeError(obj);
@@ -441,7 +442,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
 
   @override
   Future<void> dispose() async {
-    logHolder.log('controller disposed $dataSource');
+    logHolder.log('controller disposed $dataSource', level: 6);
     if (_creatingCompleter != null) {
       await _creatingCompleter!.future;
       if (!_isDisposed) {
@@ -464,13 +465,16 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
   /// has been sent to the platform, not when playback itself is totally
   /// finished.
   Future<void> play() async {
-    if (value.position == value.duration) {
-      logHolder.log('rewind');
-      await seekTo(const Duration());
-    }
-    logHolder.log('play');
-    value = value.copyWith(isPlaying: true);
-    await _applyPlayPause();
+    //skpark add lock
+    await _playLock.synchronized(() async {
+      if (value.position == value.duration) {
+        logHolder.log('rewind');
+        await seekTo(const Duration());
+      }
+      logHolder.log('play');
+      value = value.copyWith(isPlaying: true);
+      await _applyPlayPause();
+    });
   }
 
   /// Sets whether or not the video should loop after playing once. See also
@@ -482,15 +486,18 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
 
   /// Pauses the video.
   Future<void> pause() async {
-    logHolder.log('pause');
-    value = value.copyWith(isPlaying: false);
-    await _applyPlayPause();
-    //logHolder.log('pause end');
+    //skpark add lock
+    await _playLock.synchronized(() async {
+      logHolder.log('pause');
+      value = value.copyWith(isPlaying: false);
+      await _applyPlayPause();
+      //logHolder.log('pause end');
+    });
   }
 
   Future<void> _applyLooping() async {
     if (_isDisposedOrNotInitialized) {
-      logHolder.log('_isDisposedOrNotInitialized');
+      logHolder.log('_isDisposedOrNotInitialized', level: 6);
       return;
     }
     await _videoPlayerPlatform.setLooping(_textureId, value.isLooping);
@@ -498,7 +505,7 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
 
   Future<void> _applyPlayPause() async {
     if (_isDisposedOrNotInitialized) {
-      logHolder.log('_isDisposedOrNotInitialized');
+      logHolder.log('_isDisposedOrNotInitialized', level: 6);
       return;
     }
     if (value.isPlaying) {
@@ -694,12 +701,13 @@ class _VideoAppLifeCycleObserver extends Object with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     switch (state) {
       case AppLifecycleState.paused:
-        logHolder.log('AppLifecycleState.paused');
+        logHolder.log('AppLifecycleState.paused', level: 6);
         _wasPlayingBeforePause = _controller.value.isPlaying;
         _controller.pause();
         break;
       case AppLifecycleState.resumed:
         if (_wasPlayingBeforePause) {
+          logHolder.log('AppLifecycleState.played', level: 6);
           _controller.play();
         }
         break;

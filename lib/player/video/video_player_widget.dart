@@ -149,35 +149,75 @@ class VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     super.dispose();
   }
 
+  Future<bool> waitInit() async {
+    bool isReady = widget.wcontroller!.value.isInitialized;
+    while (!isReady) {
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+    if (widget.autoStart) {
+      logHolder.log('initState play', level: 5);
+      await widget.play();
+    }
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     logHolder.log('VideoPlayerWidgetState', level: 5);
 
-    if (widget.autoStart) {
-      logHolder.log('initState play', level: 5);
-      widget.play();
-    }
+    Size realSize = widget.acc.getRealSize();
 
-    return ClipRRect(
-      borderRadius: BorderRadius.only(
-        topRight: Radius.circular(widget.acc.radiusTopRight.value),
-        topLeft: Radius.circular(widget.acc.radiusTopLeft.value),
-        bottomRight: Radius.circular(widget.acc.radiusBottomRight.value),
-        bottomLeft: Radius.circular(widget.acc.radiusBottomLeft.value),
-      ),
-      child: widget.wcontroller!.value.isInitialized
-          ? SizedBox.expand(
-              child: FittedBox(
-                  fit: BoxFit.cover,
-                  child: SizedBox(
-                    width: widget.acc.getRealWidth(),
-                    height: widget.acc.getRealHeight(),
-                    child: VideoPlayer(widget.wcontroller!,
-                        key: ValueKey(widget.model!.url)),
-                    //child: VideoPlayer(controller: widget.wcontroller!),
-                  )),
-            )
-          : const Text('not init'),
-    );
+    // aspectorRatio 는 실제 비디오의  넓이/높이 이다.
+    double videoRatio = widget.wcontroller!.value.aspectRatio;
+
+    double outerWidth = realSize.width;
+    double outerHeight = realSize.height;
+
+    if (!widget.acc.sourceRatio.value) {
+      logHolder.log(
+          'before ${outerWidth.round()},${outerHeight.round()}, aspectRatio=${videoRatio.toStringAsFixed(2)}',
+          level: 6);
+
+      if (videoRatio >= 1.0) {
+        outerWidth = videoRatio * outerWidth;
+        outerHeight = outerWidth * (1.0 / videoRatio);
+      } else {
+        outerHeight = (1.0 / videoRatio) * outerHeight;
+        outerWidth = videoRatio * outerHeight;
+      }
+      double areaRatio = outerWidth / outerHeight;
+      logHolder.log(
+          'after ${outerWidth.round()},${outerHeight.round()}, ${areaRatio.toStringAsFixed(2)}, aspectRatio=${videoRatio.toStringAsFixed(2)}',
+          level: 6);
+    }
+    return FutureBuilder(
+        future: waitInit(),
+        builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+          return ClipRRect(
+              borderRadius: BorderRadius.only(
+                topRight: Radius.circular(widget.acc.radiusTopRight.value),
+                topLeft: Radius.circular(widget.acc.radiusTopLeft.value),
+                bottomRight:
+                    Radius.circular(widget.acc.radiusBottomRight.value),
+                bottomLeft: Radius.circular(widget.acc.radiusBottomLeft.value),
+              ),
+              child: //// widget.wcontroller!.value.isInitialized ?
+                  SizedBox.expand(
+                child: FittedBox(
+                    fit: BoxFit.cover,
+                    child: SizedBox(
+                      //width: realSize.width,
+                      //height: realSize.height,
+                      width: outerWidth,
+                      height: outerHeight,
+                      child: VideoPlayer(widget.wcontroller!,
+                          key: ValueKey(widget.model!.url)),
+                      //child: VideoPlayer(controller: widget.wcontroller!),
+                    )),
+              )
+              //: const Text('not init'),
+              );
+          //);
+        });
   }
 }

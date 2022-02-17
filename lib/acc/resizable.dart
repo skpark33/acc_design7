@@ -41,11 +41,20 @@ class ResiablePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     // resize 가 가능하게 하는...외곽선과 꼭지가 나오도록 한다.
+
     if (resizable) {
       double r = resizeButtonSize;
 
-      var border1 = Paint()
-        //..color = Colors.pink[500]!.withOpacity(0.5)
+      var cornerBrush1 = Paint()
+        ..color = Colors.pink.withOpacity(.3)
+        ..isAntiAlias = true
+        ..strokeWidth = 2.0
+        ..style = PaintingStyle.fill
+        //..blendMode = BlendMode.darken
+        //..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10)
+        ..strokeJoin = StrokeJoin.round;
+      var cornerBrush2 = Paint()
+        ..color = Colors.blue[500]!.withOpacity(0.5)
         // ..shader = LinearGradient(
         //   begin: Alignment.topRight,
         //   end: Alignment.bottomLeft,
@@ -54,15 +63,16 @@ class ResiablePainter extends CustomPainter {
         //     Colors.pink[200]!.withOpacity(0.5),
         //   ],
         // ).createShader(Rect.fromLTRB(0, 0, r, r))
-        ..color = Colors.pink.withOpacity(.3)
         ..isAntiAlias = true
         ..strokeWidth = 2.0
         ..style = PaintingStyle.fill
         //..blendMode = BlendMode.darken
         //..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10)
-        ..strokeJoin = StrokeJoin.round;
+        ..strokeJoin = StrokeJoin.round
+        ..blendMode = BlendMode.darken
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
 
-      var border2 = Paint()
+      var radiusBrush1 = Paint()
         ..color = Colors.pink.withOpacity(.3)
         ..isAntiAlias = true
         ..strokeWidth = 2.0
@@ -70,8 +80,16 @@ class ResiablePainter extends CustomPainter {
         //r..blendMode = BlendMode.darken
         //..maskFilter = const MaskFilter.blur(BlurStyle.solid, 10)
         ..strokeJoin = StrokeJoin.round;
+      var radiusBrush2 = Paint()
+        ..color = Colors.blue
+        ..isAntiAlias = true
+        ..strokeWidth = 2.0
+        ..style = PaintingStyle.fill
+        //r..blendMode = BlendMode.darken
+        //..maskFilter = const MaskFilter.blur(BlurStyle.solid, 10)
+        ..strokeJoin = StrokeJoin.round;
 
-      var border3 = Paint()
+      var radiusBrush3 = Paint()
         ..color = Colors.white
         ..isAntiAlias = true
         ..strokeWidth = 2.0
@@ -81,67 +99,67 @@ class ResiablePainter extends CustomPainter {
         ..strokeJoin = StrokeJoin.round;
 
       // 실제크기
-      //canvas.drawRRect(RRect.fromLTRBAndCorners(0, 0, widgetSize.width, widgetSize.height), border2);
+      //canvas.drawRRect(RRect.fromLTRBAndCorners(0, 0, widgetSize.width, widgetSize.height), radiusBrush1);
 
       // 보이는 크기
-      //canvas.drawRRect(RRect.fromLTRBAndCorners(0 + r, 0 + r, widgetSize.width - r, widgetSize.height - r), border2);
+      //canvas.drawRRect(RRect.fromLTRBAndCorners(0 + r, 0 + r, widgetSize.width - r, widgetSize.height - r), radiusBrush1);
 
-      // if (isCornerHover[0]) canvas.drawCircle(const Offset(0, 0), r, border1);
-      // if (isCornerHover[1]) canvas.drawCircle(Offset(0, widgetSize.height), r, border1);
-      // if (isCornerHover[2]) canvas.drawCircle(Offset(widgetSize.width, 0), r, border1);
-      // if (isCornerHover[3]) canvas.drawCircle(Offset(widgetSize.width, widgetSize.height), r, border1);
+      // if (isCornerHover[0]) canvas.drawCircle(const Offset(0, 0), r, cornerBrush);
+      // if (isCornerHover[1]) canvas.drawCircle(Offset(0, widgetSize.height), r, cornerBrush);
+      // if (isCornerHover[2]) canvas.drawCircle(Offset(widgetSize.width, 0), r, cornerBrush);
+      // if (isCornerHover[3]) canvas.drawCircle(Offset(widgetSize.width, widgetSize.height), r, cornerBrush);
       if (isCornered || isHover) {
         double outCenter = -r / 2;
         double inCenter = -(r - 10) / 2;
         double inR = r - 10;
         double outR = r;
         canvas.drawArc(Rect.fromLTWH(outCenter, outCenter, outR, outR), 0,
-            .5 * pi, true, border1);
+            .5 * pi, true, isCornerHover[0] ? cornerBrush2 : cornerBrush1);
         canvas.drawArc(
             Rect.fromLTWH(outCenter, widgetSize.height + outCenter, outR, outR),
             1.5 * pi,
             .5 * pi,
             true,
-            border1);
+            isCornerHover[1] ? cornerBrush2 : cornerBrush1);
         canvas.drawArc(
             Rect.fromLTWH(widgetSize.width + outCenter, outCenter, outR, outR),
             .5 * pi,
             .5 * pi,
             true,
-            border1);
+            isCornerHover[2] ? cornerBrush2 : cornerBrush1);
         canvas.drawArc(
             Rect.fromLTWH(widgetSize.width + outCenter,
                 widgetSize.height + outCenter, outR, outR),
             pi,
             .5 * pi,
             true,
-            border1);
+            isCornerHover[3] ? cornerBrush2 : cornerBrush1);
 
         canvas.drawArc(Rect.fromLTWH(inCenter, inCenter, inR, inR), 0, .5 * pi,
-            true, border3);
+            true, radiusBrush3);
         canvas.drawArc(
             Rect.fromLTWH(inCenter, widgetSize.height + inCenter, inR, inR),
             1.5 * pi,
             .5 * pi,
             true,
-            border3);
+            radiusBrush3);
         canvas.drawArc(
             Rect.fromLTWH(widgetSize.width + inCenter, inCenter, inR, inR),
             .5 * pi,
             .5 * pi,
             true,
-            border3);
+            radiusBrush3);
         canvas.drawArc(
             Rect.fromLTWH(widgetSize.width + inCenter,
                 widgetSize.height + inCenter, inR, inR),
             pi,
             .5 * pi,
             true,
-            border3);
+            radiusBrush3);
       }
 
       if (isHover) {
-        //canvas.drawOval(Rect.fromLTWH(0, 0, widgetSize.width, widgetSize.height), border2);
+        //canvas.drawOval(Rect.fromLTWH(0, 0, widgetSize.width, widgetSize.height), radiusBrush1);
 
         double dx = 0;
         double dy = 0;
@@ -156,12 +174,12 @@ class ResiablePainter extends CustomPainter {
             Offset(widgetSize.width * (1 / 8) + dx,
                 widgetSize.height * (1 / 8) + dy),
             r / 3,
-            border2);
+            isRadiusHover[0] ? radiusBrush2 : radiusBrush1);
         canvas.drawCircle(
             Offset(widgetSize.width * (1 / 8) + dx,
                 widgetSize.height * (1 / 8) + dy),
             r / 4,
-            border3);
+            radiusBrush3);
 
         dx = dy = 0;
         if (radiusTopRight > 0) {
@@ -173,12 +191,12 @@ class ResiablePainter extends CustomPainter {
             Offset(widgetSize.width * (7 / 8) + dx,
                 widgetSize.height * (1 / 8) + dy),
             r / 3,
-            border2);
+            isRadiusHover[2] ? radiusBrush2 : radiusBrush1);
         canvas.drawCircle(
             Offset(widgetSize.width * (7 / 8) + dx,
                 widgetSize.height * (1 / 8) + dy),
             r / 4,
-            border3);
+            radiusBrush3);
 
         dx = dy = 0;
         if (radiusBottomLeft > 0) {
@@ -190,12 +208,12 @@ class ResiablePainter extends CustomPainter {
             Offset(widgetSize.width * (1 / 8) + dx,
                 widgetSize.height * (7 / 8) + dy),
             r / 3,
-            border2);
+            isRadiusHover[1] ? radiusBrush2 : radiusBrush1);
         canvas.drawCircle(
             Offset(widgetSize.width * (1 / 8) + dx,
                 widgetSize.height * (7 / 8) + dy),
             r / 4,
-            border3);
+            radiusBrush3);
 
         dx = dy = 0;
         if (radiusBottomRight > 0) {
@@ -207,34 +225,34 @@ class ResiablePainter extends CustomPainter {
             Offset(widgetSize.width * (7 / 8) + dx,
                 widgetSize.height * (7 / 8) + dy),
             r / 3,
-            border2);
+            isRadiusHover[3] ? radiusBrush2 : radiusBrush1);
         canvas.drawCircle(
             Offset(widgetSize.width * (7 / 8) + dx,
                 widgetSize.height * (7 / 8) + dy),
             r / 4,
-            border3);
+            radiusBrush3);
 
-        //canvas.drawImage(ACCManager.needleImage!, Offset(widgetSize.width / 2, widgetSize.height / 2), border3);
+        //canvas.drawImage(ACCManager.needleImage!, Offset(widgetSize.width / 2, widgetSize.height / 2), radiusBrush3);
       }
 
       //Radius corner = Radius.circular(r * 2 / 3);
-// if (isCornerHover[0]) canvas.drawRRect(RRect.fromLTRBAndCorners(0, 0, r, r, bottomRight: corner), border1);
+// if (isCornerHover[0]) canvas.drawRRect(RRect.fromLTRBAndCorners(0, 0, r, r, bottomRight: corner), cornerBrush);
       // if (isCornerHover[1])
       //   canvas.drawRRect(
-      //       RRect.fromLTRBAndCorners(0, widgetSize.height - r, r, widgetSize.height, topRight: corner), border1);
+      //       RRect.fromLTRBAndCorners(0, widgetSize.height - r, r, widgetSize.height, topRight: corner), cornerBrush);
       // if (isCornerHover[2])
       //   canvas.drawRRect(
-      //       RRect.fromLTRBAndCorners(widgetSize.width - r, 0, widgetSize.width, r, bottomLeft: corner), border1);
+      //       RRect.fromLTRBAndCorners(widgetSize.width - r, 0, widgetSize.width, r, bottomLeft: corner), cornerBrush);
       // if (isCornerHover[3])
       //   canvas.drawRRect(
       //       RRect.fromLTRBAndCorners(widgetSize.width - r, widgetSize.height - r, widgetSize.width, widgetSize.height,
       //           topLeft: corner),
-      //       border1);
+      //       cornerBrush);
 
-      // if (isEdgeHover[0]) canvas.drawRect(rect[0], border1);
-      // if (isEdgeHover[1]) canvas.drawRect(rect[1], border1);
-      // if (isEdgeHover[2]) canvas.drawRect(rect[2], border1);
-      // if (isEdgeHover[3]) canvas.drawRect(rect[3], border1);
+      // if (isEdgeHover[0]) canvas.drawRect(rect[0], cornerBrush);
+      // if (isEdgeHover[1]) canvas.drawRect(rect[1], cornerBrush);
+      // if (isEdgeHover[2]) canvas.drawRect(rect[2], cornerBrush);
+      // if (isEdgeHover[3]) canvas.drawRect(rect[3], cornerBrush);
     }
   }
 

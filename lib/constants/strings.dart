@@ -51,6 +51,8 @@ class MyStrings {
 
   static String mainTitle = Locale.isKr() ? '컬러 선택' : 'Color Picker';
   static String opacity = Locale.isKr() ? '투명도' : 'Opacity';
+  static String sourceRatio =
+      Locale.isKr() ? '원본 비율대로 보기' : 'Keep source ratio';
   static String red = Locale.isKr() ? '빨강' : 'Red';
   static String green = Locale.isKr() ? '초록' : 'Green';
   static String blue = Locale.isKr() ? '파랑' : 'Blue';

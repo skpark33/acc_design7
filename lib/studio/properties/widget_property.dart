@@ -25,6 +25,7 @@ import 'package:acc_design7/common/colorPicker/color_row.dart';
 import 'package:acc_design7/studio/properties/properties_frame.dart';
 //import 'package:acc_design7/common/buttons/wave_slider.dart';
 import 'package:acc_design7/common/buttons/dial_button.dart';
+import 'package:acc_design7/common/colorPicker/widgets/opacity/opacity_slider.dart';
 
 class ExapandableModel {
   ExapandableModel({
@@ -132,6 +133,11 @@ class WidgetPropertyState extends State<WidgetProperty>
     height: 150,
     width: 240,
   );
+  ExapandableModel opacityModel = ExapandableModel(
+    title: MyStrings.opacity,
+    height: 80,
+    width: 240,
+  );
   ExapandableModel sizePosModel = ExapandableModel(
     title: MyStrings.widgetSize,
     height: 100,
@@ -156,7 +162,9 @@ class WidgetPropertyState extends State<WidgetProperty>
   @override
   void initState() {
     _aniIconController = AnimationController(
-        vsync: this, duration: Duration(milliseconds: 1000));
+        animationBehavior: AnimationBehavior.preserve,
+        vsync: this,
+        duration: Duration(milliseconds: 1000));
     super.initState();
   }
 
@@ -181,6 +189,8 @@ class WidgetPropertyState extends State<WidgetProperty>
             _titleRow(25, 25, 35, 15),
             _divider(),
             _primaryRow(acc, 25, 5, 12, 5),
+            _divider(),
+            _sourceRatioRow(acc, 25, 5, 12, 5),
             _divider(),
             sizePosModel.expandArea(
                 child: _sizePosRow(context, acc),
@@ -230,6 +240,18 @@ class WidgetPropertyState extends State<WidgetProperty>
                       )
                     : null),
             _divider(),
+            opacityModel.expandArea(
+                child: _opacityRow(context, acc),
+                titleLineWidget: Text(
+                  '${((1 - acc.opacity.value) * 100).round()} %',
+                  style: MyTextStyles.subtitle1,
+                ),
+                setStateFunction: () {
+                  setState(() {
+                    opacityModel.toggleSelected();
+                  });
+                }),
+            _divider(),
             rotateModel.expandArea(
                 child: _rotateRow(context, acc),
                 titleLineWidget: Text(
@@ -251,6 +273,7 @@ class WidgetPropertyState extends State<WidgetProperty>
                           width: 10,
                         ),
                         IconButton(
+                            padding: EdgeInsets.zero,
                             icon: AnimatedIcon(
                               icon: _getAnimeIcon(acc.animeType.value),
                               progress: _aniIconController,
@@ -259,12 +282,17 @@ class WidgetPropertyState extends State<WidgetProperty>
                             ),
                             //Icon(),
                             onPressed: () {
-                              _aniIconController.forward().then(
-                                (value) async {
-                                  await Future.delayed(Duration(seconds: 1));
-                                  _aniIconController.reverse();
-                                },
-                              );
+                              if (_aniIconController.isAnimating) {
+                                _aniIconController.stop();
+                              } else {
+                                _aniIconController.repeat();
+                                // _aniIconController.forward().then(
+                                //   (value) async {
+                                //     await Future.delayed(Duration(seconds: 1));
+                                //     _aniIconController.reverse();
+                                //   },
+                                // );
+                              }
                             }),
                       ])
                     : null,
@@ -326,7 +354,7 @@ class WidgetPropertyState extends State<WidgetProperty>
             style: MyTextStyles.subtitle2,
           ),
           IconButton(
-            padding: EdgeInsets.fromLTRB(18, 8, 8, 8),
+            padding: EdgeInsets.fromLTRB(18, 2, 8, 2),
             iconSize: 32.0,
             icon: Icon(
               acc.primary.value != true
@@ -336,6 +364,37 @@ class WidgetPropertyState extends State<WidgetProperty>
             ),
             onPressed: () {
               accManagerHolder!.setPrimary();
+              setState(() {});
+            },
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _sourceRatioRow(
+      ACC acc, double left, double top, double right, double bottom) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(left, top, right, bottom),
+      child: Row(
+        children: [
+          Text(
+            MyStrings.sourceRatio,
+            style: MyTextStyles.subtitle2,
+          ),
+          IconButton(
+            padding: EdgeInsets.fromLTRB(18, 2, 8, 2),
+            iconSize: 32.0,
+            icon: Icon(
+              acc.sourceRatio.value != true
+                  ? Icons.aspect_ratio_outlined
+                  : Icons.image_aspect_ratio_outlined,
+              color: acc.sourceRatio.value != true ? Colors.grey : Colors.red,
+            ),
+            onPressed: () {
+              acc.sourceRatio.set(!acc.sourceRatio.value);
+              //acc.setState();
+              acc.invalidateContents();
               setState(() {});
             },
           )
@@ -458,6 +517,22 @@ class WidgetPropertyState extends State<WidgetProperty>
           },
         ),
       ],
+    );
+  }
+
+  Widget _opacityRow(BuildContext context, ACC acc) {
+    return Container(
+      alignment: Alignment.center,
+      child: OpacitySlider(
+        selectedColor: MyColors.secondaryColor,
+        opacity: acc.opacity.value,
+        onChange: (value) {
+          //logHolder.log('onValueChanged: $value');
+          acc.opacity.set(value);
+          acc.setState();
+          setState(() {});
+        },
+      ),
     );
   }
 

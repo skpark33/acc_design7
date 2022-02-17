@@ -93,15 +93,18 @@ class ACCManager extends ChangeNotifier {
     if (_currentAccIndex < 0) return;
     acc ??= accMap[_currentAccIndex]!;
 
-    double dx = acc.getRealDx();
-    double dy = acc.getRealDy();
+    Offset realOffset = acc.getRealOffset();
+    double dx = realOffset.dx;
+    double dy = realOffset.dy;
+
+    Size realSize = acc.getRealSize();
 
     // 중앙위치를 잡는다.
-    dx = dx + (acc.getRealWidth() / 2.0);
+    dx = dx + (realSize.width / 2.0);
     // 여기서, munu의 width/2 를 빼면 정중앙에 위치하게 된다.
     dx = dx - (accMenu.size.width / 2.0);
     // widget 의 하단에 자리를 잡는다.
-    dy = dy + acc.getRealHeight();
+    dy = dy + realSize.height;
     dy = dy + 10; // offset
 
     // 그런데, 아래에 자리가 없으면 어떻게 할것인가 ?

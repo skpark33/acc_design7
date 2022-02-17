@@ -1,7 +1,7 @@
 //import 'dart:collection';
 // ignore_for_file: must_be_immutable
 import 'package:flutter/material.dart';
-import 'package:carousel_slider/carousel_slider.dart';
+//import 'package:carousel_slider/carousel_slider.dart';
 
 import 'package:acc_design7/common/util/logger.dart';
 import 'package:acc_design7/common/util/my_utils.dart';
@@ -10,6 +10,8 @@ import 'package:acc_design7/player/abs_player.dart';
 import 'package:acc_design7/widgets/carousel_widget.dart';
 import 'package:acc_design7/acc/acc.dart';
 import 'package:acc_design7/acc/acc_property.dart';
+
+const int minCarouselCount = 3;
 
 class BaseWidget extends StatefulWidget {
   PlayManager? playManager;
@@ -20,7 +22,7 @@ class BaseWidget extends StatefulWidget {
   }
 
   // ignore: prefer_final_fields
-  List<AbsPlayWidget> _carouselList = [];
+  //List<AbsPlayWidget> _carouselList = [];
 
   BaseWidget({required this.baseWidgetKey}) : super(key: baseWidgetKey) {
     playManager = PlayManager(this);
@@ -59,42 +61,56 @@ class BaseWidget extends StatefulWidget {
       return false;
     }
     if (getAnimeType() == AnimeType.carousel) {
-      if (playManager!.playList.value.length < 2) {
+      if (playManager!.playList.value.length < minCarouselCount) {
         return false;
       }
     }
     return true;
   }
 
-  int resetCarousel() {
-    _carouselList.clear();
-    int limit = playManager!.playList.value.length - 1;
-    int first = playManager!.currentIndex;
-
-    if (first < 0 || first > limit) return 5000;
-
-    int second = (first == limit ? 0 : first + 1);
-    int third = (second == limit ? 0 : second + 1);
-
-    // playManager!.playList.value[first].pause();
-    // playManager!.playList.value[second].pause();
-    // playManager!.playList.value[third].pause();
-    logHolder.log('reset resetCarousel', level: 5);
-
-    playManager!.playList.value[first].autoStart = true;
-    playManager!.playList.value[second].autoStart = false;
-    playManager!.playList.value[third].autoStart = false;
-
-    _carouselList.add(playManager!.playList.value[first]);
-    _carouselList.add(playManager!.playList.value[second]);
-    _carouselList.add(playManager!.playList.value[third]);
-
-    return playManager!.playList.value[first].model!.playTime;
+  bool isCarousel() {
+    if (getAnimeType() != AnimeType.carousel) {
+      return false;
+    }
+    if (playManager!.playList.value.length < minCarouselCount) {
+      return false;
+    }
+    return true;
   }
+
+// // 현재 사용하지 않는 함수
+//   void setAutoStart() {
+//     if (playManager!.currentIndex >= 0) {
+//       playManager!.playList.value[playManager!.currentIndex].autoStart = true;
+//     }
+//   }
+
+  // int resetCarousel() {
+  //   _carouselList.clear();
+  //   int limit = playManager!.playList.value.length - 1;
+  //   int first = playManager!.currentIndex;
+
+  //   if (first < 0 || first > limit) return 5000;
+
+  //   int second = (first == limit ? 0 : first + 1);
+  //   int third = (second == limit ? 0 : second + 1);
+
+  //   logHolder.log('reset resetCarousel', level: 5);
+
+  //   playManager!.playList.value[first].autoStart = true;
+  //   playManager!.playList.value[second].autoStart = false;
+  //   playManager!.playList.value[third].autoStart = false;
+
+  //   _carouselList.add(playManager!.playList.value[first]);
+  //   _carouselList.add(playManager!.playList.value[second]);
+  //   _carouselList.add(playManager!.playList.value[third]);
+
+  //   return playManager!.playList.value[first].model!.playTime;
+  // }
 }
 
 class BaseWidgetState extends State<BaseWidget> {
-  CarouselController? carouselController;
+  //AnimeCarousel? carousel;
 
   BaseWidgetState() : super() {
     logHolder.log("BaseWidgetState constructor", level: 5);
@@ -103,15 +119,17 @@ class BaseWidgetState extends State<BaseWidget> {
   @override
   void initState() {
     super.initState();
-    //carouselController = CarouselController();
+    //carousel = AnimeCarousel.create();
   }
 
   @override
   Widget build(BuildContext context) {
-    logHolder.log('baseWidget build');
-    int playTime = 5000;
-    if (widget.getAnimeType() == AnimeType.carousel) {
-      playTime = widget.resetCarousel();
+    logHolder.log('baseWidget build', level: 5);
+
+    if (widget.isCarousel()) {
+      widget.playManager!.resetCarousel();
+    } else {
+      widget.playManager!.setAutoStart();
     }
     return Container(
       color: Colors.transparent,
@@ -130,23 +148,24 @@ class BaseWidgetState extends State<BaseWidget> {
             logHolder.log(
                 'playTime===${snapshot.data!.model!.playTime}sec, ${snapshot.data!.model!.name}');
 
+            if (!widget.isAnime()) {
+              return snapshot.data!;
+            }
+
             switch (widget.getAnimeType()) {
               case AnimeType.carousel:
                 logHolder.log(
                     'AnimeType.carousel start ${widget.playManager!.currentIndex}');
-                if (widget.playManager!.playList.value.length < 2) {
-                  return snapshot.data!;
-                }
-
+                //return carousel!.carouselWidget(
                 return carouselWidget(
                     context,
                     widget.acc!.containerSize.value.height,
-                    widget._carouselList,
+                    widget.playManager!.playList.value,
                     (index, reason) {}, // onPageChanged
-                    playTime,
-                    0); // 0은 첫번째 index(즉 0번째)가 가운데로 들어오라는 뜻이다.
-              //carouselController!,
-              //widget.playManager!.currentIndex);
+                    widget.playManager!.animePageChanger,
+                    1 << 63, // 가장 큰 수를 넣는다.
+                    widget.playManager!
+                        .currentIndex); // 0은 첫번째 index(즉 0번째)가 가운데로 들어오라는 뜻이다.
 
               case AnimeType.flip:
                 logHolder.log('AnimeType.flip');

@@ -38,6 +38,9 @@ class PlayManager {
     return _currentIndex;
   }
 
+  bool _shouldChaneAnimePage = false;
+  final Lock _animelock = Lock();
+
   bool isValid() {
     return currentIndex >= 0 && playList.value.isNotEmpty;
   }
@@ -81,6 +84,25 @@ class PlayManager {
     if (_timer != null) {
       _timer!.cancel();
     }
+  }
+
+  Future<void> resetCarousel() async {
+    await _lock.synchronized(() async {
+      if (currentIndex >= 0) {
+        int len = playList.value.length;
+        for (int i = 0; i < len; i++) {
+          playList.value[i].autoStart = (i == currentIndex);
+        }
+      }
+    });
+  }
+
+  Future<void> setAutoStart() async {
+    await _lock.synchronized(() async {
+      if (_currentIndex >= 0) {
+        playList.value[_currentIndex].autoStart = true;
+      }
+    });
   }
 
   Future<CurrentData> getCurrentData() async {
@@ -211,6 +233,10 @@ class PlayManager {
         return;
       }
       playList.value.add(aWidget);
+      if (baseWidget.isAnime()) {
+        // 애니타입인 경우, 새로운 데이터를 이해시키기 위해
+        baseWidget.invalidate();
+      }
       logHolder.log('push(${model.key})=${playList.value.length}');
     });
   }
@@ -232,18 +258,18 @@ class PlayManager {
   }
 
   void onImageAfterEvent() {
-    if (playList.value.isEmpty) return;
-    // 아무것도 돌고 있지 않다면,
-    if (_currentIndex < 0) {
-      _currentIndex = 0;
-      return;
-    }
-    // if (false == playList.value[_currentIndex].isInit()) {
-    //   logHolder.log('Not yet inited');
+    // if (playList.value.isEmpty) return;
+    // // 아무것도 돌고 있지 않다면,
+    // if (_currentIndex < 0) {
+    //   _currentIndex = 0;
     //   return;
     // }
-    next();
-    return;
+    // // if (false == playList.value[_currentIndex].isInit()) {
+    // //   logHolder.log('Not yet inited');
+    // //   return;
+    // // }
+    // next();
+    // return;
   }
 
   Future<void> remove(int i) async {
@@ -278,6 +304,37 @@ class PlayManager {
     });
   }
 
+  Future<void> _changeAnimePage() async {
+    await _animelock.synchronized(() async {
+      _shouldChaneAnimePage = true;
+    });
+    if (currentIndex >= 0) {
+      int len = playList.value.length;
+      for (int i = 0; i < len; i++) {
+        if (i == _currentIndex) {
+          playList.value[i].autoStart = true;
+          await playList.value[i].play();
+          logHolder.log('anime play ${playList.value[i].model!.name}',
+              level: 5);
+        } else {
+          playList.value[i].autoStart = false;
+          await playList.value[i].pause();
+        }
+      }
+    }
+  }
+
+  Future<int> animePageChanger() async {
+    int retval = -1;
+    await _animelock.synchronized(() async {
+      if (_shouldChaneAnimePage) {
+        retval = _currentIndex;
+        _shouldChaneAnimePage = false;
+      }
+    });
+    return retval;
+  }
+
   Future<void> play() async {
     await _lock.synchronized(() async {
       if (playList.value.isNotEmpty) {
@@ -294,7 +351,7 @@ class PlayManager {
         int prevIndex = _currentIndex;
         if (_currentIndex >= 0) {
           if (pause) {
-            logHolder.log('pause($_currentIndex)--');
+            logHolder.log('pause($_currentIndex)');
             await playList.value[_currentIndex].pause();
           }
         }
@@ -305,13 +362,16 @@ class PlayManager {
         //logHolder.log('play($_currentIndex)--');
         _currentPlaySec = 0;
 
-        //if (!baseWidget.isAnime()) {
-        if (prevIndex != _currentIndex) {
-          baseWidget.invalidate();
+        if (!baseWidget.isAnime()) {
+          //skpark carousel problem
+          if (prevIndex != _currentIndex) {
+            baseWidget.invalidate();
+          } else {
+            await playList.value[_currentIndex].play();
+          }
         } else {
-          await playList.value[_currentIndex].play();
-        }
-        //}
+          await _changeAnimePage();
+        } // skpark carousel problem
         accManagerHolder!.resizeMenu(playList.value[_currentIndex].model!.type);
       }
     });
@@ -335,13 +395,15 @@ class PlayManager {
         _currentPlaySec = 0;
 
         if (!baseWidget.isAnime()) {
-          //await playList.value[_currentIndex].play();
-        }
-        if (/*doInvalidate || */ prevIndex != _currentIndex) {
-          baseWidget.invalidate();
+          //skpark carousel problem
+          if (prevIndex != _currentIndex) {
+            baseWidget.invalidate();
+          } else {
+            await playList.value[_currentIndex].play();
+          }
         } else {
-          await playList.value[_currentIndex].play();
-        }
+          await _changeAnimePage();
+        } // skpark carousel problem
         accManagerHolder!.resizeMenu(playList.value[_currentIndex].model!.type);
       }
     });
@@ -349,13 +411,13 @@ class PlayManager {
 
   Future<void> mute() async {
     await _lock.synchronized(() async {
-      playList.value[_currentIndex].mute();
+      await playList.value[_currentIndex].mute();
     });
   }
 
   Future<void> pause() async {
     await _lock.synchronized(() async {
-      playList.value[_currentIndex].pause();
+      await playList.value[_currentIndex].pause();
     });
   }
 

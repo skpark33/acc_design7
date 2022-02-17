@@ -27,6 +27,9 @@ class PageModel {
     _pageNo.set(val);
   }
 
+  Offset origin = Offset.zero;
+  Size realSize = Size(400, 400);
+
   UndoAble<String> description = UndoAble<String>('');
   UndoAble<String> shortCut = UndoAble<String>('');
   UndoAble<Color> bgColor = UndoAble<Color>(Colors.white);
@@ -53,9 +56,9 @@ class PageModel {
   Offset getPosition() {
     if (key.currentContext != null) {
       RenderBox box = key.currentContext?.findRenderObject() as RenderBox;
-      return box.localToGlobal(Offset.zero); //this is global position
+      origin = box.localToGlobal(Offset.zero); //this is global position
     }
-    return Offset.zero;
+    return origin; // 보관된 origin 값을 리턴한다.
   }
 
   Size getSize() {
@@ -65,18 +68,13 @@ class PageModel {
   Size getRealSize() {
     if (key.currentContext != null) {
       RenderBox box = key.currentContext?.findRenderObject() as RenderBox;
-      return box.size; //this is global position
+      realSize = box.size; //this is global position
     }
-    return Size(100, 100);
+    return realSize; //보관된 realSize 값을 리턴한다.
   }
 
-  double getRealWidthRatio() {
+  Size getRealRatio() {
     Size size = getRealSize();
-    return size.width / width.value;
-  }
-
-  double getRealHeightRatio() {
-    Size size = getRealSize();
-    return size.height / height.value;
+    return Size(size.width / width.value, size.height / height.value);
   }
 }
