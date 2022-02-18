@@ -102,6 +102,14 @@ class WidgetProperty extends PropertySelector {
   State<WidgetProperty> createState() => WidgetPropertyState();
 
   int _userColorIndex = 1;
+
+  void setUserColorList(Color bg) {
+    currentUser.bgColorList1[_userColorIndex] = bg;
+    _userColorIndex++;
+    if (_userColorIndex >= currentUser.maxBgColor) {
+      _userColorIndex = 1;
+    }
+  }
 }
 
 class WidgetPropertyState extends State<WidgetProperty>
@@ -126,13 +134,13 @@ class WidgetPropertyState extends State<WidgetProperty>
     width: 240,
   );
   ExapandableModel bgColorModel = ExapandableModel(
-    title: MyStrings.bgColor,
-    height: 400,
+    title: '${MyStrings.bgColor}/${MyStrings.glass}',
+    height: 360,
     width: 240,
   );
   ExapandableModel opacityModel = ExapandableModel(
-    title: '${MyStrings.opacity} / ${MyStrings.glass}',
-    height: 120,
+    title: MyStrings.opacity,
+    height: 80,
     width: 240,
   );
   ExapandableModel sizePosModel = ExapandableModel(
@@ -209,7 +217,7 @@ class WidgetPropertyState extends State<WidgetProperty>
                     bgColorModel.toggleSelected();
                   });
                 },
-                titleSize: 100,
+                titleSize: 132,
                 titleLineWidget: acc.bgColor.value != Color(0x00000000)
                     ? Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -217,21 +225,15 @@ class WidgetPropertyState extends State<WidgetProperty>
                           CircleAvatar(
                             radius: 18,
                             foregroundColor: acc.bgColor.value,
-                            //foregroundColor: acc.bgColor.value == Color(0x00000000)
-                            //    ? MyColors.primaryColor
-                            //    : acc.bgColor.value,
                             backgroundColor: MyColors.secondaryColor,
-                            child: Icon(Icons.circle, size: 32),
-                            //acc.bgColor.value == Color(0x00000000)
-                            //    ? Icon(Icons.clear, size: 32)
-                            //    : Icon(Icons.circle, size: 32),
+                            child: _glassIcon(
+                                0,
+                                acc,
+                                acc.bgColor
+                                    .value), //Icon(Icons.circle, size: 32),
                           ),
                           SizedBox(
                             width: 20,
-                          ),
-                          Text(
-                            '#${acc.bgColor.value.toString().substring(10, 16)}',
-                            style: MyTextStyles.subtitle1,
                           ),
                         ],
                       )
@@ -241,10 +243,9 @@ class WidgetPropertyState extends State<WidgetProperty>
                 child: _opacityRow(context, acc),
                 titleLineWidget: Row(children: [
                   Text(
-                    '${((1 - acc.opacity.value) * 100).round()} % ,',
+                    '${((1 - acc.opacity.value) * 100).round()} %',
                     style: MyTextStyles.subtitle1,
                   ),
-                  _glassIcon(10, acc),
                 ]),
                 setStateFunction: () {
                   setState(() {
@@ -538,13 +539,6 @@ class WidgetPropertyState extends State<WidgetProperty>
           SizedBox(
             width: 15,
           ),
-          Row(children: [
-            Text(
-              MyStrings.glass,
-              style: MyTextStyles.subtitle2,
-            ),
-            _glassIcon(32, acc),
-          ]),
         ],
       ),
     );
@@ -585,6 +579,7 @@ class WidgetPropertyState extends State<WidgetProperty>
         acc.setBgColor(hexToColor(newVal));
       }
     }
+    widget.setUserColorList(acc.bgColor.value);
   }
 
   Widget _bgColorRow(BuildContext context, ACC acc) {
@@ -592,7 +587,7 @@ class WidgetPropertyState extends State<WidgetProperty>
       padding: EdgeInsets.only(right: 20),
       alignment: Alignment.topCenter,
       child: Column(
-          // 배경 색상 수동입력
+          // 배경 색상
           children: [
             SizedBox(
               height: 10,
@@ -617,27 +612,23 @@ class WidgetPropertyState extends State<WidgetProperty>
                 ColorPickerType.both: false,
                 ColorPickerType.primary: true,
                 ColorPickerType.accent: true,
-                ColorPickerType.bw: false,
+                ColorPickerType.bw: true,
                 ColorPickerType.custom: false,
-                ColorPickerType.wheel: true
+                ColorPickerType.wheel: false
               },
               pickerTypeLabels: <ColorPickerType, String>{
                 ColorPickerType.primary: MyStrings.basicColor,
                 ColorPickerType.accent: MyStrings.accentColor,
-                ColorPickerType.wheel: MyStrings.customColor
+                ColorPickerType.bw: MyStrings.customColor
               },
               color: acc.bgColor.value,
               onColorChanged: (bg) {
                 acc.setBgColor(bg);
-                currentUser.bgColorList1[widget._userColorIndex] = bg;
-                widget._userColorIndex++;
-                if (widget._userColorIndex >= currentUser.maxBgColor) {
-                  widget._userColorIndex = 1;
-                }
+                widget.setUserColorList(bg);
               },
               width: 25,
               height: 25,
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
               showColorName: false,
               showRecentColors: false,
               //maxRecentColors: currentUser.maxBgColor,
@@ -649,8 +640,9 @@ class WidgetPropertyState extends State<WidgetProperty>
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                SizedBox(
-                  width: 80,
+                Text(
+                  MyStrings.bgColorCodeInput,
+                  style: MyTextStyles.subtitle2,
                 ),
                 SizedBox(
                   width: 100,
@@ -676,6 +668,20 @@ class WidgetPropertyState extends State<WidgetProperty>
                 ),
               ],
             ),
+            Row(children: [
+              Text(
+                MyStrings.glass,
+                style: MyTextStyles.subtitle2,
+              ),
+              SizedBox(width: 32),
+              CircleAvatar(
+                radius: 18,
+                foregroundColor: acc.bgColor.value,
+                backgroundColor: MyColors.secondaryColor,
+                child: _glassIcon(
+                    0, acc, acc.bgColor.value), //Icon(Icons.circle, size: 32),
+              ),
+            ]),
           ]),
     );
   }
@@ -782,15 +788,16 @@ class WidgetPropertyState extends State<WidgetProperty>
     }
   }
 
-  IconButton _glassIcon(double left, ACC acc) {
+  IconButton _glassIcon(double left, ACC acc, Color bg) {
     return IconButton(
-      padding: EdgeInsets.fromLTRB(left, 2, 8, 2),
+      padding: EdgeInsets.fromLTRB(left, 0, 0, 0),
       iconSize: 32.0,
       icon: Icon(
         acc.glass.value == false
-            ? Icons.blur_off_rounded
+            ? Icons.circle //Icons.blur_off_rounded
             : Icons.blur_on_rounded,
-        color: acc.glass.value == false ? Colors.grey : Colors.red,
+        color: bg,
+        //color: acc.glass.value == false ? Colors.grey : Colors.red,
       ),
       onPressed: () {
         acc.glass.set(!acc.glass.value);

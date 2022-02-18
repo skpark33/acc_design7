@@ -380,11 +380,7 @@ class ACC with ACCProperty {
     }
 
     return Border.all(
-        width: isSelected
-            ? 4
-            : (borderWidth.value == 0)
-                ? borderWidth.value
-                : 2,
+        width: (borderWidth.value == 0) ? 4 : borderWidth.value,
         color: isSelected
             ? MyColors.mainColor
             : (borderWidth.value == 0)

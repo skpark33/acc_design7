@@ -89,4 +89,6 @@ class MyStrings {
   static String basicColor = Locale.isKr() ? '기본색' : "Primary";
   static String accentColor = Locale.isKr() ? '강조색' : "Accent";
   static String customColor = Locale.isKr() ? '커스텀' : "Wheel";
+  static String bwColor = Locale.isKr() ? '흑백' : "black&White";
+  static String bgColorCodeInput = Locale.isKr() ? '색상 코드로 입력' : "Color Code";
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:acc_design7/model/contents.dart';
 import 'package:acc_design7/common/util/logger.dart';
 import 'package:acc_design7/common/util/my_utils.dart';
-import 'package:acc_design7/constants/styles.dart';
+//import 'package:acc_design7/constants/styles.dart';
 import 'package:acc_design7/common/buttons/hover_buttons.dart';
 import 'package:acc_design7/player/play_manager.dart';
 import 'acc_manager.dart';
@@ -74,10 +74,10 @@ class ACCMenu {
   }
 
   Widget showOverlay(BuildContext context, ACC? acc) {
-    double radiusTopRight = 10; // menu 는 10 정도의 round 값으로 고정한다.
-    double radiusTopLeft = 10;
-    double radiusBottomRight = 10;
-    double radiusBottomLeft = 10;
+    // double radiusTopRight = 10; // menu 는 10 정도의 round 값으로 고정한다.
+    // double radiusTopLeft = 10;
+    // double radiusBottomRight = 10;
+    // double radiusBottomLeft = 10;
 
     return Visibility(
       visible: _visible,
@@ -87,11 +87,19 @@ class ACCMenu {
         height: size.height,
         width: size.width,
         //child:
-        child: Material(
-          type: MaterialType.card,
-          child: Container(
-            decoration: decoBox(false, radiusTopLeft, radiusTopRight,
-                radiusBottomLeft, radiusBottomRight),
+        child: glassMorphic(
+          radius: 10,
+          isGlass: true,
+          child: Material(
+            type: MaterialType.card,
+            color: Colors.white.withOpacity(.5),
+            //child: Container(
+            //color: Colors.white.withOpacity(.5),
+            //padding: const EdgeInsets.all(10),
+            // decoration: BoxDecoration(
+            //   color: Colors.white.withOpacity(0.5),
+            // ),
+            //decoBox(false, radiusTopLeft, radiusTopRight,radiusBottomLeft, radiusBottomRight),
             child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -162,6 +170,7 @@ class ACCMenu {
                   menuByContentType(context, acc),
                 ]),
           ),
+          //),
         ),
       ),
     );
