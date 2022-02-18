@@ -1,31 +1,26 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, must_be_immutable
 //import 'dart:html';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:flex_color_picker/flex_color_picker.dart';
 
 import 'package:acc_design7/acc/acc.dart';
 import 'package:acc_design7/acc/acc_manager.dart';
 import 'package:acc_design7/acc/acc_property.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:acc_design7/model/pages.dart';
 import 'package:acc_design7/studio/properties/property_selector.dart';
-//import 'package:flutter/rendering.dart';
-//import 'package:acc_design7/common/buttons/toggle_switch.dart';
-//import 'package:acc_design7/studio/pages/page_manager.dart';
 import 'package:acc_design7/constants/strings.dart';
 import 'package:acc_design7/constants/styles.dart';
-//import 'package:acc_design7/constants/constants.dart';
 import 'package:acc_design7/model/users.dart';
 import 'package:acc_design7/common/util/textfileds.dart';
 import 'package:acc_design7/common/util/logger.dart';
 import 'package:acc_design7/common/util/my_utils.dart';
 import 'package:acc_design7/common/undo/undo.dart';
-//import 'package:acc_design7/common/libColor/tinyColor.dart';
-//import 'package:acc_design7/common/colorPicker/widgets/color_picker.dart';
 import 'package:acc_design7/common/colorPicker/color_row.dart';
 import 'package:acc_design7/studio/properties/properties_frame.dart';
 //import 'package:acc_design7/common/buttons/wave_slider.dart';
 import 'package:acc_design7/common/buttons/dial_button.dart';
-import 'package:acc_design7/common/colorPicker/widgets/opacity/opacity_slider.dart';
+import 'package:acc_design7/common/slider/opacity/opacity_slider.dart';
 
 class ExapandableModel {
   ExapandableModel({
@@ -105,6 +100,8 @@ class WidgetProperty extends PropertySelector {
         );
   @override
   State<WidgetProperty> createState() => WidgetPropertyState();
+
+  int _userColorIndex = 1;
 }
 
 class WidgetPropertyState extends State<WidgetProperty>
@@ -130,12 +127,12 @@ class WidgetPropertyState extends State<WidgetProperty>
   );
   ExapandableModel bgColorModel = ExapandableModel(
     title: MyStrings.bgColor,
-    height: 150,
+    height: 400,
     width: 240,
   );
   ExapandableModel opacityModel = ExapandableModel(
-    title: MyStrings.opacity,
-    height: 80,
+    title: '${MyStrings.opacity} / ${MyStrings.glass}',
+    height: 120,
     width: 240,
   );
   ExapandableModel sizePosModel = ExapandableModel(
@@ -233,7 +230,7 @@ class WidgetPropertyState extends State<WidgetProperty>
                             width: 20,
                           ),
                           Text(
-                            '#${acc.bgColor.value.toString().substring(8, 16)}',
+                            '#${acc.bgColor.value.toString().substring(10, 16)}',
                             style: MyTextStyles.subtitle1,
                           ),
                         ],
@@ -242,10 +239,13 @@ class WidgetPropertyState extends State<WidgetProperty>
             _divider(),
             opacityModel.expandArea(
                 child: _opacityRow(context, acc),
-                titleLineWidget: Text(
-                  '${((1 - acc.opacity.value) * 100).round()} %',
-                  style: MyTextStyles.subtitle1,
-                ),
+                titleLineWidget: Row(children: [
+                  Text(
+                    '${((1 - acc.opacity.value) * 100).round()} % ,',
+                    style: MyTextStyles.subtitle1,
+                  ),
+                  _glassIcon(10, acc),
+                ]),
                 setStateFunction: () {
                   setState(() {
                     opacityModel.toggleSelected();
@@ -523,15 +523,29 @@ class WidgetPropertyState extends State<WidgetProperty>
   Widget _opacityRow(BuildContext context, ACC acc) {
     return Container(
       alignment: Alignment.center,
-      child: OpacitySlider(
-        selectedColor: MyColors.secondaryColor,
-        opacity: acc.opacity.value,
-        onChange: (value) {
-          //logHolder.log('onValueChanged: $value');
-          acc.opacity.set(value);
-          acc.setState();
-          setState(() {});
-        },
+      child: Column(
+        children: [
+          OpacitySlider(
+            selectedColor: MyColors.secondaryColor,
+            opacity: acc.opacity.value,
+            onChange: (value) {
+              //logHolder.log('onValueChanged: $value');
+              acc.opacity.set(value);
+              acc.setState();
+              setState(() {});
+            },
+          ),
+          SizedBox(
+            width: 15,
+          ),
+          Row(children: [
+            Text(
+              MyStrings.glass,
+              style: MyTextStyles.subtitle2,
+            ),
+            _glassIcon(32, acc),
+          ]),
+        ],
       ),
     );
   }
@@ -551,8 +565,31 @@ class WidgetPropertyState extends State<WidgetProperty>
         ));
   }
 
+  void _editComplete(ACC acc) {
+    if (colorCon.text.isEmpty) {
+      return;
+    }
+    if (colorCon.text[0] == '#') {
+      if (colorCon.text.length == 9) {
+        acc.setBgColor(hexToColor(colorCon.text));
+      } else if (colorCon.text.length == 7) {
+        String newVal = '#ff' + colorCon.text.substring(1);
+        acc.setBgColor(hexToColor(newVal));
+      }
+    } else {
+      if (colorCon.text.length == 8) {
+        String newVal = '#' + colorCon.text;
+        acc.setBgColor(hexToColor(newVal));
+      } else if (colorCon.text.length == 6) {
+        String newVal = '#ff' + colorCon.text;
+        acc.setBgColor(hexToColor(newVal));
+      }
+    }
+  }
+
   Widget _bgColorRow(BuildContext context, ACC acc) {
     return Container(
+      padding: EdgeInsets.only(right: 20),
       alignment: Alignment.topCenter,
       child: Column(
           // 배경 색상 수동입력
@@ -572,6 +609,43 @@ class WidgetPropertyState extends State<WidgetProperty>
                 //pageManagerHolder!.setState();
               },
             ),
+            SizedBox(
+              height: 10,
+            ),
+            ColorPicker(
+              pickersEnabled: const <ColorPickerType, bool>{
+                ColorPickerType.both: false,
+                ColorPickerType.primary: true,
+                ColorPickerType.accent: true,
+                ColorPickerType.bw: false,
+                ColorPickerType.custom: false,
+                ColorPickerType.wheel: true
+              },
+              pickerTypeLabels: <ColorPickerType, String>{
+                ColorPickerType.primary: MyStrings.basicColor,
+                ColorPickerType.accent: MyStrings.accentColor,
+                ColorPickerType.wheel: MyStrings.customColor
+              },
+              color: acc.bgColor.value,
+              onColorChanged: (bg) {
+                acc.setBgColor(bg);
+                currentUser.bgColorList1[widget._userColorIndex] = bg;
+                widget._userColorIndex++;
+                if (widget._userColorIndex >= currentUser.maxBgColor) {
+                  widget._userColorIndex = 1;
+                }
+              },
+              width: 25,
+              height: 25,
+              padding: const EdgeInsets.all(8),
+              showColorName: false,
+              showRecentColors: false,
+              //maxRecentColors: currentUser.maxBgColor,
+              //recentColors: currentUser.bgColorList1,
+              //onRecentColorsChanged: (list) {
+              //  currentUser.bgColorList1 = list;
+              //},
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -582,7 +656,7 @@ class WidgetPropertyState extends State<WidgetProperty>
                   width: 100,
                   height: 30,
                   child: myTextField(
-                    '#${acc.bgColor.value.toString().substring(8, 16)}',
+                    '#${acc.bgColor.value.toString().substring(10, 16)}',
                     limit: 9,
                     controller: colorCon,
                     style: MyTextStyles.body2,
@@ -590,14 +664,14 @@ class WidgetPropertyState extends State<WidgetProperty>
                     hasBorder: true,
                     hasDeleteButton: false,
                     onEditingComplete: () {
-                      acc.setBgColor(hexToColor(colorCon.text));
+                      _editComplete(acc);
                     },
                   ),
                 ),
                 writeButton(
                   // color를  Write 하는 icon
                   onPressed: () {
-                    acc.setBgColor(hexToColor(colorCon.text));
+                    _editComplete(acc);
                   },
                 ),
               ],
@@ -706,5 +780,29 @@ class WidgetPropertyState extends State<WidgetProperty>
       default:
         return "";
     }
+  }
+
+  IconButton _glassIcon(double left, ACC acc) {
+    return IconButton(
+      padding: EdgeInsets.fromLTRB(left, 2, 8, 2),
+      iconSize: 32.0,
+      icon: Icon(
+        acc.glass.value == false
+            ? Icons.blur_off_rounded
+            : Icons.blur_on_rounded,
+        color: acc.glass.value == false ? Colors.grey : Colors.red,
+      ),
+      onPressed: () {
+        acc.glass.set(!acc.glass.value);
+        if (acc.glass.value == true) {
+          if (acc.bgColor.value == Colors.transparent) {
+            // 바탕색이 투명일때, 유리질을 선택하면, 바탕색을 힌색으로 잡아준다.
+            acc.bgColor.set(Colors.white);
+          }
+        }
+        acc.setState();
+        setState(() {});
+      },
+    );
   }
 }

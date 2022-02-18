@@ -51,6 +51,7 @@ class MyStrings {
 
   static String mainTitle = Locale.isKr() ? '컬러 선택' : 'Color Picker';
   static String opacity = Locale.isKr() ? '투명도' : 'Opacity';
+  static String glass = Locale.isKr() ? '유리느낌' : 'Glass Feel';
   static String sourceRatio =
       Locale.isKr() ? '원본 비율대로 보기' : 'Keep source ratio';
   static String red = Locale.isKr() ? '빨강' : 'Red';
@@ -84,4 +85,8 @@ class MyStrings {
 
   static String animeCarousel = Locale.isKr() ? '카로셀' : "Carousel";
   static String animeFlip = Locale.isKr() ? '플립' : "Flip";
+
+  static String basicColor = Locale.isKr() ? '기본색' : "Primary";
+  static String accentColor = Locale.isKr() ? '강조색' : "Accent";
+  static String customColor = Locale.isKr() ? '커스텀' : "Wheel";
 }

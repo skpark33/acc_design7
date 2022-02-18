@@ -40,6 +40,7 @@ class ACCProperty {
   UndoAble<double> _rotate = UndoAble<double>(0);
   UndoAble<double> _opacity = UndoAble<double>(1);
   UndoAble<bool> _sourceRatio = UndoAble<bool>(false);
+  UndoAble<bool> _glass = UndoAble<bool>(false);
   //UndoAbleList<ContentsModel> _contents = UndoAbleList<ContentsModel>([]);
 
   bool get visible => _visible;
@@ -57,6 +58,7 @@ class ACCProperty {
   UndoAble<Size> get containerSize => _containerSize;
   UndoAble<double> get rotate => _rotate;
   UndoAble<double> get opacity => _opacity;
+  UndoAble<bool> get glass => _glass;
   UndoAble<bool> get sourceRatio => _sourceRatio;
   //UndoAbleList<ContentsModel> get contents => _contents;
 
@@ -65,6 +67,15 @@ class ACCProperty {
 
   UndoAble<Color> _bgColor = UndoAble<Color>(Colors.transparent);
   UndoAble<Color> get bgColor => _bgColor;
+
+  UndoAble<Color> _borderColor = UndoAble<Color>(Colors.transparent);
+  UndoAble<Color> get borderColor => _borderColor;
+  UndoAble<double> _borderWidth = UndoAble<double>(0);
+  UndoAble<double> get borderWidth => _borderWidth;
+  UndoAble<int> _borderType = UndoAble<int>(0);
+  UndoAble<int> get borderType => _borderType;
+  UndoAble<int> _borderEffect = UndoAble<int>(0);
+  UndoAble<int> get borderEffect => _borderEffect;
 
   void setDirty(bool p) {
     _dirty = p;

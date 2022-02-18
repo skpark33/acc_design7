@@ -9,14 +9,14 @@ import 'package:acc_design7/studio/pages/page_manager.dart';
 import 'package:acc_design7/constants/strings.dart';
 import 'package:acc_design7/constants/styles.dart';
 import 'package:acc_design7/constants/constants.dart';
-import 'package:acc_design7/model/users.dart';
+//import 'package:acc_design7/model/users.dart';
 import 'package:acc_design7/common/util/textfileds.dart';
 import 'package:acc_design7/common/util/logger.dart';
 import 'package:acc_design7/common/util/my_utils.dart';
 import 'package:acc_design7/common/undo/undo.dart';
 //import 'package:acc_design7/common/libColor/tinyColor.dart';
 //import 'package:acc_design7/common/colorPicker/widgets/color_picker.dart';
-import 'package:acc_design7/common/colorPicker/color_row.dart';
+//import 'package:acc_design7/common/colorPicker/color_row.dart';
 import 'package:acc_design7/studio/properties/properties_frame.dart';
 
 class PageProperty extends PropertySelector {
@@ -336,73 +336,73 @@ class PagePropertyState extends State<PageProperty> {
             ],
           ),
         ),
-        Padding(
-          // 배경 색상 처리부
-          padding: const EdgeInsets.fromLTRB(25, 18, 20, 0),
-          child: colorRow(
-            context: context,
-            value: widget.selectedPage!.bgColor.value,
-            list: [
-              for (int i = 0; i < currentUser.maxBgColor; i++)
-                currentUser.bgColorList1[i],
-            ],
-            onPressed: (bg) {
-              widget.selectedPage!.bgColor.set(bg);
-              pageManagerHolder!.setState();
-            },
-          ),
+        // Padding(
+        //   // 배경 색상 처리부
+        //   padding: const EdgeInsets.fromLTRB(25, 18, 20, 0),
+        //   child: colorRow(
+        //     context: context,
+        //     value: widget.selectedPage!.bgColor.value,
+        //     list: [
+        //       for (int i = 0; i < currentUser.maxBgColor; i++)
+        //         currentUser.bgColorList1[i],
+        //     ],
+        //     onPressed: (bg) {
+        //       widget.selectedPage!.bgColor.set(bg);
+        //       pageManagerHolder!.setState();
+        //     },
+        //   ),
 
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //   children: [
-          //     IconButton(
-          //       // 스포이드  spoid
-          //       constraints: BoxConstraints(),
-          //       iconSize: isSnippetStatus() ? 34 : 28,
-          //       padding: EdgeInsets.only(right: 5),
-          //       icon: Icon(Icons.colorize_rounded),
-          //       color: isSnippetStatus()
-          //           ? MyColors.primaryColor
-          //           : MyColors.mediumIcon,
-          //       onPressed: () {
-          //         // setState(() {
-          //         //   if (!isSnippetStatus()) {
-          //         //     cursorManagerHolder!.setCursor(MyPageCursor.precise);
-          //         //   } else {
-          //         //     cursorManagerHolder!.setCursor(MyPageCursor.basic);
-          //         //   }
-          //         // });
-          //       },
-          //     ),
-          //     ...colorList([
-          //       for (int i = 0; i < currentUser.maxBgColor; i++)
-          //         currentUser.bgColorList1[i],
-          //     ]),
-          //     IconButton(
-          //       // 빠레뜨
-          //       constraints: BoxConstraints(),
-          //       iconSize: 30,
-          //       padding: EdgeInsets.zero,
-          //       icon: Icon(Icons.palette_outlined),
-          //       color: MyColors.mediumIcon,
-          //       onPressed: () {
-          //         showColorPicker(
-          //           context: context,
-          //           selectedColor: widget.selectedPage!.bgColor.value,
-          //           onColorSelected: (value) {
-          //             //setState(() {
-          //             logHolder.log(value.toString());
-          //             widget.selectedPage!.bgColor.set(value);
-          //             _setUserPallete(value);
-          //             //});
-          //             pageManagerHolder!.setState();
-          //           },
-          //         );
-          //       },
-          //     ),
-          //   ],
-          // )
-        ),
+        // Row(
+        //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //   children: [
+        //     IconButton(
+        //       // 스포이드  spoid
+        //       constraints: BoxConstraints(),
+        //       iconSize: isSnippetStatus() ? 34 : 28,
+        //       padding: EdgeInsets.only(right: 5),
+        //       icon: Icon(Icons.colorize_rounded),
+        //       color: isSnippetStatus()
+        //           ? MyColors.primaryColor
+        //           : MyColors.mediumIcon,
+        //       onPressed: () {
+        //         // setState(() {
+        //         //   if (!isSnippetStatus()) {
+        //         //     cursorManagerHolder!.setCursor(MyPageCursor.precise);
+        //         //   } else {
+        //         //     cursorManagerHolder!.setCursor(MyPageCursor.basic);
+        //         //   }
+        //         // });
+        //       },
+        //     ),
+        //     ...colorList([
+        //       for (int i = 0; i < currentUser.maxBgColor; i++)
+        //         currentUser.bgColorList1[i],
+        //     ]),
+        //     IconButton(
+        //       // 빠레뜨
+        //       constraints: BoxConstraints(),
+        //       iconSize: 30,
+        //       padding: EdgeInsets.zero,
+        //       icon: Icon(Icons.palette_outlined),
+        //       color: MyColors.mediumIcon,
+        //       onPressed: () {
+        //         showColorPicker(
+        //           context: context,
+        //           selectedColor: widget.selectedPage!.bgColor.value,
+        //           onColorSelected: (value) {
+        //             //setState(() {
+        //             logHolder.log(value.toString());
+        //             widget.selectedPage!.bgColor.set(value);
+        //             _setUserPallete(value);
+        //             //});
+        //             pageManagerHolder!.setState();
+        //           },
+        //         );
+        //       },
+        //     ),
+        //   ],
+        // )
+        //),
       ],
     );
   }

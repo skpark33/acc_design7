@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_final_fields
 import 'dart:math';
+import 'package:acc_design7/common/util/my_utils.dart';
 import 'package:flutter/material.dart';
 import 'resizable.dart';
 import 'acc_property.dart';
@@ -174,248 +175,221 @@ class ACC with ACCProperty {
         top: realOffset.dy,
         height: realSize.height,
         width: realSize.width,
-        //child:
         child: Opacity(
-          opacity: opacity.value,
-          child: Transform.rotate(
-            angle: rotate.value * (pi / 180),
-            child: Stack(
-              children: [
-                accManagerHolder!.isCurrentIndex(index) == true
-                    ? AnimatedContainer(
-                        //margin: EdgeInsets.symmetric(vertical: isHover ? 10 : 3),
-                        decoration: decoBox(
-                            isHover,
-                            radiusTopLeft.value,
-                            radiusTopRight.value,
-                            radiusBottomLeft.value,
-                            radiusBottomRight.value),
-                        duration: const Duration(milliseconds: 50),
-                      )
-                    : Container(
-                        decoration: BoxDecoration(
-                          color: bgColor.value,
-                          borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(radiusTopRight.value),
-                            topLeft: Radius.circular(radiusTopLeft.value),
-                            bottomRight:
-                                Radius.circular(radiusBottomRight.value),
-                            bottomLeft: Radius.circular(radiusBottomLeft.value),
-                          ),
-                          border: Border.all(
-                            width: 2,
-                            color: isHover ? Colors.red : Colors.black12,
-                          ),
-                        ),
-                      ),
-                GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTapDown: (details) {
-                    accManagerHolder!.setCurrentIndex(index);
-                    logHolder.log('acc onTapDown : ${details.localPosition}',
-                        level: 5);
-                    //entry!.markNeedsBuild();  // setCurrentIndex 내부에서 하므로,,안해도됨.
-                    if (accManagerHolder!.isMenuVisible()) {
-                      bool reshow = accManagerHolder!.isMenuHostChanged();
-                      accManagerHolder!.unshowMenu(context);
-                      if (reshow) {
-                        accManagerHolder!.showMenu(context, this);
-                      }
-                    } else {
-                      accManagerHolder!.showMenu(context, this);
-                    }
-                  },
-                  onPanStart: (details) {
-                    logHolder.log('acc onPanStart : ${details.localPosition}',
-                        level: 5);
-                    //accManagerHolder!.currentAccIndex = index;
-                    //isInResizeEdge(details.localPosition, containerSize, resizeButtonSize);
+            opacity: opacity.value, child: _accBody(context, ratio, realSize)),
+      ),
+    );
+  }
+
+  Transform _accBody(BuildContext context, Size ratio, Size realSize) {
+    bool isSelected = accManagerHolder!.isCurrentIndex(index);
+    return Transform.rotate(
+      angle: rotate.value * (pi / 180),
+      child: Stack(
+        children: [
+          GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTapDown: (details) {
+              accManagerHolder!.setCurrentIndex(index);
+              logHolder.log('acc onTapDown : ${details.localPosition}',
+                  level: 5);
+              //entry!.markNeedsBuild();  // setCurrentIndex 내부에서 하므로,,안해도됨.
+              if (accManagerHolder!.isMenuVisible()) {
+                bool reshow = accManagerHolder!.isMenuHostChanged();
+                accManagerHolder!.unshowMenu(context);
+                if (reshow) {
+                  accManagerHolder!.showMenu(context, this);
+                }
+              } else {
+                accManagerHolder!.showMenu(context, this);
+              }
+            },
+            onPanStart: (details) {
+              logHolder.log('acc onPanStart : ${details.localPosition}',
+                  level: 5);
+              //accManagerHolder!.currentAccIndex = index;
+              //isInResizeEdge(details.localPosition, containerSize, resizeButtonSize);
+              if (isCorners(
+                  details.localPosition, realSize, resizeButtonSize)) {
+                isHover = false;
+                isCornered = true;
+              } else {
+                isCornered = false;
+                if (isRadius(
+                    details.localPosition, realSize, resizeButtonSize / 4)) {
+                  //isHover = false;
+                } else {
+                  isHover = true;
+                }
+              }
+
+              logHolder.log('onPanStart : ${details.localPosition}');
+              mychangeStack.startTrans();
+              entry!.markNeedsBuild();
+              accManagerHolder!.unshowMenu(context);
+              //accManagerHolder!.showMenu(this, context);
+            },
+            onPanEnd: (details) {
+              logHolder.log('onPanEnd:', level: 5);
+              mychangeStack.endTrans();
+              // if (accManagerHolder!.isMenuVisible()) {
+              //   accManagerHolder!.showMenu(this, context);
+              // }
+              //entry!.markNeedsBuild();
+              invalidateContents(); //skpak test code
+            },
+            onPanUpdate: (details) {
+              if (!resizeWidget(
+                  details, containerSize.value, isCornerHover, ratio)) {
+                //logHolder.log('move');
+                //translateContainerOffset(details.delta);
+                if (offsetValidationCheck(details.delta)) {
+                  _setContainerOffset(Offset(
+                      (containerOffset.value.dx +
+                              details.delta.dx / ratio.width * 1.1)
+                          .roundToDouble(),
+                      (containerOffset.value.dy +
+                              details.delta.dy / ratio.height * 1.1)
+                          .roundToDouble()));
+                  //containerOffset
+                  //    .set(containerOffset.value + details.delta);
+                }
+              }
+              // OverayEntry 를 사용할 때는 setState 를 하지 않고, markNeedsBuild 를 수행한다.
+              entry!.markNeedsBuild();
+              //invalidateContents();
+            },
+            child: Stack(children: [
+              glassMorphic(
+                isGlass: glass.value,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: bgColor.value.withOpacity(glass.value
+                        ? 0.5
+                        : bgColor.value == Colors.transparent
+                            ? 0
+                            : 1),
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(radiusTopRight.value),
+                      topLeft: Radius.circular(radiusTopLeft.value),
+                      bottomRight: Radius.circular(radiusBottomRight.value),
+                      bottomLeft: Radius.circular(radiusBottomLeft.value),
+                    ),
+                    border: _drawBorder(isSelected),
+                  ),
+                  child: accChild,
+                ),
+              ),
+              Visibility(
+                visible: accManagerHolder!.orderVisible,
+                child: Material(
+                    type: MaterialType.transparency,
+                    child: Container(
+                        height: realSize.height,
+                        width: realSize.width,
+                        color: Colors.white.withOpacity(0.5),
+                        child: Center(
+                            child: Text(
+                          '${order.value}',
+                          style: MyTextStyles.h3Eng,
+                        )))),
+              ),
+              Visibility(
+                visible: primary.value,
+                child: const Icon(
+                  Icons.star,
+                  color: Colors.red,
+                  semanticLabel: 'Primary',
+                ),
+              ),
+              CustomPaint(
+                painter: ResiablePainter(
+                    accManagerHolder!.isCurrentIndex(index),
+                    resizable,
+                    realSize,
+                    isCornered,
+                    isHover,
+                    isCornerHover,
+                    isRadiusHover,
+                    radiusTopLeft.value,
+                    radiusTopRight.value,
+                    radiusBottomLeft.value,
+                    radiusBottomRight.value),
+                child: MouseRegion(
+                  onHover: (details) {
+                    //logHolder.log('Hover ${details.localPosition}',
+                    //    level: 5);
                     if (isCorners(
                         details.localPosition, realSize, resizeButtonSize)) {
-                      isHover = false;
                       isCornered = true;
+                      isHover = false;
+                      entry!.markNeedsBuild();
                     } else {
                       isCornered = false;
                       if (isRadius(details.localPosition, realSize,
-                          resizeButtonSize / 4)) {
+                          resizeButtonSize / 3)) {
                         //isHover = false;
+                        //entry!.markNeedsBuild();
                       } else {
-                        isHover = true;
-                      }
-                    }
-
-                    logHolder.log('onPanStart : ${details.localPosition}');
-                    mychangeStack.startTrans();
-                    entry!.markNeedsBuild();
-                    accManagerHolder!.unshowMenu(context);
-                    //accManagerHolder!.showMenu(this, context);
-                  },
-                  onPanEnd: (details) {
-                    logHolder.log('onPanEnd:', level: 5);
-                    mychangeStack.endTrans();
-                    // if (accManagerHolder!.isMenuVisible()) {
-                    //   accManagerHolder!.showMenu(this, context);
-                    // }
-                    //entry!.markNeedsBuild();
-                    invalidateContents(); //skpak test code
-                  },
-                  onPanUpdate: (details) {
-                    if (!resizeWidget(
-                        details, containerSize.value, isCornerHover, ratio)) {
-                      //logHolder.log('move');
-                      //translateContainerOffset(details.delta);
-                      if (offsetValidationCheck(details.delta)) {
-                        _setContainerOffset(Offset(
-                            (containerOffset.value.dx +
-                                    details.delta.dx / ratio.width * 1.1)
-                                .roundToDouble(),
-                            (containerOffset.value.dy +
-                                    details.delta.dy / ratio.height * 1.1)
-                                .roundToDouble()));
-                        //containerOffset
-                        //    .set(containerOffset.value + details.delta);
-                      }
-                    }
-                    // OverayEntry 를 사용할 때는 setState 를 하지 않고, markNeedsBuild 를 수행한다.
-                    entry!.markNeedsBuild();
-                    //invalidateContents();
-                  },
-                  child: Stack(children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        color: bgColor.value,
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(radiusTopRight.value),
-                          topLeft: Radius.circular(radiusTopLeft.value),
-                          bottomRight: Radius.circular(radiusBottomRight.value),
-                          bottomLeft: Radius.circular(radiusBottomLeft.value),
-                        ),
-                      ),
-                      child: accChild,
-                    ),
-                    Visibility(
-                      visible: accManagerHolder!.orderVisible,
-                      child: Material(
-                          type: MaterialType.transparency,
-                          child: Container(
-                              height: realSize.height,
-                              width: realSize.width,
-                              color: Colors.white.withOpacity(0.5),
-                              child: Center(
-                                  child: Text(
-                                '${order.value}',
-                                style: MyTextStyles.h3Eng,
-                              )))),
-                    ),
-                    Visibility(
-                      visible: primary.value,
-                      child: const Icon(
-                        Icons.star,
-                        color: Colors.red,
-                        semanticLabel: 'Primary',
-                      ),
-                    ),
-                    // Visibility(
-                    //   visible: isHover,
-                    //   child: Material(
-                    //     type: MaterialType.transparency,
-                    //     child: Container(
-                    //         height: containerSize.value.height,
-                    //         width: containerSize.value.width,
-                    //         color: Colors.white.withOpacity(0.5),
-                    //         child: Column(
-                    //           children: [
-                    //             Row(children: [
-                    //               IconButton(
-                    //                   onPressed: () {},
-                    //                   icon: const Icon(Icons
-                    //                       .fit_screen_outlined)), //ac_unit, all_out, api, blur_on, center_focus_weak, fit_screen_rounded panorama_photosphere
-                    //               //panorama_wide_angle, vignette_rounded
-                    //               IconButton(onPressed: () {}, icon: const Icon(Icons.fit_screen_outlined)),
-                    //             ]),
-                    //             Row(children: [
-                    //               IconButton(onPressed: () {}, icon: const Icon(Icons.fit_screen_outlined)),
-                    //               IconButton(onPressed: () {}, icon: const Icon(Icons.fit_screen_outlined)),
-                    //             ]),
-                    //           ],
-                    //         )),
-                    //   ),
-                    // ),
-                    CustomPaint(
-                      painter: ResiablePainter(
-                          accManagerHolder!.isCurrentIndex(index),
-                          resizable,
-                          realSize,
-                          isCornered,
-                          isHover,
-                          isCornerHover,
-                          isRadiusHover,
-                          radiusTopLeft.value,
-                          radiusTopRight.value,
-                          radiusBottomLeft.value,
-                          radiusBottomRight.value),
-                      child: MouseRegion(
-                        onHover: (details) {
-                          //logHolder.log('Hover ${details.localPosition}',
-                          //    level: 5);
-                          if (isCorners(details.localPosition, realSize,
-                              resizeButtonSize)) {
-                            isCornered = true;
-                            isHover = false;
-                            entry!.markNeedsBuild();
-                          } else {
-                            isCornered = false;
-                            if (isRadius(details.localPosition, realSize,
-                                resizeButtonSize / 3)) {
-                              //isHover = false;
-                              //entry!.markNeedsBuild();
-                            } else {
-                              //logHolder.log('Hover ${details.localPosition}');
-                              if (!isHover) {
-                                isHover = true;
-                                entry!.markNeedsBuild();
-                              }
-                            }
-                          }
-                        },
-                        onEnter: (details) {
-                          //logHolder.log('Enter ${details.localPosition}',
-                          //    level: 5);
+                        //logHolder.log('Hover ${details.localPosition}');
+                        if (!isHover) {
                           isHover = true;
                           entry!.markNeedsBuild();
-                        },
-                        onExit: (details) {
-                          //logHolder.log('Exit', level: 5);
-                          isHover = false;
-                          isCornered = false;
-                          clearCornerHover();
-                          entry!.markNeedsBuild();
-                        },
-                        child: DropZoneWidget(
-                          onDroppedFile: (model) {
-                            logHolder.log('contents added ${model.key}');
-                            accChild.playManager!.push(this, model);
-                          },
-                        ),
-                      ),
-                    ),
-                  ]),
-                  // Container(
-                  //   key: containerKey,
-                  // ),
-                  //),
-                  // child: ElevatedButton.icon(
-                  //     onPressed: () {},
-                  //     icon: Icon(Icons.stop_circle_rounded),
-                  //     label: Text('Record')),
-                  // ),
+                        }
+                      }
+                    }
+                  },
+                  onEnter: (details) {
+                    //logHolder.log('Enter ${details.localPosition}',
+                    //    level: 5);
+                    isHover = true;
+                    entry!.markNeedsBuild();
+                  },
+                  onExit: (details) {
+                    //logHolder.log('Exit', level: 5);
+                    isHover = false;
+                    isCornered = false;
+                    clearCornerHover();
+                    entry!.markNeedsBuild();
+                  },
+                  child: DropZoneWidget(
+                    onDroppedFile: (model) {
+                      logHolder.log('contents added ${model.key}');
+                      accChild.playManager!.push(this, model);
+                    },
+                  ),
                 ),
-              ],
-            ),
+              ),
+            ]),
           ),
-        ),
+        ],
       ),
     );
+  }
+
+  Border _drawBorder(bool isSelected) {
+    bool hasContents = false;
+    if (accChild.playManager != null) {
+      if (accChild.playManager!.playList.value.isNotEmpty) {
+        hasContents = true;
+      }
+    }
+
+    if (hasContents && !isSelected && borderWidth.value == 0) {
+      return Border.all(style: BorderStyle.none);
+    }
+
+    return Border.all(
+        width: isSelected
+            ? 4
+            : (borderWidth.value == 0)
+                ? borderWidth.value
+                : 2,
+        color: isSelected
+            ? MyColors.mainColor
+            : (borderWidth.value == 0)
+                ? MyColors.primaryColor
+                : borderColor.value);
   }
 
   void invalidateContents() {

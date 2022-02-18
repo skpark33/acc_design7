@@ -3,11 +3,14 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-import '../../theme.dart';
+//import '../../theme.dart';
 import 'opacity_slider_thumb.dart';
 import 'opacity_slider_track.dart';
-import 'package:acc_design7/constants/strings.dart';
+
+//import 'package:acc_design7/constants/strings.dart';
 //import 'package:acc_design7/common/colorPicker/widgets/selectors/channels/channel_slider.dart';
+const double defaultRadius = 8.0;
+const defaultBorderRadius = BorderRadius.all(Radius.circular(defaultRadius));
 
 class OpacitySlider extends StatelessWidget {
   final double opacity;
@@ -37,10 +40,6 @@ class OpacitySlider extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 8.0),
-                child: Text(MyStrings.opacity, style: textTheme.subtitle2),
-              ),
               Row(
                 mainAxisSize: MainAxisSize.max,
                 children: [

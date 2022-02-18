@@ -62,12 +62,13 @@ dev_dependencies:
   rxdart: ^0.27.3
   pigment: ^1.0.3
   meta: ^1.2.2
-  flutter_colorpicker: ^1.0.3
   image: ^3.0.5
   quiver: ^3.0.1
   basics: ^0.6.0
   carousel_slider: ^4.0.0
   uuid: ^3.0.5
+  flex_color_picker: ^2.2.0
+  
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

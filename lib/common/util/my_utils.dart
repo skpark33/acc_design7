@@ -14,6 +14,20 @@ Widget frostedEdged(
           child: child));
 }
 
+Widget glassMorphic(
+    {required bool isGlass,
+    required Widget child,
+    double radius = 0,
+    double sigma = 10.0}) {
+  return isGlass
+      ? ClipRRect(
+          borderRadius: BorderRadius.circular(radius),
+          child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
+              child: child))
+      : child;
+}
+
 Widget infoCard(BuildContext context, String title, String msg, Color color) {
   return frostedEdged(
       child: Container(
