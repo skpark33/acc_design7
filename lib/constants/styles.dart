@@ -121,6 +121,7 @@ class MyColors {
   static const Color divide = Color(0xffD9D9D9);
   static const Color artBoardBgColor = Color(0xFFE3E3E3);
   static const Color pageBg = white;
+  static const Color accBg = Color(0xff9E9E9E);
   static const Color buttonBorder = border;
   static const Color buttonFG = Color(0xFF722ED1);
   static const Color buttonBG = secondaryColor;
@@ -143,7 +144,6 @@ class MyColors {
   static const Color gray01 = Color(0xff3A3B41);
   static const Color gray02 = Color(0xffD3D3D3);
   static const Color gray03 = Color(0xffF1F1F1);
-  static const Color gray04 = Color(0xffFAFAFA);
   static const Color white = Color(0xffffffff);
   static const Color primaryText = Color(0xff262626);
   static const Color icon = Color(0xff262626);

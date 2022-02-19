@@ -54,6 +54,8 @@ class MyStrings {
   static String glass = Locale.isKr() ? '유리느낌' : 'Glass Feel';
   static String sourceRatio =
       Locale.isKr() ? '원본 비율대로 보기' : 'Keep source ratio';
+  static String sourceRatioToggle =
+      Locale.isKr() ? '꽉찬 화면으로 보기' : 'Follow frame ratio';
   static String red = Locale.isKr() ? '빨강' : 'Red';
   static String green = Locale.isKr() ? '초록' : 'Green';
   static String blue = Locale.isKr() ? '파랑' : 'Blue';

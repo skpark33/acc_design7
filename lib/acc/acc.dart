@@ -168,203 +168,218 @@ class ACC with ACCProperty {
     Size ratio = getRealRatio();
     Offset realOffset = getRealOffsetWithGivenRatio(ratio);
     Size realSize = getRealSize();
-    return Visibility(
-      visible: (visible && !removed.value),
-      child: Positioned(
-        left: realOffset.dx,
-        top: realOffset.dy,
-        height: realSize.height,
-        width: realSize.width,
-        child: Opacity(
-            opacity: opacity.value, child: _accBody(context, ratio, realSize)),
-      ),
-    );
-  }
-
-  Transform _accBody(BuildContext context, Size ratio, Size realSize) {
     bool isSelected = accManagerHolder!.isCurrentIndex(index);
-    return Transform.rotate(
-      angle: rotate.value * (pi / 180),
-      child: Stack(
-        children: [
-          GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTapDown: (details) {
-              accManagerHolder!.setCurrentIndex(index);
-              logHolder.log('acc onTapDown : ${details.localPosition}',
-                  level: 5);
-              //entry!.markNeedsBuild();  // setCurrentIndex 내부에서 하므로,,안해도됨.
-              if (accManagerHolder!.isMenuVisible()) {
-                bool reshow = accManagerHolder!.isMenuHostChanged();
-                accManagerHolder!.unshowMenu(context);
-                if (reshow) {
+    return Visibility(
+        visible: (visible && !removed.value),
+        child: Positioned(
+          left: realOffset.dx,
+          top: realOffset.dy,
+          height: realSize.height,
+          width: realSize.width,
+          child: Transform.rotate(
+            angle: rotate.value * (pi / 180),
+            child:
+                // Opacity(
+                //   opacity: opacity.value,
+                //   child:
+                GestureDetector(
+              //behavior: HitTestBehavior.deferToChild,
+              onTapDown: (details) {
+                accManagerHolder!.setCurrentIndex(index);
+                logHolder.log('acc onTapDown : ${details.localPosition}',
+                    level: 5);
+                //entry!.markNeedsBuild();  // setCurrentIndex 내부에서 하므로,,안해도됨.
+                if (accManagerHolder!.isMenuVisible()) {
+                  bool reshow = accManagerHolder!.isMenuHostChanged();
+                  accManagerHolder!.unshowMenu(context);
+                  if (reshow) {
+                    accManagerHolder!.showMenu(context, this);
+                  }
+                } else {
                   accManagerHolder!.showMenu(context, this);
                 }
-              } else {
-                accManagerHolder!.showMenu(context, this);
-              }
-            },
-            onPanStart: (details) {
-              logHolder.log('acc onPanStart : ${details.localPosition}',
-                  level: 5);
-              //accManagerHolder!.currentAccIndex = index;
-              //isInResizeEdge(details.localPosition, containerSize, resizeButtonSize);
-              if (isCorners(
-                  details.localPosition, realSize, resizeButtonSize)) {
-                isHover = false;
-                isCornered = true;
-              } else {
-                isCornered = false;
-                if (isRadius(
-                    details.localPosition, realSize, resizeButtonSize / 4)) {
-                  //isHover = false;
+              },
+              onPanStart: (details) {
+                logHolder.log('acc onPanStart : ${details.localPosition}',
+                    level: 5);
+                //accManagerHolder!.currentAccIndex = index;
+                //isInResizeEdge(details.localPosition, containerSize, resizeButtonSize);
+                if (isCorners(
+                    details.localPosition, realSize, resizeButtonSize)) {
+                  isHover = false;
+                  isCornered = true;
                 } else {
-                  isHover = true;
-                }
-              }
-
-              logHolder.log('onPanStart : ${details.localPosition}');
-              mychangeStack.startTrans();
-              entry!.markNeedsBuild();
-              accManagerHolder!.unshowMenu(context);
-              //accManagerHolder!.showMenu(this, context);
-            },
-            onPanEnd: (details) {
-              logHolder.log('onPanEnd:', level: 5);
-              mychangeStack.endTrans();
-              // if (accManagerHolder!.isMenuVisible()) {
-              //   accManagerHolder!.showMenu(this, context);
-              // }
-              //entry!.markNeedsBuild();
-              invalidateContents(); //skpak test code
-            },
-            onPanUpdate: (details) {
-              if (!resizeWidget(
-                  details, containerSize.value, isCornerHover, ratio)) {
-                //logHolder.log('move');
-                //translateContainerOffset(details.delta);
-                if (offsetValidationCheck(details.delta)) {
-                  _setContainerOffset(Offset(
-                      (containerOffset.value.dx +
-                              details.delta.dx / ratio.width * 1.1)
-                          .roundToDouble(),
-                      (containerOffset.value.dy +
-                              details.delta.dy / ratio.height * 1.1)
-                          .roundToDouble()));
-                  //containerOffset
-                  //    .set(containerOffset.value + details.delta);
-                }
-              }
-              // OverayEntry 를 사용할 때는 setState 를 하지 않고, markNeedsBuild 를 수행한다.
-              entry!.markNeedsBuild();
-              //invalidateContents();
-            },
-            child: Stack(children: [
-              glassMorphic(
-                isGlass: glass.value,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: bgColor.value.withOpacity(glass.value
-                        ? 0.5
-                        : bgColor.value == Colors.transparent
-                            ? 0
-                            : 1),
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(radiusTopRight.value),
-                      topLeft: Radius.circular(radiusTopLeft.value),
-                      bottomRight: Radius.circular(radiusBottomRight.value),
-                      bottomLeft: Radius.circular(radiusBottomLeft.value),
-                    ),
-                    border: _drawBorder(isSelected),
-                  ),
-                  child: accChild,
-                ),
-              ),
-              Visibility(
-                visible: accManagerHolder!.orderVisible,
-                child: Material(
-                    type: MaterialType.transparency,
-                    child: Container(
-                        height: realSize.height,
-                        width: realSize.width,
-                        color: Colors.white.withOpacity(0.5),
-                        child: Center(
-                            child: Text(
-                          '${order.value}',
-                          style: MyTextStyles.h3Eng,
-                        )))),
-              ),
-              Visibility(
-                visible: primary.value,
-                child: const Icon(
-                  Icons.star,
-                  color: Colors.red,
-                  semanticLabel: 'Primary',
-                ),
-              ),
-              CustomPaint(
-                painter: ResiablePainter(
-                    accManagerHolder!.isCurrentIndex(index),
-                    resizable,
-                    realSize,
-                    isCornered,
-                    isHover,
-                    isCornerHover,
-                    isRadiusHover,
-                    radiusTopLeft.value,
-                    radiusTopRight.value,
-                    radiusBottomLeft.value,
-                    radiusBottomRight.value),
-                child: MouseRegion(
-                  onHover: (details) {
-                    //logHolder.log('Hover ${details.localPosition}',
-                    //    level: 5);
-                    if (isCorners(
-                        details.localPosition, realSize, resizeButtonSize)) {
-                      isCornered = true;
-                      isHover = false;
-                      entry!.markNeedsBuild();
-                    } else {
-                      isCornered = false;
-                      if (isRadius(details.localPosition, realSize,
-                          resizeButtonSize / 3)) {
-                        //isHover = false;
-                        //entry!.markNeedsBuild();
-                      } else {
-                        //logHolder.log('Hover ${details.localPosition}');
-                        if (!isHover) {
-                          isHover = true;
-                          entry!.markNeedsBuild();
-                        }
-                      }
-                    }
-                  },
-                  onEnter: (details) {
-                    //logHolder.log('Enter ${details.localPosition}',
-                    //    level: 5);
+                  isCornered = false;
+                  if (isRadius(
+                      details.localPosition, realSize, resizeButtonSize / 4)) {
+                    //isHover = false;
+                  } else {
                     isHover = true;
-                    entry!.markNeedsBuild();
-                  },
-                  onExit: (details) {
-                    //logHolder.log('Exit', level: 5);
-                    isHover = false;
-                    isCornered = false;
-                    clearCornerHover();
-                    entry!.markNeedsBuild();
-                  },
-                  child: DropZoneWidget(
-                    onDroppedFile: (model) {
-                      logHolder.log('contents added ${model.key}');
-                      accChild.playManager!.push(this, model);
-                    },
+                  }
+                }
+
+                logHolder.log('onPanStart : ${details.localPosition}');
+                mychangeStack.startTrans();
+                entry!.markNeedsBuild();
+                accManagerHolder!.unshowMenu(context);
+                //accManagerHolder!.showMenu(this, context);
+              },
+              onPanEnd: (details) {
+                logHolder.log('onPanEnd:', level: 5);
+                mychangeStack.endTrans();
+                // if (accManagerHolder!.isMenuVisible()) {
+                //   accManagerHolder!.showMenu(this, context);
+                // }
+                //entry!.markNeedsBuild();
+                invalidateContents(); //skpak test code
+              },
+              onPanUpdate: (details) {
+                if (!resizeWidget(
+                    details, containerSize.value, isCornerHover, ratio)) {
+                  //logHolder.log('move');
+                  //translateContainerOffset(details.delta);
+                  if (offsetValidationCheck(details.delta)) {
+                    double dx = containerOffset.value.dx +
+                        details.delta.dx / ratio.width * 1.1;
+                    double dy = containerOffset.value.dy +
+                        details.delta.dy / ratio.height * 1.1;
+                    if (rotate.value == 0) {
+                      _setContainerOffset(
+                          Offset(dx.roundToDouble(), dy.roundToDouble()));
+                    } else {
+                      double moveAngle = getRoundMoveAngle2(Offset(
+                          details.delta.dx / ratio.width * 1.1,
+                          details.delta.dy / ratio.height * 1.1));
+
+                      Offset newOffset = moveOnCircle2(
+                          (rotate.value + moveAngle) % 360,
+                          details.delta.dx / ratio.width * 1.1,
+                          details.delta.dy / ratio.height * 1.1);
+
+                      _setContainerOffset(Offset(
+                          (containerOffset.value.dx + newOffset.dx)
+                              .roundToDouble(),
+                          (containerOffset.value.dy + newOffset.dy)
+                              .roundToDouble()));
+                    }
+                  }
+                }
+                // OverayEntry 를 사용할 때는 setState 를 하지 않고, markNeedsBuild 를 수행한다.
+                entry!.markNeedsBuild();
+                //invalidateContents();
+              },
+              child: Opacity(
+                opacity: opacity.value,
+                child: Stack(children: [
+                  glassMorphic(
+                    isGlass: glass.value,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: bgColor.value.withOpacity(glass.value
+                            ? 0.5
+                            : bgColor.value == Colors.transparent
+                                ? 0
+                                : 1),
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(radiusTopRight.value),
+                          topLeft: Radius.circular(radiusTopLeft.value),
+                          bottomRight: Radius.circular(radiusBottomRight.value),
+                          bottomLeft: Radius.circular(radiusBottomLeft.value),
+                        ),
+                        border: _drawBorder(isSelected),
+                      ),
+                      //child: Transform.rotate(
+                      //  angle: rotate.value * (pi / 180),
+                      //  child: accChild,
+                      //),
+                      child: accChild,
+                    ),
                   ),
-                ),
+                  Visibility(
+                    visible: accManagerHolder!.orderVisible,
+                    child: Material(
+                        type: MaterialType.transparency,
+                        child: Container(
+                            height: realSize.height,
+                            width: realSize.width,
+                            color: Colors.white.withOpacity(0.5),
+                            child: Center(
+                                child: Text(
+                              '${order.value}',
+                              style: MyTextStyles.h3Eng,
+                            )))),
+                  ),
+                  Visibility(
+                    visible: primary.value,
+                    child: const Icon(
+                      Icons.star,
+                      color: Colors.red,
+                      semanticLabel: 'Primary',
+                    ),
+                  ),
+                  CustomPaint(
+                    painter: ResiablePainter(
+                        accManagerHolder!.isCurrentIndex(index),
+                        resizable,
+                        realSize,
+                        isCornered,
+                        isHover,
+                        isCornerHover,
+                        isRadiusHover,
+                        radiusTopLeft.value,
+                        radiusTopRight.value,
+                        radiusBottomLeft.value,
+                        radiusBottomRight.value),
+                    child: MouseRegion(
+                      onHover: (details) {
+                        //logHolder.log('Hover ${details.localPosition}',
+                        //    level: 5);
+                        if (isCorners(details.localPosition, realSize,
+                            resizeButtonSize)) {
+                          isCornered = true;
+                          isHover = false;
+                          entry!.markNeedsBuild();
+                        } else {
+                          isCornered = false;
+                          if (isRadius(details.localPosition, realSize,
+                              resizeButtonSize / 3)) {
+                            //isHover = false;
+                            //entry!.markNeedsBuild();
+                          } else {
+                            //logHolder.log('Hover ${details.localPosition}');
+                            if (!isHover) {
+                              isHover = true;
+                              entry!.markNeedsBuild();
+                            }
+                          }
+                        }
+                      },
+                      onEnter: (details) {
+                        //logHolder.log('Enter ${details.localPosition}',
+                        //    level: 5);
+                        isHover = true;
+                        entry!.markNeedsBuild();
+                      },
+                      onExit: (details) {
+                        //logHolder.log('Exit', level: 5);
+                        isHover = false;
+                        isCornered = false;
+                        clearCornerHover();
+                        entry!.markNeedsBuild();
+                      },
+                      child: DropZoneWidget(
+                        onDroppedFile: (model) {
+                          logHolder.log('contents added ${model.key}');
+                          accChild.playManager!.push(this, model);
+                        },
+                      ),
+                    ),
+                  ),
+                ]),
               ),
-            ]),
+            ),
           ),
-        ],
-      ),
-    );
+        ));
   }
 
   Border _drawBorder(bool isSelected) {

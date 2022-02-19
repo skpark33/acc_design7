@@ -21,6 +21,7 @@ import 'package:acc_design7/studio/properties/properties_frame.dart';
 //import 'package:acc_design7/common/buttons/wave_slider.dart';
 import 'package:acc_design7/common/buttons/dial_button.dart';
 import 'package:acc_design7/common/slider/opacity/opacity_slider.dart';
+import 'package:acc_design7/common/colorPicker/my_color_indicator.dart';
 
 class ExapandableModel {
   ExapandableModel({
@@ -55,11 +56,16 @@ class ExapandableModel {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              SizedBox(
-                width: titleSize,
-                child: Text(
-                  title,
-                  style: MyTextStyles.subtitle2,
+              GestureDetector(
+                onTapDown: (details) {
+                  setStateFunction.call();
+                },
+                child: SizedBox(
+                  width: titleSize,
+                  child: Text(
+                    title,
+                    style: MyTextStyles.subtitle2,
+                  ),
                 ),
               ),
               if (titleLineWidget != null) titleLineWidget,
@@ -101,13 +107,13 @@ class WidgetProperty extends PropertySelector {
   @override
   State<WidgetProperty> createState() => WidgetPropertyState();
 
-  int _userColorIndex = 1;
+  int _userColorIndex = 3;
 
   void setUserColorList(Color bg) {
     currentUser.bgColorList1[_userColorIndex] = bg;
     _userColorIndex++;
     if (_userColorIndex >= currentUser.maxBgColor) {
-      _userColorIndex = 1;
+      _userColorIndex = 3;
     }
   }
 }
@@ -127,20 +133,22 @@ class WidgetPropertyState extends State<WidgetProperty>
   TextEditingController yCon = TextEditingController();
 
   bool isSizeChangable = true;
+  final List<ExapandableModel> _modelList = [];
 
   ExapandableModel animeModel = ExapandableModel(
     title: MyStrings.anime,
     height: 260,
     width: 240,
   );
+
   ExapandableModel bgColorModel = ExapandableModel(
     title: '${MyStrings.bgColor}/${MyStrings.glass}',
-    height: 360,
+    height: 410,
     width: 240,
   );
   ExapandableModel opacityModel = ExapandableModel(
     title: MyStrings.opacity,
-    height: 80,
+    height: 64,
     width: 240,
   );
   ExapandableModel sizePosModel = ExapandableModel(
@@ -164,12 +172,29 @@ class WidgetPropertyState extends State<WidgetProperty>
     width: 240,
   );
 
+  void unexpendAll(String expandModelName) {
+    for (ExapandableModel model in _modelList) {
+      if (expandModelName != model.title) {
+        model.isSelected = false;
+      }
+    }
+  }
+
   @override
   void initState() {
     _aniIconController = AnimationController(
         animationBehavior: AnimationBehavior.preserve,
         vsync: this,
         duration: Duration(milliseconds: 1000));
+
+    _modelList.add(animeModel);
+    _modelList.add(bgColorModel);
+    _modelList.add(opacityModel);
+    _modelList.add(sizePosModel);
+    _modelList.add(cornerModel);
+    _modelList.add(rotateModel);
+    _modelList.add(borderModel);
+
     super.initState();
   }
 
@@ -191,7 +216,7 @@ class WidgetPropertyState extends State<WidgetProperty>
           //crossAxisAlignment: CrossAxisAlignment.start,
           controller: _scrollController,
           children: [
-            _titleRow(25, 25, 35, 15),
+            _titleRow(25, 15, 12, 10),
             _divider(),
             _primaryRow(acc, 25, 5, 12, 5),
             _divider(),
@@ -201,6 +226,7 @@ class WidgetPropertyState extends State<WidgetProperty>
                 child: _sizePosRow(context, acc),
                 setStateFunction: () {
                   setState(() {
+                    unexpendAll(sizePosModel.title);
                     sizePosModel.toggleSelected();
                   });
                 },
@@ -214,6 +240,7 @@ class WidgetPropertyState extends State<WidgetProperty>
                 child: _bgColorRow(context, acc),
                 setStateFunction: () {
                   setState(() {
+                    unexpendAll(bgColorModel.title);
                     bgColorModel.toggleSelected();
                   });
                 },
@@ -222,16 +249,7 @@ class WidgetPropertyState extends State<WidgetProperty>
                     ? Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          CircleAvatar(
-                            radius: 18,
-                            foregroundColor: acc.bgColor.value,
-                            backgroundColor: MyColors.secondaryColor,
-                            child: _glassIcon(
-                                0,
-                                acc,
-                                acc.bgColor
-                                    .value), //Icon(Icons.circle, size: 32),
-                          ),
+                          _glassIcon(acc, acc.bgColor.value),
                           SizedBox(
                             width: 20,
                           ),
@@ -249,6 +267,7 @@ class WidgetPropertyState extends State<WidgetProperty>
                 ]),
                 setStateFunction: () {
                   setState(() {
+                    unexpendAll(opacityModel.title);
                     opacityModel.toggleSelected();
                   });
                 }),
@@ -261,6 +280,7 @@ class WidgetPropertyState extends State<WidgetProperty>
                 ),
                 setStateFunction: () {
                   setState(() {
+                    unexpendAll(rotateModel.title);
                     rotateModel.toggleSelected();
                   });
                 }),
@@ -299,6 +319,7 @@ class WidgetPropertyState extends State<WidgetProperty>
                     : null,
                 setStateFunction: () {
                   setState(() {
+                    unexpendAll(animeModel.title);
                     animeModel.toggleSelected();
                   });
                 }),
@@ -307,6 +328,7 @@ class WidgetPropertyState extends State<WidgetProperty>
                 child: _borderRow(context, acc),
                 setStateFunction: () {
                   setState(() {
+                    unexpendAll(borderModel.title);
                     borderModel.toggleSelected();
                   });
                 }),
@@ -315,6 +337,7 @@ class WidgetPropertyState extends State<WidgetProperty>
                 child: _cornerRow(context, acc),
                 setStateFunction: () {
                   setState(() {
+                    unexpendAll(cornerModel.title);
                     cornerModel.toggleSelected();
                   });
                 }),
@@ -334,12 +357,22 @@ class WidgetPropertyState extends State<WidgetProperty>
     );
   }
 
+  Divider _smallDivider() {
+    return Divider(
+      height: 4,
+      thickness: 1,
+      color: MyColors.divide,
+      indent: 24,
+      endIndent: 24,
+    );
+  }
+
   Widget _titleRow(double left, double top, double right, double bottom) {
     return Padding(
       padding: EdgeInsets.fromLTRB(left, top, right, bottom),
       child: Text(
         MyStrings.widgetPropTitle,
-        style: MyTextStyles.body2,
+        style: MyTextStyles.body1,
       ),
     );
   }
@@ -380,17 +413,19 @@ class WidgetPropertyState extends State<WidgetProperty>
       child: Row(
         children: [
           Text(
-            MyStrings.sourceRatio,
+            acc.sourceRatio.value == true
+                ? MyStrings.sourceRatio
+                : MyStrings.sourceRatioToggle,
             style: MyTextStyles.subtitle2,
           ),
           IconButton(
             padding: EdgeInsets.fromLTRB(18, 2, 8, 2),
             iconSize: 32.0,
             icon: Icon(
-              acc.sourceRatio.value != true
-                  ? Icons.aspect_ratio_outlined
-                  : Icons.image_aspect_ratio_outlined,
-              color: acc.sourceRatio.value != true ? Colors.grey : Colors.red,
+              acc.sourceRatio.value == true
+                  ? Icons.image_aspect_ratio_outlined
+                  : Icons.aspect_ratio_outlined,
+              color: acc.sourceRatio.value == true ? Colors.grey : Colors.red,
             ),
             onPressed: () {
               acc.sourceRatio.set(!acc.sourceRatio.value);
@@ -608,26 +643,28 @@ class WidgetPropertyState extends State<WidgetProperty>
               height: 10,
             ),
             ColorPicker(
+              subheading: _smallDivider(),
               pickersEnabled: const <ColorPickerType, bool>{
                 ColorPickerType.both: false,
                 ColorPickerType.primary: true,
                 ColorPickerType.accent: true,
-                ColorPickerType.bw: true,
+                ColorPickerType.bw: false,
                 ColorPickerType.custom: false,
-                ColorPickerType.wheel: false
+                ColorPickerType.wheel: true
               },
               pickerTypeLabels: <ColorPickerType, String>{
                 ColorPickerType.primary: MyStrings.basicColor,
                 ColorPickerType.accent: MyStrings.accentColor,
-                ColorPickerType.bw: MyStrings.customColor
+                ColorPickerType.wheel: MyStrings.customColor
               },
               color: acc.bgColor.value,
-              onColorChanged: (bg) {
+              onColorChanged: (bg) {},
+              onColorChangeEnd: (bg) {
                 acc.setBgColor(bg);
                 widget.setUserColorList(bg);
               },
-              width: 25,
-              height: 25,
+              width: 22,
+              height: 22,
               padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
               showColorName: false,
               showRecentColors: false,
@@ -674,13 +711,14 @@ class WidgetPropertyState extends State<WidgetProperty>
                 style: MyTextStyles.subtitle2,
               ),
               SizedBox(width: 32),
-              CircleAvatar(
-                radius: 18,
-                foregroundColor: acc.bgColor.value,
-                backgroundColor: MyColors.secondaryColor,
-                child: _glassIcon(
-                    0, acc, acc.bgColor.value), //Icon(Icons.circle, size: 32),
-              ),
+              _glassIcon(acc, acc.bgColor.value),
+              // CircleAvatar(
+              //   radius: 18,
+              //   foregroundColor: acc.bgColor.value,
+              //   backgroundColor: MyColors.secondaryColor,
+              //   child: _glassIcon(
+              //       0, acc, acc.bgColor.value), //Icon(Icons.circle, size: 32),
+              // ),
             ]),
           ]),
     );
@@ -788,18 +826,10 @@ class WidgetPropertyState extends State<WidgetProperty>
     }
   }
 
-  IconButton _glassIcon(double left, ACC acc, Color bg) {
-    return IconButton(
-      padding: EdgeInsets.fromLTRB(left, 0, 0, 0),
-      iconSize: 32.0,
-      icon: Icon(
-        acc.glass.value == false
-            ? Icons.circle //Icons.blur_off_rounded
-            : Icons.blur_on_rounded,
-        color: bg,
-        //color: acc.glass.value == false ? Colors.grey : Colors.red,
-      ),
-      onPressed: () {
+  MyColorIndicator _glassIcon(ACC acc, Color bg) {
+    return MyColorIndicator(
+      color: bg == Color(0x00000000) ? Color(0xFFFFFFFF) : bg,
+      onSelect: () {
         acc.glass.set(!acc.glass.value);
         if (acc.glass.value == true) {
           if (acc.bgColor.value == Colors.transparent) {
@@ -810,6 +840,39 @@ class WidgetPropertyState extends State<WidgetProperty>
         acc.setState();
         setState(() {});
       },
+      isSelected: acc.glass.value,
+      width: 30,
+      height: 30,
+      borderRadius: 0,
+      hasBorder: true,
+      borderColor:
+          bg == Color(0x00000000) ? Colors.black : MyColors.primaryColor,
+      elevation: 5,
+      selectedIcon: Icons.blur_on_rounded,
     );
   }
+  // IconButton _glassIcon(double left, ACC acc, Color bg) {
+  //   return IconButton(
+  //     padding: EdgeInsets.fromLTRB(left, 0, 0, 0),
+  //     iconSize: 32.0,
+  //     icon: Icon(
+  //       acc.glass.value == false
+  //           ? Icons.circle //Icons.blur_off_rounded
+  //           : Icons.blur_on_rounded,
+  //       color: bg,
+  //       //color: acc.glass.value == false ? Colors.grey : Colors.red,
+  //     ),
+  //     onPressed: () {
+  //       acc.glass.set(!acc.glass.value);
+  //       if (acc.glass.value == true) {
+  //         if (acc.bgColor.value == Colors.transparent) {
+  //           // 바탕색이 투명일때, 유리질을 선택하면, 바탕색을 힌색으로 잡아준다.
+  //           acc.bgColor.set(Colors.white);
+  //         }
+  //       }
+  //       acc.setState();
+  //       setState(() {});
+  //     },
+  //   );
+  // }
 }

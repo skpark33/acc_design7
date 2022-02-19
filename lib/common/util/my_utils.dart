@@ -128,6 +128,11 @@ Offset moveOnCircle(double degree, double radius, Offset center) {
   return Offset(x1, y1);
 }
 
+Offset moveOnCircle2(double degree, double dx, double dy) {
+  double radius = sqrt(dx * dx + dy * dy);
+  return moveOnCircle(degree, radius, const Offset(0, 0));
+}
+
 double getRoundMoveAngle(Offset localPosition, double radius) {
   double degree = -4;
 
@@ -188,6 +193,49 @@ double getRoundMoveAngle(Offset localPosition, double radius) {
   }
 
   degree = divide + theta;
+  //logHolder.log('Update: $degree, $divide, theta=$theta');
+  return degree;
+}
+
+double getRoundMoveAngle2(Offset pos) {
+  double rx = pos.dx;
+  double ry = pos.dy;
+  if (rx == 0 && ry == 0) {
+    return 0;
+  }
+  double degree = -4;
+  double divide = 0;
+
+  if (rx < 0 && ry < 0) {
+    // 4/4 분면
+    divide = 270;
+  } else if (rx > 0 && ry < 0) {
+    // 1/4 분면
+    divide = 0;
+  } else if (rx > 0 && ry > 0) {
+    // 2/4 분면
+    divide = 90;
+  } else if (rx < 0 && ry > 0) {
+    // 3/4 분면
+    divide = 180;
+  }
+
+  double theta = 0;
+  double buf = ry / sqrt(rx * rx + ry * ry);
+  if (buf > 1.0 || buf < -1.0) {
+    logHolder.log('ERROR Invalid asin input=$buf');
+    return -2;
+  }
+  theta = asin(buf);
+  // theta 는 radian (호의 길이) 이므로, 이를 각도로 변화해 준다.
+  theta = (180 / pi) * theta;
+
+  // theta 는 90 을 넘을 수 없다.
+  if (theta > 90 || theta < -90) {
+    logHolder.log('ERROR Invalid theta=$theta');
+    return -3;
+  }
+  degree = divide + 90 - theta;
   //logHolder.log('Update: $degree, $divide, theta=$theta');
   return degree;
 }
