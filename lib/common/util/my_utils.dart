@@ -129,8 +129,11 @@ Offset moveOnCircle(double degree, double radius, Offset center) {
 }
 
 Offset moveOnCircle2(double degree, double dx, double dy) {
+  // center 를 (0,0) 로 산정한 케이스 이다.
   double radius = sqrt(dx * dx + dy * dy);
-  return moveOnCircle(degree, radius, const Offset(0, 0));
+  var x1 = radius * cos(degree * pi / 180);
+  var y1 = radius * sin(degree * pi / 180);
+  return Offset(x1, y1);
 }
 
 double getRoundMoveAngle(Offset localPosition, double radius) {
@@ -197,26 +200,42 @@ double getRoundMoveAngle(Offset localPosition, double radius) {
   return degree;
 }
 
-double getRoundMoveAngle2(Offset pos) {
-  double rx = pos.dx;
-  double ry = pos.dy;
-  if (rx == 0 && ry == 0) {
+double getRoundMoveAngle2(double dx, double dy) {
+  if (dx == 0 && dy == 0) {
     return 0;
   }
+  if (dx == 0) {
+    return (((dy > 0) ? 180 : 0) + 270);
+  }
+  if (dy == 0) {
+    return (((dx > 0) ? 90 : 270) + 270);
+  }
+
   double degree = -4;
   double divide = 0;
 
-  if (rx < 0 && ry < 0) {
+  double rx = 0;
+  double ry = 0;
+
+  if (dx < 0 && dy < 0) {
+    rx = dx.abs(); //-
+    ry = dy.abs();
     // 4/4 분면
     divide = 270;
-  } else if (rx > 0 && ry < 0) {
+  } else if (dx > 0 && dy < 0) {
     // 1/4 분면
+    rx = dy.abs(); //-
+    ry = dx.abs();
     divide = 0;
-  } else if (rx > 0 && ry > 0) {
+  } else if (dx > 0 && dy > 0) {
     // 2/4 분면
+    rx = dx.abs();
+    ry = dy.abs(); //-
     divide = 90;
-  } else if (rx < 0 && ry > 0) {
+  } else if (dx < 0 && dy > 0) {
     // 3/4 분면
+    rx = dy.abs();
+    ry = dx.abs(); //-
     divide = 180;
   }
 
@@ -235,9 +254,9 @@ double getRoundMoveAngle2(Offset pos) {
     logHolder.log('ERROR Invalid theta=$theta');
     return -3;
   }
-  degree = divide + 90 - theta;
+  degree = divide + theta;
   //logHolder.log('Update: $degree, $divide, theta=$theta');
-  return degree;
+  return degree + 270;
 }
 
 Widget errMsgWidget(AsyncSnapshot<Object> snapshot) {

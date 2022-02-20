@@ -113,27 +113,50 @@ class ResiablePainter extends CustomPainter {
         double inCenter = -(r - 10) / 2;
         double inR = r - 10;
         double outR = r;
+        //neResize
         canvas.drawArc(Rect.fromLTWH(outCenter, outCenter, outR, outR), 0,
             .5 * pi, true, isCornerHover[0] ? cornerBrush2 : cornerBrush1);
-        canvas.drawArc(
-            Rect.fromLTWH(outCenter, widgetSize.height + outCenter, outR, outR),
-            1.5 * pi,
-            .5 * pi,
-            true,
-            isCornerHover[1] ? cornerBrush2 : cornerBrush1);
+        //nwResize
         canvas.drawArc(
             Rect.fromLTWH(widgetSize.width + outCenter, outCenter, outR, outR),
             .5 * pi,
             .5 * pi,
             true,
-            isCornerHover[2] ? cornerBrush2 : cornerBrush1);
+            isCornerHover[1] ? cornerBrush2 : cornerBrush1);
+
+        //swResize
         canvas.drawArc(
             Rect.fromLTWH(widgetSize.width + outCenter,
                 widgetSize.height + outCenter, outR, outR),
             pi,
             .5 * pi,
             true,
+            isCornerHover[2] ? cornerBrush2 : cornerBrush1);
+        //seResize
+        canvas.drawArc(
+            Rect.fromLTWH(outCenter, widgetSize.height + outCenter, outR, outR),
+            1.5 * pi,
+            .5 * pi,
+            true,
             isCornerHover[3] ? cornerBrush2 : cornerBrush1);
+        // canvas.drawArc(
+        //     Rect.fromLTWH(widgetSize.width + outCenter, outCenter, outR, outR),
+        //     .5 * pi,
+        //     .5 * pi,
+        //     true,
+        //     isCornerHover[2] ? cornerBrush2 : cornerBrush1);
+        // canvas.drawArc(
+        //     Rect.fromLTWH(widgetSize.width + outCenter,widgetSize.height + outCenter, outR, outR),
+        //     pi,
+        //     .5 * pi,
+        //     true,
+        //     isCornerHover[3] ? cornerBrush2 : cornerBrush1);
+        // canvas.drawArc(
+        //     Rect.fromLTWH(outCenter, widgetSize.height + outCenter, outR, outR),
+        //     1.5 * pi,
+        //     .5 * pi,
+        //     true,
+        //     isCornerHover[1] ? cornerBrush2 : cornerBrush1);
 
         canvas.drawArc(Rect.fromLTWH(inCenter, inCenter, inR, inR), 0, .5 * pi,
             true, radiusBrush3);
@@ -191,7 +214,7 @@ class ResiablePainter extends CustomPainter {
             Offset(widgetSize.width * (7 / 8) + dx,
                 widgetSize.height * (1 / 8) + dy),
             r / 3,
-            isRadiusHover[2] ? radiusBrush2 : radiusBrush1);
+            isRadiusHover[1] ? radiusBrush2 : radiusBrush1); //2
         canvas.drawCircle(
             Offset(widgetSize.width * (7 / 8) + dx,
                 widgetSize.height * (1 / 8) + dy),
@@ -208,7 +231,7 @@ class ResiablePainter extends CustomPainter {
             Offset(widgetSize.width * (1 / 8) + dx,
                 widgetSize.height * (7 / 8) + dy),
             r / 3,
-            isRadiusHover[1] ? radiusBrush2 : radiusBrush1);
+            isRadiusHover[3] ? radiusBrush2 : radiusBrush1); //1
         canvas.drawCircle(
             Offset(widgetSize.width * (1 / 8) + dx,
                 widgetSize.height * (7 / 8) + dy),
@@ -225,7 +248,7 @@ class ResiablePainter extends CustomPainter {
             Offset(widgetSize.width * (7 / 8) + dx,
                 widgetSize.height * (7 / 8) + dy),
             r / 3,
-            isRadiusHover[3] ? radiusBrush2 : radiusBrush1);
+            isRadiusHover[2] ? radiusBrush2 : radiusBrush1); //3
         canvas.drawCircle(
             Offset(widgetSize.width * (7 / 8) + dx,
                 widgetSize.height * (7 / 8) + dy),
