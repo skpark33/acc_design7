@@ -10,6 +10,7 @@ import '../common/util/logger.dart';
 import '../common/undo/undo.dart';
 import '../widgets/base_widget.dart';
 import '../constants/styles.dart';
+import '../constants/constants.dart';
 import '../studio/artboard/artboard_frame.dart';
 import '../model/pages.dart';
 import '../model/contents.dart';
@@ -35,6 +36,7 @@ class ACC with ACCProperty {
 
   bool isHover = false;
   bool isCornered = false;
+  bool isRadiused = false;
   final List<bool> isCornerHover = [false, false, false, false];
   final List<bool> isRadiusHover = [false, false, false, false];
   CursorType cursor = CursorType.pointer;
@@ -212,14 +214,16 @@ class ACC with ACCProperty {
                   details.localPosition, realSize, resizeButtonSize)) {
                 isHover = false;
                 isCornered = true;
+                isRadiused = false;
+              } else if (isRadius(
+                  details.localPosition, realSize, resizeButtonSize / 4)) {
+                isRadiused = true;
+                isHover = false;
+                isCornered = false;
               } else {
                 isCornered = false;
-                if (isRadius(
-                    details.localPosition, realSize, resizeButtonSize / 4)) {
-                  //isHover = false;
-                } else {
-                  isHover = true;
-                }
+                isRadiused = false;
+                isHover = true;
               }
 
               logHolder.log('onPanStart : ${details.localPosition}');
@@ -243,8 +247,8 @@ class ACC with ACCProperty {
                 //logHolder.log('move');
                 //translateContainerOffset(details.delta);
                 if (offsetValidationCheck(details.delta)) {
-                  double dx = details.delta.dx / ratio.width * 1.1;
-                  double dy = details.delta.dy / ratio.height * 1.1;
+                  double dx = details.delta.dx / ratio.width;
+                  double dy = details.delta.dy / ratio.height;
                   //if (rotate.value == 0) {
                   _setContainerOffset(Offset(
                       (containerOffset.value.dx + dx).roundToDouble(),
@@ -276,6 +280,7 @@ class ACC with ACCProperty {
                       glassMorphic(
                         isGlass: glass.value,
                         child: Container(
+                          clipBehavior: Clip.hardEdge,
                           decoration: BoxDecoration(
                             color: bgColor.value.withOpacity(glass.value
                                 ? 0.5
@@ -388,6 +393,7 @@ class ACC with ACCProperty {
                       resizable,
                       realSize,
                       isCornered,
+                      isRadiused,
                       isHover,
                       isCornerHover,
                       isRadiusHover,
@@ -402,20 +408,21 @@ class ACC with ACCProperty {
                       if (isCorners(
                           details.localPosition, realSize, resizeButtonSize)) {
                         isCornered = true;
+                        isRadiused = false;
+                        isHover = false;
+                        entry!.markNeedsBuild();
+                      } else if (isRadius(
+                          details.localPosition, realSize, resizeButtonSize)) {
+                        isCornered = false;
+                        isRadiused = true;
                         isHover = false;
                         entry!.markNeedsBuild();
                       } else {
                         isCornered = false;
-                        if (isRadius(details.localPosition, realSize,
-                            resizeButtonSize / 3)) {
-                          //isHover = false;
-                          //entry!.markNeedsBuild();
-                        } else {
-                          //logHolder.log('Hover ${details.localPosition}');
-                          if (!isHover) {
-                            isHover = true;
-                            entry!.markNeedsBuild();
-                          }
+                        isRadiused = false;
+                        if (!isHover) {
+                          isHover = true;
+                          entry!.markNeedsBuild();
                         }
                       }
                     },
@@ -429,6 +436,7 @@ class ACC with ACCProperty {
                       //logHolder.log('Exit', level: 5);
                       isHover = false;
                       isCornered = false;
+                      isRadiused = false;
                       clearCornerHover();
                       entry!.markNeedsBuild();
                     },
@@ -484,8 +492,8 @@ class ACC with ACCProperty {
     //
     // Size change Check part
     //
-    double dx = (details.delta.dx / ratio.width).roundToDouble();
-    double dy = (details.delta.dy / ratio.height).roundToDouble();
+    double dx = (details.delta.dx / ratio.width);
+    double dy = (details.delta.dy / ratio.height);
 
     bool isSizeChange = false;
     switch (cursor) {
@@ -505,10 +513,10 @@ class ACC with ACCProperty {
       //dx = rotateCorner.dx;
       //dy = rotateCorner.dy;
 
-      double w = containerSize.value.width.roundToDouble();
-      double h = containerSize.value.height.roundToDouble();
-      double cx = containerOffset.value.dx.roundToDouble();
-      double cy = containerOffset.value.dy.roundToDouble();
+      double w = containerSize.value.width;
+      double h = containerSize.value.height;
+      double cx = containerOffset.value.dx;
+      double cy = containerOffset.value.dy;
 
       if (!sizeValidationCheck(details.delta, cursor)) {
         return false;
@@ -519,31 +527,35 @@ class ACC with ACCProperty {
       //switch (rotateCorner.cursor) {
       switch (cursor) {
         case CursorType.neResize:
-          logHolder.log("neResise $dx,$dy", level: 6);
+          //logHolder.log("neResise $dx,$dy", level: 6);
           afterSize = Size((w - dx), (h - dy));
           afterOffset = Offset((cx + dx), (cy + dy));
           break;
         case CursorType.seResize:
-          logHolder.log("seResise $dx,$dy", level: 6);
+          //logHolder.log("seResise $dx,$dy", level: 6);
           afterSize = Size((w - dx), (h + dy));
           afterOffset = Offset((cx + dx), cy);
           break;
         case CursorType.nwResize:
-          logHolder.log("nwResise $dx,$dy", level: 6);
+          //logHolder.log("nwResise $dx,$dy", level: 6);
           afterSize = Size((w + dx), (h - dy));
           afterOffset = Offset(cx, (cy + dy));
           break;
         case CursorType.swResize:
-          logHolder.log("swResise $dx,$dy", level: 6);
+          //logHolder.log("swResise $dx,$dy", level: 6);
           afterSize = Size((w + dx), (h + dy));
           break;
         default:
           break;
       }
-      if (afterSize.width * ratio.width > 10 &&
-          afterSize.height * ratio.height > 10) {
+      if (afterSize.width * ratio.width > minAccSize &&
+          afterSize.height * ratio.height > minAccSize) {
         //logHolder.log("_setContainerOffsetAndSize $afterSize", level: 6);
-        _setContainerOffsetAndSize(afterOffset, afterSize);
+        _setContainerOffsetAndSize(
+            Offset(
+                afterOffset.dx.roundToDouble(), afterOffset.dy.roundToDouble()),
+            Size(afterSize.width.roundToDouble(),
+                afterSize.height.roundToDouble()));
       }
       return true;
     }
@@ -574,7 +586,9 @@ class ACC with ACCProperty {
         break;
     }
 
-    newRadius += (dx.abs() + dy.abs()) * pi * direction;
+    //newRadius += (dx.abs() + dy.abs()) * pi * direction;
+    newRadius +=
+        asin(dy.abs() / sqrt(dx * dx + dy * dy)) * (180 / pi) * direction;
     if (newRadius < 0) newRadius = 0;
     if (newRadius > pi * 180) newRadius = pi * 180;
 
@@ -586,6 +600,7 @@ class ACC with ACCProperty {
         radiusBottomLeft.set(newRadius);
         return true;
       case CursorType.nwRadius:
+        logHolder.log('CursorType.nwRadius=$newRadius', level: 6);
         radiusTopRight.set(newRadius);
         return true;
       case CursorType.swRadius:
@@ -596,6 +611,7 @@ class ACC with ACCProperty {
     }
   }
 
+// 사용하지 않는 함수임.
   RotateCorner getRotateCorner(Size realSize, double dx, double dy) {
     double angle = rotate.value;
     List<CursorType> _cursorList = [
@@ -694,71 +710,44 @@ class ACC with ACCProperty {
       isRadiusHover[i] = false;
     }
 
-    double dx = 0;
-    double dy = 0;
-    if (radiusTopLeft.value > 0) {
-      dx = radiusTopLeft.value / (2 * pi);
-      if (dx > 90) dx = 90;
-      dy = dx;
-    }
-    if (ResiablePainter.isCorner(
-        point,
-        Offset(
-            widgetSize.width * (1 / 8) + dx, widgetSize.height * (1 / 8) + dy),
-        r)) {
+    double left = widgetSize.width * (1 / 8) - r / 4;
+    double top = widgetSize.height * (1 / 8) - r / 4;
+    double right = widgetSize.width * (7 / 8) - r * 3 / 4;
+    double bottom = widgetSize.height * (7 / 8) - r * 3 / 4;
+
+    double dx = getRadiusPos(radiusTopLeft.value);
+    double dy = dx;
+
+    if (ResiablePainter.isCorner(point, Offset(left + dx, top + dy), r)) {
       cursor = CursorType.neRadius;
       isRadiusHover[0] = true;
       return true;
     }
 
-    dx = dy = 0;
-    if (radiusTopRight.value > 0) {
-      dy = radiusTopRight.value / (2 * pi);
-      if (dy > 90) dy = 90;
-      dx = -dy;
-    }
-    if (ResiablePainter.isCorner(
-        point,
-        Offset(
-            widgetSize.width * (7 / 8) + dx, widgetSize.height * (1 / 8) + dy),
-        r)) {
+    dy = getRadiusPos(radiusTopRight.value);
+    dx = -dy;
+    if (ResiablePainter.isCorner(point, Offset(right + dx, top + dy), r)) {
       cursor = CursorType.nwRadius;
       isRadiusHover[1] = true;
       return true;
     }
 
-    dx = dy = 0;
-    if (radiusBottomRight.value > 0) {
-      dx = (radiusBottomRight.value / (2 * pi)) * (-1);
-      if (dx < -90) dx = -90;
-      dy = dx;
-    }
-    if (ResiablePainter.isCorner(
-        point,
-        Offset(
-            widgetSize.width * (7 / 8) + dx, widgetSize.height * (7 / 8) + dy),
-        r)) {
+    dx = getRadiusPos(radiusBottomRight.value, minus: -1);
+    dy = dx;
+    if (ResiablePainter.isCorner(point, Offset(right + dx, bottom + dy), r)) {
       cursor = CursorType.swRadius;
       isRadiusHover[2] = true;
       return true;
     }
 
-    dx = dy = 0;
-    if (radiusBottomLeft.value > 0) {
-      dx = radiusBottomLeft.value / (2 * pi);
-      if (dx > 90) dx = 90;
-      dy = -dx;
-    }
-    if (ResiablePainter.isCorner(
-        point,
-        Offset(
-            widgetSize.width * (1 / 8) + dx, widgetSize.height * (7 / 8) + dy),
-        r)) {
+    dx = getRadiusPos(radiusBottomLeft.value);
+    dy = -dx;
+
+    if (ResiablePainter.isCorner(point, Offset(left + dx, bottom + dy), r)) {
       cursor = CursorType.seRadius;
       isRadiusHover[3] = true;
       return true;
     }
-
     cursor = CursorType.move;
     return false;
   }

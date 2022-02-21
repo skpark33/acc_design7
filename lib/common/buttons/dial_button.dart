@@ -8,8 +8,9 @@ import 'package:flutter/material.dart';
 //import 'dart:async';
 import 'dart:math';
 
+// ignore: must_be_immutable
 class DialView extends StatefulWidget {
-  const DialView({
+  DialView({
     Key? key,
     required this.angle,
     required this.size,
@@ -17,18 +18,17 @@ class DialView extends StatefulWidget {
   }) : super(key: key);
 
   final Size size;
-  final double angle;
+  double angle;
   final void Function(double value)? onValueChanged;
 
   @override
-  DialViewState createState() => DialViewState(angle: angle, size: size);
+  DialViewState createState() => DialViewState(size: size);
 }
 
 class DialViewState extends State<DialView> {
-  double angle = 0;
   Size size = Size.zero;
 
-  DialViewState({required this.angle, required this.size});
+  DialViewState({required this.size});
 
   Offset handleOffset = Offset.zero;
   Offset center = Offset.zero;
@@ -56,7 +56,7 @@ class DialViewState extends State<DialView> {
     center = Offset(centerX, centerY);
     radius = min(centerX, centerY);
     handleOffset =
-        moveOnCircle(angle, radius - (handleRadius / 2) - 20, center);
+        moveOnCircle(widget.angle, radius - (handleRadius / 2) - 20, center);
     //logHolder.log('resetHandle=$handleOffset');
   }
 
@@ -105,10 +105,10 @@ class DialViewState extends State<DialView> {
                     getRoundMoveAngle(update.localPosition, radius);
                 if (movedAngle >= 0) {
                   setState(() {
-                    angle = movedAngle.roundToDouble();
+                    widget.angle = movedAngle.roundToDouble();
                   });
                   if (widget.onValueChanged != null) {
-                    widget.onValueChanged!.call(angle);
+                    widget.onValueChanged!.call(widget.angle);
                   }
                 }
               }
@@ -119,7 +119,7 @@ class DialViewState extends State<DialView> {
                 if (dragStart) {
                   dragStart = false;
                   if (widget.onValueChanged != null) {
-                    widget.onValueChanged!.call(angle);
+                    widget.onValueChanged!.call(widget.angle);
                   }
                 }
               });
@@ -131,13 +131,13 @@ class DialViewState extends State<DialView> {
             //hasBorder: true,
             hasDeleteButton: true,
             hasCounterButton: true,
-            defaultValue: angle,
+            defaultValue: widget.angle,
             controller: angleCon,
             onEditingComplete: () {
               setState(() {
-                angle = double.parse(angleCon.text);
+                widget.angle = double.parse(angleCon.text);
                 if (widget.onValueChanged != null) {
-                  widget.onValueChanged!.call(angle);
+                  widget.onValueChanged!.call(widget.angle);
                 }
               });
             }),

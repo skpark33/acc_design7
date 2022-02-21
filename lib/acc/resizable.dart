@@ -2,7 +2,8 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 //import 'acc_manager.dart';
-//import '../util/logger.dart';
+import '../constants/styles.dart';
+import '../common/util/my_utils.dart';
 
 const double resizeButtonSize = 40.0;
 
@@ -11,6 +12,7 @@ class ResiablePainter extends CustomPainter {
   bool resizable = true;
   final Size widgetSize;
   final bool isCornered;
+  final bool isRadiused;
   final bool isHover;
   final List<bool> isCornerHover;
   final List<bool> isRadiusHover;
@@ -29,6 +31,7 @@ class ResiablePainter extends CustomPainter {
       this.resizable,
       this.widgetSize,
       this.isCornered,
+      this.isRadiused,
       this.isHover,
       this.isCornerHover,
       this.isRadiusHover,
@@ -42,240 +45,131 @@ class ResiablePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     // resize 가 가능하게 하는...외곽선과 꼭지가 나오도록 한다.
 
-    if (resizable) {
-      double r = resizeButtonSize;
+    if (!resizable) {
+      return;
+    }
 
-      var cornerBrush1 = Paint()
-        ..color = Colors.pink.withOpacity(.3)
-        ..isAntiAlias = true
-        ..strokeWidth = 2.0
-        ..style = PaintingStyle.fill
-        //..blendMode = BlendMode.darken
-        //..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10)
-        ..strokeJoin = StrokeJoin.round;
-      var cornerBrush2 = Paint()
-        ..color = Colors.blue[500]!.withOpacity(0.5)
-        // ..shader = LinearGradient(
-        //   begin: Alignment.topRight,
-        //   end: Alignment.bottomLeft,
-        //   colors: [
-        //     Colors.pink[900]!.withOpacity(0.5),
-        //     Colors.pink[200]!.withOpacity(0.5),
-        //   ],
-        // ).createShader(Rect.fromLTRB(0, 0, r, r))
-        ..isAntiAlias = true
-        ..strokeWidth = 2.0
-        ..style = PaintingStyle.fill
-        //..blendMode = BlendMode.darken
-        //..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10)
-        ..strokeJoin = StrokeJoin.round
-        ..blendMode = BlendMode.darken
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
+    // shader example !!!!
+    // ..shader = LinearGradient(
+    //   begin: Alignment.topRight,
+    //   end: Alignment.bottomLeft,
+    //   colors: [
+    //     Colors.pink[900]!.withOpacity(0.5),
+    //     Colors.pink[200]!.withOpacity(0.5),
+    //   ],
+    // ).createShader(Rect.fromLTRB(0, 0, r, r))
 
-      var radiusBrush1 = Paint()
-        ..color = Colors.pink.withOpacity(.3)
-        ..isAntiAlias = true
-        ..strokeWidth = 2.0
-        ..style = PaintingStyle.fill
-        //r..blendMode = BlendMode.darken
-        //..maskFilter = const MaskFilter.blur(BlurStyle.solid, 10)
-        ..strokeJoin = StrokeJoin.round;
-      var radiusBrush2 = Paint()
-        ..color = Colors.blue
-        ..isAntiAlias = true
-        ..strokeWidth = 2.0
-        ..style = PaintingStyle.fill
-        //r..blendMode = BlendMode.darken
-        //..maskFilter = const MaskFilter.blur(BlurStyle.solid, 10)
-        ..strokeJoin = StrokeJoin.round;
+    // blus example !!!
+    //..blendMode = BlendMode.darken
+    //  ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
 
-      var radiusBrush3 = Paint()
-        ..color = Colors.white
-        ..isAntiAlias = true
-        ..strokeWidth = 2.0
-        ..style = PaintingStyle.stroke
-        //r..blendMode = BlendMode.darken
-        //..maskFilter = const MaskFilter.blur(BlurStyle.solid, 10)
-        ..strokeJoin = StrokeJoin.round;
+    var radiusBrush = Paint()
+      //..color = Colors.pink.withOpacity(.3)
+      //..color = MyColors.primaryColor
+      ..color = Colors.white.withOpacity(.3)
+      ..isAntiAlias = true
+      ..strokeWidth = 2.0
+      ..style = PaintingStyle.fill
+      ..strokeJoin = StrokeJoin.round;
 
-      // 실제크기
-      //canvas.drawRRect(RRect.fromLTRBAndCorners(0, 0, widgetSize.width, widgetSize.height), radiusBrush1);
+    var cornerBrush = Paint()
+      //..color = Colors.pink.withOpacity(.3)
+      //..color = MyColors.primaryColor
+      ..color = Colors.grey
+      ..isAntiAlias = true
+      ..strokeWidth = 2.0
+      ..style = PaintingStyle.fill
+      ..strokeJoin = StrokeJoin.round;
 
-      // 보이는 크기
-      //canvas.drawRRect(RRect.fromLTRBAndCorners(0 + r, 0 + r, widgetSize.width - r, widgetSize.height - r), radiusBrush1);
+    var selectBrush = Paint()
+      ..color = MyColors.active
+      ..isAntiAlias = true
+      ..strokeWidth = 2.0
+      ..style = PaintingStyle.fill
+      ..strokeJoin = StrokeJoin.round;
 
-      // if (isCornerHover[0]) canvas.drawCircle(const Offset(0, 0), r, cornerBrush);
-      // if (isCornerHover[1]) canvas.drawCircle(Offset(0, widgetSize.height), r, cornerBrush);
-      // if (isCornerHover[2]) canvas.drawCircle(Offset(widgetSize.width, 0), r, cornerBrush);
-      // if (isCornerHover[3]) canvas.drawCircle(Offset(widgetSize.width, widgetSize.height), r, cornerBrush);
-      if (isCornered || isHover) {
-        double outCenter = -r / 2;
-        double inCenter = -(r - 10) / 2;
-        double inR = r - 10;
-        double outR = r;
-        //neResize
-        canvas.drawArc(Rect.fromLTWH(outCenter, outCenter, outR, outR), 0,
-            .5 * pi, true, isCornerHover[0] ? cornerBrush2 : cornerBrush1);
-        //nwResize
-        canvas.drawArc(
-            Rect.fromLTWH(widgetSize.width + outCenter, outCenter, outR, outR),
-            .5 * pi,
-            .5 * pi,
-            true,
-            isCornerHover[1] ? cornerBrush2 : cornerBrush1);
+    var borderBrush = Paint()
+      ..color = Colors.white
+      ..isAntiAlias = true
+      ..strokeWidth = 2.0
+      ..style = PaintingStyle.stroke
+      ..strokeJoin = StrokeJoin.round;
 
-        //swResize
-        canvas.drawArc(
-            Rect.fromLTWH(widgetSize.width + outCenter,
-                widgetSize.height + outCenter, outR, outR),
-            pi,
-            .5 * pi,
-            true,
-            isCornerHover[2] ? cornerBrush2 : cornerBrush1);
-        //seResize
-        canvas.drawArc(
-            Rect.fromLTWH(outCenter, widgetSize.height + outCenter, outR, outR),
-            1.5 * pi,
-            .5 * pi,
-            true,
-            isCornerHover[3] ? cornerBrush2 : cornerBrush1);
-        // canvas.drawArc(
-        //     Rect.fromLTWH(widgetSize.width + outCenter, outCenter, outR, outR),
-        //     .5 * pi,
-        //     .5 * pi,
-        //     true,
-        //     isCornerHover[2] ? cornerBrush2 : cornerBrush1);
-        // canvas.drawArc(
-        //     Rect.fromLTWH(widgetSize.width + outCenter,widgetSize.height + outCenter, outR, outR),
-        //     pi,
-        //     .5 * pi,
-        //     true,
-        //     isCornerHover[3] ? cornerBrush2 : cornerBrush1);
-        // canvas.drawArc(
-        //     Rect.fromLTWH(outCenter, widgetSize.height + outCenter, outR, outR),
-        //     1.5 * pi,
-        //     .5 * pi,
-        //     true,
-        //     isCornerHover[1] ? cornerBrush2 : cornerBrush1);
+    double r = resizeButtonSize;
 
-        canvas.drawArc(Rect.fromLTWH(inCenter, inCenter, inR, inR), 0, .5 * pi,
-            true, radiusBrush3);
-        canvas.drawArc(
-            Rect.fromLTWH(inCenter, widgetSize.height + inCenter, inR, inR),
-            1.5 * pi,
-            .5 * pi,
-            true,
-            radiusBrush3);
-        canvas.drawArc(
-            Rect.fromLTWH(widgetSize.width + inCenter, inCenter, inR, inR),
-            .5 * pi,
-            .5 * pi,
-            true,
-            radiusBrush3);
-        canvas.drawArc(
-            Rect.fromLTWH(widgetSize.width + inCenter,
-                widgetSize.height + inCenter, inR, inR),
-            pi,
-            .5 * pi,
-            true,
-            radiusBrush3);
+    if (isCornered || isHover) {
+      const Radius radius = Radius.circular(3);
+      double half = r / 15;
+      double thick = half * 3;
+      double length = r * 3 / 4;
+
+      double left = -half;
+      double right = widgetSize.width + half - length;
+      double top = -half;
+      double bottom = widgetSize.height + half - thick;
+
+      List<Rect> barList = [
+        // left,top,width,height
+        Rect.fromLTWH(left, top, length, thick), //neResize
+        Rect.fromLTWH(right, top, length, thick), //nwResize
+        Rect.fromLTWH(right, bottom, length, thick), //swResize
+        Rect.fromLTWH(left, bottom, length, thick), //seResize
+      ];
+
+      right = widgetSize.width + half - thick;
+      bottom = widgetSize.height + half - length;
+
+      List<Rect> stickList = [
+        // left,top,width,height
+        Rect.fromLTWH(left, top, thick, length), //neResize
+        Rect.fromLTWH(right, top, thick, length), //nwResize
+        Rect.fromLTWH(right, bottom, thick, length), //swResize
+        Rect.fromLTWH(left, bottom, thick, length), //seResize
+      ];
+
+      for (int i = 0; i < 4; i++) {
+        canvas.drawRRect(RRect.fromRectAndRadius(barList[i], radius),
+            isCornerHover[i] ? selectBrush : cornerBrush);
+        canvas.drawRRect(RRect.fromRectAndRadius(stickList[i], radius),
+            isCornerHover[i] ? selectBrush : cornerBrush);
+        // canvas.drawRRect(RRect.fromRectAndRadius(barList[i], radius), bgBrush);
+        // canvas.drawRRect(
+        //     RRect.fromRectAndRadius(stickList[i], radius), bgBrush);
       }
+    }
 
-      if (isHover) {
-        //canvas.drawOval(Rect.fromLTWH(0, 0, widgetSize.width, widgetSize.height), radiusBrush1);
+    if (isHover || isRadiused) {
+      List<Offset> angleList = [
+        const Offset(1.0 * pi, 0.5 * pi),
+        const Offset(1.5 * pi, 0.5 * pi),
+        const Offset(0.0 * pi, 0.5 * pi),
+        const Offset(0.5 * pi, 0.5 * pi),
+      ];
 
-        double dx = 0;
-        double dy = 0;
+      double left = widgetSize.width * (1 / 8) - r / 4;
+      double top = widgetSize.height * (1 / 8) - r / 4;
+      double right = widgetSize.width * (7 / 8) - r * 3 / 4;
+      double bottom = widgetSize.height * (7 / 8) - r * 3 / 4;
 
-        if (radiusTopLeft > 0) {
-          dx = radiusTopLeft / (2 * pi);
-          if (dx > 90) dx = 90;
-          dy = dx;
-        }
-        //logHolder.log('dx=$dx, dy=$dy');
-        canvas.drawCircle(
-            Offset(widgetSize.width * (1 / 8) + dx,
-                widgetSize.height * (1 / 8) + dy),
-            r / 3,
-            isRadiusHover[0] ? radiusBrush2 : radiusBrush1);
-        canvas.drawCircle(
-            Offset(widgetSize.width * (1 / 8) + dx,
-                widgetSize.height * (1 / 8) + dy),
-            r / 4,
-            radiusBrush3);
+      double ne = getRadiusPos(radiusTopLeft);
+      double nw = getRadiusPos(radiusTopRight);
+      double sw = getRadiusPos(radiusBottomRight, minus: -1);
+      double se = getRadiusPos(radiusBottomLeft);
 
-        dx = dy = 0;
-        if (radiusTopRight > 0) {
-          dy = radiusTopRight / (2 * pi);
-          if (dy > 90) dy = 90;
-          dx = -dy;
-        }
-        canvas.drawCircle(
-            Offset(widgetSize.width * (7 / 8) + dx,
-                widgetSize.height * (1 / 8) + dy),
-            r / 3,
-            isRadiusHover[1] ? radiusBrush2 : radiusBrush1); //2
-        canvas.drawCircle(
-            Offset(widgetSize.width * (7 / 8) + dx,
-                widgetSize.height * (1 / 8) + dy),
-            r / 4,
-            radiusBrush3);
+      List<Rect> bigArcList = [
+        // left,top,width,height
+        Rect.fromLTWH(left + ne, top + ne, r, r), //neResize
+        Rect.fromLTWH(right - nw, top + nw, r, r), //nwResize
+        Rect.fromLTWH(right + sw, bottom + sw, r, r), //swResize
+        Rect.fromLTWH(left + se, bottom - se, r, r), //seResize
+      ];
 
-        dx = dy = 0;
-        if (radiusBottomLeft > 0) {
-          dx = radiusBottomLeft / (2 * pi);
-          if (dx > 90) dx = 90;
-          dy = -dx;
-        }
-        canvas.drawCircle(
-            Offset(widgetSize.width * (1 / 8) + dx,
-                widgetSize.height * (7 / 8) + dy),
-            r / 3,
-            isRadiusHover[3] ? radiusBrush2 : radiusBrush1); //1
-        canvas.drawCircle(
-            Offset(widgetSize.width * (1 / 8) + dx,
-                widgetSize.height * (7 / 8) + dy),
-            r / 4,
-            radiusBrush3);
-
-        dx = dy = 0;
-        if (radiusBottomRight > 0) {
-          dx = (radiusBottomRight / (2 * pi)) * (-1);
-          if (dx < -90) dx = -90;
-          dy = dx;
-        }
-        canvas.drawCircle(
-            Offset(widgetSize.width * (7 / 8) + dx,
-                widgetSize.height * (7 / 8) + dy),
-            r / 3,
-            isRadiusHover[2] ? radiusBrush2 : radiusBrush1); //3
-        canvas.drawCircle(
-            Offset(widgetSize.width * (7 / 8) + dx,
-                widgetSize.height * (7 / 8) + dy),
-            r / 4,
-            radiusBrush3);
-
-        //canvas.drawImage(ACCManager.needleImage!, Offset(widgetSize.width / 2, widgetSize.height / 2), radiusBrush3);
+      for (int i = 0; i < 4; i++) {
+        canvas.drawArc(bigArcList[i], angleList[i].dx, angleList[i].dy, true,
+            isRadiusHover[i] ? selectBrush : radiusBrush);
+        canvas.drawArc(bigArcList[i].translate(-2, -2), angleList[i].dx,
+            angleList[i].dy, true, borderBrush);
       }
-
-      //Radius corner = Radius.circular(r * 2 / 3);
-// if (isCornerHover[0]) canvas.drawRRect(RRect.fromLTRBAndCorners(0, 0, r, r, bottomRight: corner), cornerBrush);
-      // if (isCornerHover[1])
-      //   canvas.drawRRect(
-      //       RRect.fromLTRBAndCorners(0, widgetSize.height - r, r, widgetSize.height, topRight: corner), cornerBrush);
-      // if (isCornerHover[2])
-      //   canvas.drawRRect(
-      //       RRect.fromLTRBAndCorners(widgetSize.width - r, 0, widgetSize.width, r, bottomLeft: corner), cornerBrush);
-      // if (isCornerHover[3])
-      //   canvas.drawRRect(
-      //       RRect.fromLTRBAndCorners(widgetSize.width - r, widgetSize.height - r, widgetSize.width, widgetSize.height,
-      //           topLeft: corner),
-      //       cornerBrush);
-
-      // if (isEdgeHover[0]) canvas.drawRect(rect[0], cornerBrush);
-      // if (isEdgeHover[1]) canvas.drawRect(rect[1], cornerBrush);
-      // if (isEdgeHover[2]) canvas.drawRect(rect[2], cornerBrush);
-      // if (isEdgeHover[3]) canvas.drawRect(rect[3], cornerBrush);
     }
   }
 

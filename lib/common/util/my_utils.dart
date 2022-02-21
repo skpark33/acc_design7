@@ -280,3 +280,12 @@ Widget emptyImage() {
   // );
   return Container();
 }
+
+double getRadiusPos(double radius, {double minus = 1.0}) {
+  double dx = 0;
+  if (radius > 0) {
+    dx = radius / (2 * pi) * minus;
+    if (dx.abs() > 180 * pi) dx = 180 * pi * minus;
+  }
+  return dx;
+}

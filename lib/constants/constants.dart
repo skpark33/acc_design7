@@ -6,3 +6,5 @@ const double minWindowHeight = 500;
 
 const double layoutPageWidth = 324;
 const double layoutPropertiesWidth = 328;
+
+const double minAccSize = 10;
