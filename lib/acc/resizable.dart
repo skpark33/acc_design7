@@ -1,11 +1,28 @@
 //import 'dart:ui' as ui;
 import 'dart:math';
+//import 'package:acc_design7/common/util/logger.dart';
 import 'package:flutter/material.dart';
-//import 'acc_manager.dart';
+import 'acc_property.dart';
 import '../constants/styles.dart';
 import '../common/util/my_utils.dart';
 
 const double resizeButtonSize = 40.0;
+List<CursorType> cursorList = [
+  CursorType.neResize,
+  CursorType.ncResize,
+  CursorType.nwResize,
+  CursorType.mwResize,
+  CursorType.swResize,
+  CursorType.scResize,
+  CursorType.seResize,
+  CursorType.meResize,
+];
+List<CursorType> radiusList = [
+  CursorType.neRadius,
+  CursorType.nwRadius,
+  CursorType.seRadius,
+  CursorType.swRadius,
+];
 
 class ResiablePainter extends CustomPainter {
   bool isSelected = false;
@@ -26,6 +43,10 @@ class ResiablePainter extends CustomPainter {
   //final List<Rect> rect;
   //Size _realSize = const Size(0, 0);
 
+  Paint bgPaint = Paint();
+  Paint fgPaint = Paint();
+  Paint selectPaint = Paint();
+
   ResiablePainter(
       this.isSelected,
       this.resizable,
@@ -39,15 +60,18 @@ class ResiablePainter extends CustomPainter {
       this.radiusTopRight,
       this.radiusBottomLeft,
       this.radiusBottomRight)
-      : super();
+      : super() {
+    bgPaint.color = Colors.grey.withOpacity(.8);
+    fgPaint.color = Colors.white;
+    selectPaint.color = MyColors.primaryColor;
 
-  @override
-  void paint(Canvas canvas, Size size) {
-    // resize 가 가능하게 하는...외곽선과 꼭지가 나오도록 한다.
+    bgPaint.style = PaintingStyle.fill;
+    fgPaint.style = PaintingStyle.stroke;
+    selectPaint.style = PaintingStyle.fill;
 
-    if (!resizable) {
-      return;
-    }
+    bgPaint.strokeWidth = 2.0;
+    fgPaint.strokeWidth = 2.0;
+    selectPaint.strokeWidth = 2.0;
 
     // shader example !!!!
     // ..shader = LinearGradient(
@@ -62,129 +86,22 @@ class ResiablePainter extends CustomPainter {
     // blus example !!!
     //..blendMode = BlendMode.darken
     //  ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
+  }
 
-    var radiusBrush = Paint()
-      //..color = Colors.pink.withOpacity(.3)
-      //..color = MyColors.primaryColor
-      ..color = Colors.white.withOpacity(.3)
-      ..isAntiAlias = true
-      ..strokeWidth = 2.0
-      ..style = PaintingStyle.fill
-      ..strokeJoin = StrokeJoin.round;
-
-    var cornerBrush = Paint()
-      //..color = Colors.pink.withOpacity(.3)
-      //..color = MyColors.primaryColor
-      ..color = Colors.grey
-      ..isAntiAlias = true
-      ..strokeWidth = 2.0
-      ..style = PaintingStyle.fill
-      ..strokeJoin = StrokeJoin.round;
-
-    var selectBrush = Paint()
-      ..color = MyColors.active
-      ..isAntiAlias = true
-      ..strokeWidth = 2.0
-      ..style = PaintingStyle.fill
-      ..strokeJoin = StrokeJoin.round;
-
-    var borderBrush = Paint()
-      ..color = Colors.white
-      ..isAntiAlias = true
-      ..strokeWidth = 2.0
-      ..style = PaintingStyle.stroke
-      ..strokeJoin = StrokeJoin.round;
-
-    double r = resizeButtonSize;
-
-    if (isCornered || isHover) {
-      const Radius radius = Radius.circular(5);
-      double half = r / 15;
-      double thick = half * 3;
-      double length = r * 3 / 4;
-
-      double arcR = r * 5 / 4;
-      double left = -arcR / 2;
-      double right = widgetSize.width - arcR / 2;
-      double top = -arcR / 2;
-      double bottom = widgetSize.height - arcR / 2;
-
-      List<Rect> cornerArcList = [
-        // left,top,width,height
-        Rect.fromLTWH(left, top, arcR, arcR), //neResize
-        Rect.fromLTWH(right, top, arcR, arcR), //nwResize
-        Rect.fromLTWH(right, bottom, arcR, arcR), //swResize
-        Rect.fromLTWH(left, bottom, arcR, arcR), //seResize
-      ];
-
-      left = -half;
-      right = widgetSize.width + half - length;
-      top = -half;
-      bottom = widgetSize.height + half - thick;
-
-      List<Rect> barList = [
-        // left,top,width,height
-        Rect.fromLTWH(left, top, length, thick), //neResize
-        Rect.fromLTWH(right, top, length, thick), //nwResize
-        Rect.fromLTWH(right, bottom, length, thick), //swResize
-        Rect.fromLTWH(left, bottom, length, thick), //seResize
-      ];
-
-      right = widgetSize.width + half - thick;
-      bottom = widgetSize.height + half - length;
-
-      List<Rect> stickList = [
-        // left,top,width,height
-        Rect.fromLTWH(left, top, thick, length), //neResize
-        Rect.fromLTWH(right, top, thick, length), //nwResize
-        Rect.fromLTWH(right, bottom, thick, length), //swResize
-        Rect.fromLTWH(left, bottom, thick, length), //seResize
-      ];
-
-      double east = -half;
-      double west = widgetSize.width + half - thick;
-      double north = -half;
-      double south = widgetSize.height + half - thick;
-      double middle = (widgetSize.height - length) / 2;
-      double center = (widgetSize.width - length) / 2;
-
-      List<Rect> middleList = [
-        // left,top,width,height
-        Rect.fromLTWH(east, middle, thick, length), //east-middle
-        Rect.fromLTWH(center, north, length, thick), //north-center
-        Rect.fromLTWH(west, middle, thick, length), //weast-middle
-        Rect.fromLTWH(center, south, length, thick), //source-center
-      ];
-      // List<Rect> middleArcList = [
-      //   // left,top,width,height
-      //   Rect.fromLTWH(east, middle, arcR, arcR), //neResize
-      //   Rect.fromLTWH(center, north, arcR, arcR), //nwResize
-      //   Rect.fromLTWH(west, middle, arcR, arcR), //swResize
-      //   Rect.fromLTWH(center, south, arcR, arcR), //seResize
-      // ];
-
-      List<Offset> angleList = [
-        const Offset(0.0 * pi, 0.5 * pi),
-        const Offset(0.5 * pi, 0.5 * pi),
-        const Offset(1.0 * pi, 0.5 * pi),
-        const Offset(1.5 * pi, 0.5 * pi),
-      ];
-
-      for (int i = 0; i < 4; i++) {
-        if (isCornerHover[i]) {
-          canvas.drawRRect(RRect.fromRectAndRadius(barList[i], radius), selectBrush);
-          canvas.drawRRect(RRect.fromRectAndRadius(stickList[i], radius), selectBrush);
-          canvas.drawRRect(RRect.fromRectAndRadius(middleList[i], radius), selectBrush);
-          canvas.drawArc(cornerArcList[i], angleList[i].dx, angleList[i].dy, true, selectBrush);
-          //canvas.drawArc(middleArcList[i], angleList[i].dx, angleList[i].dy, true, selectBrush);
-        } else {
-          canvas.drawRRect(RRect.fromRectAndRadius(barList[i], radius), cornerBrush);
-          canvas.drawRRect(RRect.fromRectAndRadius(stickList[i], radius), cornerBrush);
-          canvas.drawRRect(RRect.fromRectAndRadius(middleList[i], radius), cornerBrush);
-        }
+  @override
+  void paint(Canvas canvas, Size size) {
+    // resize 가 가능하게 하는...외곽선과 꼭지가 나오도록 한다.
+    if (!resizable) {
+      return;
+    }
+    if (isHover || isCornered) {
+      List<Offset> centerList = getCornerCenters(size);
+      int i = 0;
+      for (Offset center in centerList) {
+        drawCircleHandle(canvas, center, resizeButtonSize / 2, isCornerHover[i]);
+        i++;
       }
     }
-
     if (isHover || isRadiused) {
       List<Offset> angleList = [
         const Offset(1.0 * pi, 0.5 * pi),
@@ -192,32 +109,22 @@ class ResiablePainter extends CustomPainter {
         const Offset(0.0 * pi, 0.5 * pi),
         const Offset(0.5 * pi, 0.5 * pi),
       ];
-
-      double left = widgetSize.width * (1 / 8) - r / 4;
-      double top = widgetSize.height * (1 / 8) - r / 4;
-      double right = widgetSize.width * (7 / 8) - r * 3 / 4;
-      double bottom = widgetSize.height * (7 / 8) - r * 3 / 4;
-
-      double ne = getRadiusPos(radiusTopLeft);
-      double nw = getRadiusPos(radiusTopRight);
-      double sw = getRadiusPos(radiusBottomRight, minus: -1);
-      double se = getRadiusPos(radiusBottomLeft);
-
-      List<Rect> bigArcList = [
-        // left,top,width,height
-        Rect.fromLTWH(left + ne, top + ne, r, r), //neResize
-        Rect.fromLTWH(right - nw, top + nw, r, r), //nwResize
-        Rect.fromLTWH(right + sw, bottom + sw, r, r), //swResize
-        Rect.fromLTWH(left + se, bottom - se, r, r), //seResize
-      ];
-
+      List<Rect> arcList =
+          getRadiusRect(size, radiusTopLeft, radiusTopRight, radiusBottomRight, radiusBottomLeft);
       for (int i = 0; i < 4; i++) {
-        canvas.drawArc(bigArcList[i], angleList[i].dx, angleList[i].dy, true,
-            isRadiusHover[i] ? selectBrush : radiusBrush);
-        canvas.drawArc(
-            bigArcList[i].translate(-2, -2), angleList[i].dx, angleList[i].dy, true, borderBrush);
+        drawArcHandle(canvas, arcList[i], angleList[i].dx, angleList[i].dy, isRadiusHover[i]);
       }
     }
+  }
+
+  void drawCircleHandle(Canvas canvas, Offset center, double radius, bool isSelected) {
+    canvas.drawCircle(center, radius, isSelected ? selectPaint : bgPaint);
+    canvas.drawCircle(center, radius - 2, fgPaint);
+  }
+
+  void drawArcHandle(Canvas canvas, Rect rect, double start, double end, bool isSelected) {
+    canvas.drawArc(rect, start, end, true, isSelected ? selectPaint : bgPaint);
+    canvas.drawArc(rect, start, end, true, fgPaint);
   }
 
   @override
@@ -243,5 +150,56 @@ class ResiablePainter extends CustomPainter {
     // 마지막으로 위대한 피타고라스 선생의 공식을 적용한다.
     if (pow(dx, 2) + pow(dy, 2) > pow(R, 2)) return false;
     return true;
+  }
+
+  static List<Offset> getCornerCenters(Size size) {
+    double r = resizeButtonSize;
+    double margin = r / 2;
+
+    double east = margin;
+    double center = size.width / 2;
+    double west = size.width - margin;
+
+    double north = margin;
+    double middle = size.height / 2;
+    double south = size.height - margin;
+
+    List<Offset> centerList = [
+      // 시계방향으로 나열한다.
+      Offset(east, north),
+      Offset(center, north),
+      Offset(west, north),
+      Offset(west, middle),
+      Offset(west, south),
+      Offset(center, south),
+      Offset(east, south),
+      Offset(east, middle),
+    ];
+    return centerList;
+  }
+
+  static List<Rect> getRadiusRect(Size size, double radiusTopLeft, double radiusTopRight,
+      double radiusBottomRight, double radiusBottomLeft) {
+    double r = resizeButtonSize; // size of handle
+    double padding = r / 2; // mousePadding
+
+    double left = padding;
+    double top = padding;
+    double right = size.width - padding - r;
+    double bottom = size.height - padding - r;
+
+    double ne = getRadiusPos(radiusTopLeft);
+    double nw = getRadiusPos(radiusTopRight);
+    double sw = getRadiusPos(radiusBottomRight, minus: -1);
+    double se = getRadiusPos(radiusBottomLeft);
+
+    List<Rect> arcList = [
+      // left,top,width,height
+      Rect.fromLTWH(left + ne, top + ne, r, r), //neResize
+      Rect.fromLTWH(right - nw, top + nw, r, r), //nwResize
+      Rect.fromLTWH(right + sw, bottom + sw, r, r), //swResize
+      Rect.fromLTWH(left + se, bottom - se, r, r), //seResize
+    ];
+    return arcList;
   }
 }
