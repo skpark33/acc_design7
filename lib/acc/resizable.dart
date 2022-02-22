@@ -98,15 +98,29 @@ class ResiablePainter extends CustomPainter {
     double r = resizeButtonSize;
 
     if (isCornered || isHover) {
-      const Radius radius = Radius.circular(3);
+      const Radius radius = Radius.circular(5);
       double half = r / 15;
       double thick = half * 3;
       double length = r * 3 / 4;
 
-      double left = -half;
-      double right = widgetSize.width + half - length;
-      double top = -half;
-      double bottom = widgetSize.height + half - thick;
+      double arcR = r * 5 / 4;
+      double left = -arcR / 2;
+      double right = widgetSize.width - arcR / 2;
+      double top = -arcR / 2;
+      double bottom = widgetSize.height - arcR / 2;
+
+      List<Rect> cornerArcList = [
+        // left,top,width,height
+        Rect.fromLTWH(left, top, arcR, arcR), //neResize
+        Rect.fromLTWH(right, top, arcR, arcR), //nwResize
+        Rect.fromLTWH(right, bottom, arcR, arcR), //swResize
+        Rect.fromLTWH(left, bottom, arcR, arcR), //seResize
+      ];
+
+      left = -half;
+      right = widgetSize.width + half - length;
+      top = -half;
+      bottom = widgetSize.height + half - thick;
 
       List<Rect> barList = [
         // left,top,width,height
@@ -127,14 +141,47 @@ class ResiablePainter extends CustomPainter {
         Rect.fromLTWH(left, bottom, thick, length), //seResize
       ];
 
+      double east = -half;
+      double west = widgetSize.width + half - thick;
+      double north = -half;
+      double south = widgetSize.height + half - thick;
+      double middle = (widgetSize.height - length) / 2;
+      double center = (widgetSize.width - length) / 2;
+
+      List<Rect> middleList = [
+        // left,top,width,height
+        Rect.fromLTWH(east, middle, thick, length), //east-middle
+        Rect.fromLTWH(center, north, length, thick), //north-center
+        Rect.fromLTWH(west, middle, thick, length), //weast-middle
+        Rect.fromLTWH(center, south, length, thick), //source-center
+      ];
+      // List<Rect> middleArcList = [
+      //   // left,top,width,height
+      //   Rect.fromLTWH(east, middle, arcR, arcR), //neResize
+      //   Rect.fromLTWH(center, north, arcR, arcR), //nwResize
+      //   Rect.fromLTWH(west, middle, arcR, arcR), //swResize
+      //   Rect.fromLTWH(center, south, arcR, arcR), //seResize
+      // ];
+
+      List<Offset> angleList = [
+        const Offset(0.0 * pi, 0.5 * pi),
+        const Offset(0.5 * pi, 0.5 * pi),
+        const Offset(1.0 * pi, 0.5 * pi),
+        const Offset(1.5 * pi, 0.5 * pi),
+      ];
+
       for (int i = 0; i < 4; i++) {
-        canvas.drawRRect(RRect.fromRectAndRadius(barList[i], radius),
-            isCornerHover[i] ? selectBrush : cornerBrush);
-        canvas.drawRRect(RRect.fromRectAndRadius(stickList[i], radius),
-            isCornerHover[i] ? selectBrush : cornerBrush);
-        // canvas.drawRRect(RRect.fromRectAndRadius(barList[i], radius), bgBrush);
-        // canvas.drawRRect(
-        //     RRect.fromRectAndRadius(stickList[i], radius), bgBrush);
+        if (isCornerHover[i]) {
+          canvas.drawRRect(RRect.fromRectAndRadius(barList[i], radius), selectBrush);
+          canvas.drawRRect(RRect.fromRectAndRadius(stickList[i], radius), selectBrush);
+          canvas.drawRRect(RRect.fromRectAndRadius(middleList[i], radius), selectBrush);
+          canvas.drawArc(cornerArcList[i], angleList[i].dx, angleList[i].dy, true, selectBrush);
+          //canvas.drawArc(middleArcList[i], angleList[i].dx, angleList[i].dy, true, selectBrush);
+        } else {
+          canvas.drawRRect(RRect.fromRectAndRadius(barList[i], radius), cornerBrush);
+          canvas.drawRRect(RRect.fromRectAndRadius(stickList[i], radius), cornerBrush);
+          canvas.drawRRect(RRect.fromRectAndRadius(middleList[i], radius), cornerBrush);
+        }
       }
     }
 
@@ -167,8 +214,8 @@ class ResiablePainter extends CustomPainter {
       for (int i = 0; i < 4; i++) {
         canvas.drawArc(bigArcList[i], angleList[i].dx, angleList[i].dy, true,
             isRadiusHover[i] ? selectBrush : radiusBrush);
-        canvas.drawArc(bigArcList[i].translate(-2, -2), angleList[i].dx,
-            angleList[i].dy, true, borderBrush);
+        canvas.drawArc(
+            bigArcList[i].translate(-2, -2), angleList[i].dx, angleList[i].dy, true, borderBrush);
       }
     }
   }

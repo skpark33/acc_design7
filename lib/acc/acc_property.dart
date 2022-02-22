@@ -89,8 +89,4 @@ class ACCProperty {
   void setResizable(bool p) {
     _resizable = p;
   }
-
-  bool isFullscreen() {
-    return fullscreen.value;
-  }
 }

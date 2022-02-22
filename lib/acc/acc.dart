@@ -171,12 +171,25 @@ class ACC with ACCProperty {
     accManagerHolder?.notify();
   }
 
+  void _showACCMenu(BuildContext context) {
+    if (accManagerHolder!.isMenuVisible()) {
+      bool reshow = accManagerHolder!.isMenuHostChanged();
+      accManagerHolder!.unshowMenu(context);
+      if (reshow) {
+        accManagerHolder!.showMenu(context, this);
+      }
+    } else {
+      accManagerHolder!.showMenu(context, this);
+    }
+  }
+
   Widget showOverlay(BuildContext context) {
     //logHolder.log('showOverlay:${rotate.value}');
     Size ratio = getRealRatio();
     Offset realOffset = getRealOffsetWithGivenRatio(ratio);
     Size realSize = getRealSize();
     bool isSelected = accManagerHolder!.isCurrentIndex(index);
+    //double mouseMargin = resizeButtonSize / 2;
     return Visibility(
         visible: (visible && !removed.value),
         child: Positioned(
@@ -184,39 +197,23 @@ class ACC with ACCProperty {
           top: realOffset.dy,
           height: realSize.height,
           width: realSize.width,
-          child:
-              // Opacity(
-              //   opacity: opacity.value,
-              //   child:
-              GestureDetector(
-            //behavior: HitTestBehavior.deferToChild,
+          // left: realOffset.dx - mouseMargin,
+          // top: realOffset.dy - mouseMargin,
+          // height: realSize.height + mouseMargin,
+          // width: realSize.width + mouseMargin,
+          child: GestureDetector(
             onTapDown: (details) {
               accManagerHolder!.setCurrentIndex(index);
-              logHolder.log('acc onTapDown : ${details.localPosition}',
-                  level: 5);
-              //entry!.markNeedsBuild();  // setCurrentIndex 내부에서 하므로,,안해도됨.
-              if (accManagerHolder!.isMenuVisible()) {
-                bool reshow = accManagerHolder!.isMenuHostChanged();
-                accManagerHolder!.unshowMenu(context);
-                if (reshow) {
-                  accManagerHolder!.showMenu(context, this);
-                }
-              } else {
-                accManagerHolder!.showMenu(context, this);
-              }
+              logHolder.log('onTapDown:${details.localPosition}', level: 5);
+              _showACCMenu(context);
             },
             onPanStart: (details) {
-              logHolder.log('acc onPanStart : ${details.localPosition}',
-                  level: 5);
-              //accManagerHolder!.currentAccIndex = index;
-              //isInResizeEdge(details.localPosition, containerSize, resizeButtonSize);
-              if (isCorners(
-                  details.localPosition, realSize, resizeButtonSize)) {
+              logHolder.log('onPanStart:${details.localPosition}', level: 5);
+              if (isCorners(details.localPosition, realSize, resizeButtonSize)) {
                 isHover = false;
                 isCornered = true;
                 isRadiused = false;
-              } else if (isRadius(
-                  details.localPosition, realSize, resizeButtonSize / 4)) {
+              } else if (isRadius(details.localPosition, realSize, resizeButtonSize / 4)) {
                 isRadiused = true;
                 isHover = false;
                 isCornered = false;
@@ -225,53 +222,33 @@ class ACC with ACCProperty {
                 isRadiused = false;
                 isHover = true;
               }
-
               logHolder.log('onPanStart : ${details.localPosition}');
               mychangeStack.startTrans();
               entry!.markNeedsBuild();
               accManagerHolder!.unshowMenu(context);
-              //accManagerHolder!.showMenu(this, context);
+            },
+            onPanUpdate: (details) {
+              if (!resizeWidget(details, containerSize.value, isCornerHover, ratio)) {
+                if (offsetValidationCheck(details.delta)) {
+                  double dx = details.delta.dx / ratio.width;
+                  double dy = details.delta.dy / ratio.height;
+                  _setContainerOffset(Offset((containerOffset.value.dx + dx).roundToDouble(),
+                      (containerOffset.value.dy + dy).roundToDouble()));
+                }
+              }
+              entry!.markNeedsBuild();
+              //invalidateContents();
             },
             onPanEnd: (details) {
               logHolder.log('onPanEnd:', level: 5);
               mychangeStack.endTrans();
-              // if (accManagerHolder!.isMenuVisible()) {
-              //   accManagerHolder!.showMenu(this, context);
-              // }
-              //entry!.markNeedsBuild();
-              invalidateContents(); //skpak test code
-            },
-            onPanUpdate: (details) {
-              if (!resizeWidget(
-                  details, containerSize.value, isCornerHover, ratio)) {
-                //logHolder.log('move');
-                //translateContainerOffset(details.delta);
-                if (offsetValidationCheck(details.delta)) {
-                  double dx = details.delta.dx / ratio.width;
-                  double dy = details.delta.dy / ratio.height;
-                  //if (rotate.value == 0) {
-                  _setContainerOffset(Offset(
-                      (containerOffset.value.dx + dx).roundToDouble(),
-                      (containerOffset.value.dy + dy).roundToDouble()));
-                  //} else {
-                  //   double moveAngle = getRoundMoveAngle2(dx, dy);
-                  //   Offset newOffset = moveOnCircle2(
-                  //       (rotate.value + moveAngle) % 360, dx, dy);
-
-                  //   _setContainerOffset(Offset(
-                  //       (containerOffset.value.dx + newOffset.dx)
-                  //           .roundToDouble(),
-                  //       (containerOffset.value.dy + newOffset.dy)
-                  //           .roundToDouble()));
-                  // }
-                }
-              }
-              // OverayEntry 를 사용할 때는 setState 를 하지 않고, markNeedsBuild 를 수행한다.
-              entry!.markNeedsBuild();
-              //invalidateContents();
+              invalidateContents();
             },
             child: Stack(
               children: [
+                //Padding(
+                //padding: EdgeInsets.all(mouseMargin),
+                //child:
                 Transform.rotate(
                   angle: rotate.value * (pi / 180),
                   child: Opacity(
@@ -290,10 +267,8 @@ class ACC with ACCProperty {
                             borderRadius: BorderRadius.only(
                               topRight: Radius.circular(radiusTopRight.value),
                               topLeft: Radius.circular(radiusTopLeft.value),
-                              bottomRight:
-                                  Radius.circular(radiusBottomRight.value),
-                              bottomLeft:
-                                  Radius.circular(radiusBottomLeft.value),
+                              bottomRight: Radius.circular(radiusBottomRight.value),
+                              bottomLeft: Radius.circular(radiusBottomLeft.value),
                             ),
                             border: _drawBorder(isSelected),
                           ),
@@ -326,66 +301,9 @@ class ACC with ACCProperty {
                           semanticLabel: 'Primary',
                         ),
                       ),
-                      // CustomPaint(
-                      //   painter: ResiablePainter(
-                      //       accManagerHolder!.isCurrentIndex(index),
-                      //       resizable,
-                      //       realSize,
-                      //       isCornered,
-                      //       isHover,
-                      //       isCornerHover,
-                      //       isRadiusHover,
-                      //       radiusTopLeft.value,
-                      //       radiusTopRight.value,
-                      //       radiusBottomLeft.value,
-                      //       radiusBottomRight.value),
-                      //   child: MouseRegion(
-                      //     onHover: (details) {
-                      //       //logHolder.log('Hover ${details.localPosition}',
-                      //       //    level: 5);
-                      //       if (isCorners(details.localPosition, realSize,
-                      //           resizeButtonSize)) {
-                      //         isCornered = true;
-                      //         isHover = false;
-                      //         entry!.markNeedsBuild();
-                      //       } else {
-                      //         isCornered = false;
-                      //         if (isRadius(details.localPosition, realSize,
-                      //             resizeButtonSize / 3)) {
-                      //           //isHover = false;
-                      //           //entry!.markNeedsBuild();
-                      //         } else {
-                      //           //logHolder.log('Hover ${details.localPosition}');
-                      //           if (!isHover) {
-                      //             isHover = true;
-                      //             entry!.markNeedsBuild();
-                      //           }
-                      //         }
-                      //       }
-                      //     },
-                      //     onEnter: (details) {
-                      //       //logHolder.log('Enter ${details.localPosition}',
-                      //       //    level: 5);
-                      //       isHover = true;
-                      //       entry!.markNeedsBuild();
-                      //     },
-                      //     onExit: (details) {
-                      //       //logHolder.log('Exit', level: 5);
-                      //       isHover = false;
-                      //       isCornered = false;
-                      //       clearCornerHover();
-                      //       entry!.markNeedsBuild();
-                      //     },
-                      //     child: DropZoneWidget(
-                      //       onDroppedFile: (model) {
-                      //         logHolder.log('contents added ${model.key}');
-                      //         accChild.playManager!.push(this, model);
-                      //       },
-                      //     ),
-                      //   ),
-                      // ),
                     ]),
                   ),
+                  //),
                 ),
                 CustomPaint(
                   painter: ResiablePainter(
@@ -405,14 +323,12 @@ class ACC with ACCProperty {
                     onHover: (details) {
                       //logHolder.log('Hover ${details.localPosition}',
                       //    level: 5);
-                      if (isCorners(
-                          details.localPosition, realSize, resizeButtonSize)) {
+                      if (isCorners(details.localPosition, realSize, resizeButtonSize)) {
                         isCornered = true;
                         isRadiused = false;
                         isHover = false;
                         entry!.markNeedsBuild();
-                      } else if (isRadius(
-                          details.localPosition, realSize, resizeButtonSize)) {
+                      } else if (isRadius(details.localPosition, realSize, resizeButtonSize)) {
                         isCornered = false;
                         isRadiused = true;
                         isHover = false;
@@ -485,8 +401,8 @@ class ACC with ACCProperty {
     await accChild.pauseAllExceptCurrent();
   }
 
-  bool resizeWidget(DragUpdateDetails details, Size widgetSize,
-      List<bool> isCornerHover, Size ratio) {
+  bool resizeWidget(
+      DragUpdateDetails details, Size widgetSize, List<bool> isCornerHover, Size ratio) {
     if (details.delta.dx == 0 && details.delta.dy == 0) return false;
 
     //
@@ -527,22 +443,18 @@ class ACC with ACCProperty {
       //switch (rotateCorner.cursor) {
       switch (cursor) {
         case CursorType.neResize:
-          //logHolder.log("neResise $dx,$dy", level: 6);
           afterSize = Size((w - dx), (h - dy));
           afterOffset = Offset((cx + dx), (cy + dy));
           break;
         case CursorType.seResize:
-          //logHolder.log("seResise $dx,$dy", level: 6);
           afterSize = Size((w - dx), (h + dy));
           afterOffset = Offset((cx + dx), cy);
           break;
         case CursorType.nwResize:
-          //logHolder.log("nwResise $dx,$dy", level: 6);
           afterSize = Size((w + dx), (h - dy));
           afterOffset = Offset(cx, (cy + dy));
           break;
         case CursorType.swResize:
-          //logHolder.log("swResise $dx,$dy", level: 6);
           afterSize = Size((w + dx), (h + dy));
           break;
         default:
@@ -550,12 +462,9 @@ class ACC with ACCProperty {
       }
       if (afterSize.width * ratio.width > minAccSize &&
           afterSize.height * ratio.height > minAccSize) {
-        //logHolder.log("_setContainerOffsetAndSize $afterSize", level: 6);
         _setContainerOffsetAndSize(
-            Offset(
-                afterOffset.dx.roundToDouble(), afterOffset.dy.roundToDouble()),
-            Size(afterSize.width.roundToDouble(),
-                afterSize.height.roundToDouble()));
+            Offset(afterOffset.dx.roundToDouble(), afterOffset.dy.roundToDouble()),
+            Size(afterSize.width.roundToDouble(), afterSize.height.roundToDouble()));
       }
       return true;
     }
@@ -583,12 +492,15 @@ class ACC with ACCProperty {
         newRadius = radiusBottomRight.value;
         break;
       default:
-        break;
+        return false;
     }
 
     //newRadius += (dx.abs() + dy.abs()) * pi * direction;
-    newRadius +=
-        asin(dy.abs() / sqrt(dx * dx + dy * dy)) * (180 / pi) * direction;
+    newRadius += asin(dy.abs() / sqrt(dx * dx + dy * dy)) * (180 / pi) * direction;
+    logHolder.log("newRadius=$newRadius", level: 6);
+    if (newRadius > pi * 180) {
+      return true;
+    }
     if (newRadius < 0) newRadius = 0;
     if (newRadius > pi * 180) newRadius = pi * 180;
 
@@ -600,7 +512,6 @@ class ACC with ACCProperty {
         radiusBottomLeft.set(newRadius);
         return true;
       case CursorType.nwRadius:
-        logHolder.log('CursorType.nwRadius=$newRadius', level: 6);
         radiusTopRight.set(newRadius);
         return true;
       case CursorType.swRadius:
@@ -689,8 +600,7 @@ class ACC with ACCProperty {
       isCornerHover[1] = true; //2
       return true;
     }
-    if (ResiablePainter.isCorner(
-        point, Offset(widgetSize.width, widgetSize.height), r / 2)) {
+    if (ResiablePainter.isCorner(point, Offset(widgetSize.width, widgetSize.height), r / 2)) {
       cursor = CursorType.swResize;
       isCornerHover[2] = true; //3
       return true;
@@ -801,25 +711,6 @@ class ACC with ACCProperty {
     accManagerHolder!.notify();
   }
 
-  // bool offsetValidationCheck(Offset delta) {
-  //   if (containerOffset.value.dx + delta.dx < 0) {
-  //     return false;
-  //   }
-  //   if (containerOffset.value.dy + delta.dy < 0) {
-  //     return false;
-  //   }
-  //   if (page != null) {
-  //     if (containerOffset.value.dx + containerSize.value.width + delta.dx >
-  //         page!.width.value) {
-  //       return false;
-  //     }
-  //     if (containerOffset.value.dy + containerSize.value.height + delta.dy >
-  //         page!.height.value) {
-  //       return false;
-  //     }
-  //   }
-  //   return true;
-  // }
   bool offsetValidationCheck(Offset delta) {
     if (page != null) {
       double deltaX = delta.dx; // * page!.getRealWidthRatio();
@@ -831,105 +722,102 @@ class ACC with ACCProperty {
       double realHeight = realSize.height;
       double realWidth = realSize.width;
 
-      // 주의할 점은 이미 범위를 벗어난 상태에 있는 것은 끌어들일수 있어야 한다는
-      // 것이다.  따라서, 델타의 방향에 따라 전략을 달리해야 한다.
-
       // left 꼭지점 validation Check.
       if (realX + deltaX < page!.origin.dx) {
         // 이경우 deltaX 가 플러스라면 혀용해야 한다.
-        //if (deltaX < 0) {
-        return false;
-        //}
+        if (deltaX < 0) {
+          return false;
+        }
       }
       // Right 꼭지점 validation Check.
       if (realX + realWidth + deltaX > page!.origin.dx + page!.realSize.width) {
         // 이경우 deltaX 가 마이너스라면 혀용해야 한다.
-        //if (deltaX > 0) {
-        return false;
-        //}
+        if (deltaX > 0) {
+          return false;
+        }
       }
       // top 꼭지점  validation Check
       if (realY + deltaY < page!.origin.dy) {
         // 이경우 deltaY 가 플러스라면 혀용해야 한다.
-        //if (deltaY < 0) {
-        return false;
-        //}
+        if (deltaY < 0) {
+          return false;
+        }
       }
       // bottom 꼭지점 validation Check.
-      if (realY + realHeight + deltaY >
-          page!.origin.dy + page!.realSize.height) {
+      if (realY + realHeight + deltaY > page!.origin.dy + page!.realSize.height) {
         // 이경우 deltaY 가 마이너스라면 혀용해야 한다.
-        //if (deltaY > 0) {
-        return false;
-        //}
+        if (deltaY > 0) {
+          return false;
+        }
       }
     }
     return true;
   }
 
   bool sizeValidationCheck(Offset delta, CursorType cursor) {
-    if (page != null) {
-      double deltaX = delta.dx; // * page!.getRealWidthRatio();
-      double deltaY = delta.dy; // * page!.getRealHeightRatio();
-      Offset realOffset = getRealOffset();
-      double realX = realOffset.dx;
-      double realY = realOffset.dy;
-      Size realSize = getRealSize();
-      double realHeight = realSize.height;
-      double realWidth = realSize.width;
+    if (page == null) {
+      return true;
+    }
+    double deltaX = delta.dx; // * page!.getRealWidthRatio();
+    double deltaY = delta.dy; // * page!.getRealHeightRatio();
+    Offset realOffset = getRealOffset();
+    double realX = realOffset.dx;
+    double realY = realOffset.dy;
+    Size realSize = getRealSize();
+    double realHeight = realSize.height;
+    double realWidth = realSize.width;
 
-      //CursorType newCursor = resetCornerPosition(rotate.value, cursor);
+    //CursorType newCursor = resetCornerPosition(rotate.value, cursor);
 
-      if (cursor == CursorType.neResize) {
-        // left-top 꼭지점 validation Check.
-        if (realX + deltaX < page!.origin.dx) {
-          return false;
-        }
-        if (realY + deltaY < page!.origin.dy) {
-          return false;
-        }
-      } else if (cursor == CursorType.nwResize) {
-        // right-top 꼭지점 validation Check.
-        if (realX + realWidth + deltaX >
-            page!.origin.dx + page!.realSize.width) {
-          return false;
-        }
-        if (realY + deltaY < page!.origin.dy) {
-          return false;
-        }
-      } else if (cursor == CursorType.seResize) {
-        // left-top 꼭지점 validation Check.
-        if (realX + deltaX < page!.origin.dx) {
-          return false;
-        }
-        if (realY + realHeight + deltaY >
-            page!.origin.dy + page!.realSize.height) {
-          return false;
-        }
-      } else if (cursor == CursorType.swResize) {
-        // right-bottom 꼭지점 validation Check.
-        if (realX + realWidth + deltaX >
-            page!.origin.dx + page!.realSize.width) {
-          return false;
-        }
-        if (realY + realHeight + deltaY >
-            page!.origin.dy + page!.realSize.height) {
-          return false;
-        }
+    if (cursor == CursorType.neResize) {
+      // left-top 꼭지점 validation Check.
+      if (deltaX < 0 && realX + deltaX < page!.origin.dx) {
+        return false;
       }
-      // size validataion check
+      if (deltaY < 0 && realY + deltaY < page!.origin.dy) {
+        return false;
+      }
+    } else if (cursor == CursorType.nwResize) {
+      // right-top 꼭지점 validation Check.
+      if (deltaX > 0 && realX + realWidth + deltaX > page!.origin.dx + page!.realSize.width) {
+        return false;
+      }
+      if (deltaY < 0 && realY + deltaY < page!.origin.dy) {
+        return false;
+      }
+    } else if (cursor == CursorType.seResize) {
+      // left-top 꼭지점 validation Check.
+      if (deltaX < 0 && realX + deltaX < page!.origin.dx) {
+        return false;
+      }
+      if (deltaY > 0 && realY + realHeight + deltaY > page!.origin.dy + page!.realSize.height) {
+        return false;
+      }
+    } else if (cursor == CursorType.swResize) {
+      // right-bottom 꼭지점 validation Check.
+      if (deltaX > 0 && realX + realWidth + deltaX > page!.origin.dx + page!.realSize.width) {
+        return false;
+      }
+      if (deltaY > 0 && realY + realHeight + deltaY > page!.origin.dy + page!.realSize.height) {
+        return false;
+      }
+    }
+    // size validataion check
+    if (cursor == CursorType.nwResize || cursor == CursorType.swResize) {
       if (realWidth + deltaX > page!.realSize.width) {
         return false;
       }
+    }
+    if (cursor == CursorType.seResize || cursor == CursorType.swResize) {
       if (realHeight + deltaY > page!.realSize.height) {
         return false;
       }
-      if (realWidth + deltaX < 1) {
-        return false;
-      }
-      if (realHeight + deltaY < 1) {
-        return false;
-      }
+    }
+    if (realWidth + deltaX < minAccSize) {
+      return false;
+    }
+    if (realHeight + deltaY < minAccSize) {
+      return false;
     }
     return true;
   }
@@ -950,5 +838,17 @@ class ACC with ACCProperty {
       //containerOffset.set(_prevOffset);
       //containerSize.set(_prevSize);
     }
+  }
+
+  bool isFullscreen() {
+    if (page != null) {
+      if (containerSize.value.width.round() == page!.width.value &&
+          containerSize.value.height.round() == page!.height.value) {
+        fullscreen.set(true);
+      } else {
+        fullscreen.set(false);
+      }
+    }
+    return fullscreen.value;
   }
 }
