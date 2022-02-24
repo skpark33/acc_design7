@@ -186,16 +186,6 @@ class ACC with ACCProperty {
     accManagerHolder?.notify();
   }
 
-  double _getBorderThickness(bool isSelected) {
-    if (isSelected || !hasContents) {
-      return accBorder > borderWidth.value ? accBorder : borderWidth.value;
-    }
-    if (hasContents) {
-      return borderWidth.value;
-    }
-    return accBorder;
-  }
-
   void _showACCMenu(BuildContext context) {
     if (accManagerHolder!.isMenuVisible()) {
       bool reshow = accManagerHolder!.isMenuHostChanged();
@@ -212,7 +202,7 @@ class ACC with ACCProperty {
     Size ratio = getRealRatio();
     Offset realOffset = getRealOffsetWithGivenRatio(ratio);
     Size realSize = getRealSize();
-    bool isSelected = accManagerHolder!.isCurrentIndex(index);
+    bool isAccSelected = accManagerHolder!.isCurrentIndex(index);
     double mouseMargin = resizeButtonSize / 2;
     Size marginSize = Size(realSize.width + resizeButtonSize, realSize.height + resizeButtonSize);
 
@@ -273,8 +263,8 @@ class ACC with ACCProperty {
             onPanUpdate: (details) {
               double dx = (details.delta.dx / ratio.width);
               double dy = (details.delta.dy / ratio.height);
-              if (!resizeWidget(dx, dy, ratio, isSelected)) {
-                if (_validationCheck(false, dx, dy, cursor, isSelected, ratio)) {
+              if (!resizeWidget(dx, dy, ratio, isAccSelected)) {
+                if (_validationCheck(false, dx, dy, cursor, isAccSelected, ratio)) {
                   _setContainerOffset(
                       Offset((containerOffset.value.dx + dx), (containerOffset.value.dy + dy)));
                 }
@@ -301,8 +291,8 @@ class ACC with ACCProperty {
                           isGlass: glass.value,
                           child: myNeumorphicButton(
                             boxShape: _getBoxShape(),
-                            borderColor: _getBorderColor(isSelected),
-                            borderWidth: _getBorderWidth(isSelected),
+                            borderColor: _getBorderColor(),
+                            borderWidth: borderWidth.value,
                             intensity: intensity.value,
                             lightSource: lightSource.value,
                             depth: depth.value,
@@ -312,26 +302,6 @@ class ACC with ACCProperty {
                                     ? 0
                                     : 1),
                             onPressed: () {},
-
-                            //glassMorphic(
-                            //isGlass: glass.value,
-                            // child: Container(
-                            //   clipBehavior: Clip.hardEdge,
-                            //   decoration: BoxDecoration(
-                            //     color: bgColor.value.withOpacity(glass.value
-                            //         ? 0.5
-                            //         : bgColor.value == Colors.transparent
-                            //             ? 0
-                            //             : 1),
-                            //     borderRadius: BorderRadius.only(
-                            //       topRight: Radius.circular(radiusTopRight.value),
-                            //       topLeft: Radius.circular(radiusTopLeft.value),
-                            //       bottomRight: Radius.circular(radiusBottomRight.value),
-                            //       bottomLeft: Radius.circular(radiusBottomLeft.value),
-                            //     ),
-                            //     border: _drawBorder(isSelected),
-                            //   ),
-
                             child: Transform.rotate(
                               angle: contentRotate.value ? rotate.value * (pi / 180) : 0,
                               child: accChild,
@@ -366,7 +336,9 @@ class ACC with ACCProperty {
                 ),
                 CustomPaint(
                   painter: ResiablePainter(
-                      accManagerHolder!.isCurrentIndex(index),
+                      isAccSelected, //accManagerHolder!.isCurrentIndex(index),
+                      bgColor.value,
+                      borderColor.value,
                       resizable,
                       realSize,
                       isCornered,
@@ -460,56 +432,19 @@ class ACC with ACCProperty {
     return defaultBoxShape;
   }
 
-  double _getBorderWidth(bool isSelected) {
+  Color _getBorderColor() {
     if (accChild.playManager != null) {
       if (accChild.playManager!.playList.value.isNotEmpty) {
         hasContents = true;
       }
     }
 
-    if (hasContents && !isSelected && borderWidth.value == 0) {
-      return 0;
-    }
-    return (borderWidth.value == 0) ? accBorder : borderWidth.value;
-  }
-
-  Color _getBorderColor(bool isSelected) {
-    if (accChild.playManager != null) {
-      if (accChild.playManager!.playList.value.isNotEmpty) {
-        hasContents = true;
-      }
-    }
-
-    if (hasContents && !isSelected && borderWidth.value == 0) {
+    if (hasContents && borderWidth.value == 0) {
       return Colors.transparent;
     }
 
-    return isSelected
-        ? MyColors.mainColor
-        : (borderWidth.value == 0)
-            ? MyColors.primaryColor
-            : borderColor.value;
+    return (borderWidth.value == 0) ? MyColors.primaryColor : borderColor.value;
   }
-
-  // Border _drawBorder(bool isSelected) {
-  //   if (accChild.playManager != null) {
-  //     if (accChild.playManager!.playList.value.isNotEmpty) {
-  //       hasContents = true;
-  //     }
-  //   }
-
-  //   if (hasContents && !isSelected && borderWidth.value == 0) {
-  //     return Border.all(style: BorderStyle.none);
-  //   }
-
-  //   return Border.all(
-  //       width: (borderWidth.value == 0) ? accBorder : borderWidth.value,
-  //       color: isSelected
-  //           ? MyColors.mainColor
-  //           : (borderWidth.value == 0)
-  //               ? MyColors.primaryColor
-  //               : borderColor.value);
-  // }
 
   void invalidateContents() {
     //logHolder.log('invalidateContents');
@@ -521,7 +456,7 @@ class ACC with ACCProperty {
     await accChild.pauseAllExceptCurrent();
   }
 
-  bool resizeWidget(double dx, double dy, Size ratio, bool isSelected) {
+  bool resizeWidget(double dx, double dy, Size ratio, bool isAccSelected) {
     if (dx == 0 && dy == 0) return false;
 
     switch (cursor) {
@@ -533,20 +468,20 @@ class ACC with ACCProperty {
       case CursorType.scResize:
       case CursorType.seResize:
       case CursorType.meResize:
-        return _sizeChanged(dx, dy, ratio, isSelected);
+        return _sizeChanged(dx, dy, ratio, isAccSelected);
       default:
         break;
     }
     return _radiusChanged(dx, dy);
   }
 
-  bool _sizeChanged(double dx, double dy, Size ratio, bool isSelected) {
+  bool _sizeChanged(double dx, double dy, Size ratio, bool isAccSelected) {
     double w = containerSize.value.width;
     double h = containerSize.value.height;
     double cx = containerOffset.value.dx;
     double cy = containerOffset.value.dy;
 
-    if (!_validationCheck(true, dx, dy, cursor, isSelected, ratio)) {
+    if (!_validationCheck(true, dx, dy, cursor, isAccSelected, ratio)) {
       return true;
     }
 
@@ -734,7 +669,7 @@ class ACC with ACCProperty {
   }
 
   bool _validationCheck(
-      bool isSizeCheck, double dx, double dy, CursorType cursor, bool isSelected, Size ratio) {
+      bool isSizeCheck, double dx, double dy, CursorType cursor, bool isAccSelected, Size ratio) {
     if (page == null) {
       return true;
     }
@@ -753,7 +688,7 @@ class ACC with ACCProperty {
     double pageRight = pageLeft + page!.realSize.width;
     double pageBottom = pageTop + page!.realSize.height;
 
-    double border = _getBorderThickness(isSelected);
+    double border = borderWidth.value;
     double borderW = border * ratio.width;
     double borderH = border * ratio.height;
 

@@ -25,7 +25,9 @@ List<CursorType> radiusList = [
 ];
 
 class ResiablePainter extends CustomPainter {
-  bool isSelected = false;
+  bool isAccSelected = false;
+  Color bgColor;
+  Color borderColor;
   bool resizable = true;
   final Size widgetSize;
   final bool isCornered;
@@ -46,9 +48,12 @@ class ResiablePainter extends CustomPainter {
   Paint bgPaint = Paint();
   Paint fgPaint = Paint();
   Paint selectPaint = Paint();
+  Paint linePaint = Paint();
 
   ResiablePainter(
-      this.isSelected,
+      this.isAccSelected,
+      this.bgColor,
+      this.borderColor,
       this.resizable,
       this.widgetSize,
       this.isCornered,
@@ -64,14 +69,18 @@ class ResiablePainter extends CustomPainter {
     bgPaint.color = MyColors.gray02.withOpacity(.7);
     fgPaint.color = Colors.white;
     selectPaint.color = MyColors.primaryColor;
+    linePaint.color =
+        (bgColor == Colors.white || borderColor == Colors.white) ? MyColors.gray01 : Colors.white;
 
     bgPaint.style = PaintingStyle.fill;
     fgPaint.style = PaintingStyle.stroke;
     selectPaint.style = PaintingStyle.fill;
+    linePaint.style = PaintingStyle.stroke;
 
     bgPaint.strokeWidth = 2.0;
     fgPaint.strokeWidth = 2.0;
     selectPaint.strokeWidth = 3.0;
+    linePaint.strokeWidth = 2.0;
 
     // shader example !!!!
     // ..shader = LinearGradient(
@@ -96,12 +105,26 @@ class ResiablePainter extends CustomPainter {
     }
 
     //logHolder.log('paint $size', level: 6);
+    if (isAccSelected) {
+      //List<Offset> centerList = getCornerCenters(size);
+      double margin = resizeButtonSize / 2 + 4;
+
+      canvas.drawRect(
+          Rect.fromLTWH(margin, margin, size.width - resizeButtonSize - 8,
+              size.height - resizeButtonSize - 8),
+          linePaint);
+      // canvas.drawLine(centerList[0], centerList[2], selectPaint);
+      // canvas.drawLine(centerList[2], centerList[4], selectPaint);
+      // canvas.drawLine(centerList[4], centerList[6], selectPaint);
+      // canvas.drawLine(centerList[6], centerList[0], selectPaint);
+    }
 
     if (isHover || isCornered) {
       List<Offset> centerList = getCornerCenters(size);
       int i = 0;
       for (Offset center in centerList) {
         drawCircleHandle(canvas, center, resizeButtonSize / 2, isCornerHover[i]);
+
         i++;
       }
     }

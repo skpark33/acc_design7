@@ -785,11 +785,16 @@ class WidgetPropertyState extends State<WidgetProperty> with SingleTickerProvide
                   onColorChangeEnd: (bg) {
                     acc.borderColor.set(bg);
                     acc.setState();
-                    setState(() {});
+                    setState(() {
+                      if (acc.borderWidth.value == 0) {
+                        acc.borderWidth.set(1);
+                      }
+                      _borderColorVisible = false;
+                    });
                   },
                   width: 22,
                   height: 22,
-                  padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                  padding: const EdgeInsets.fromLTRB(0, 8, 20, 0),
                   showColorName: false,
                   showRecentColors: false,
                   //maxRecentColors: currentUser.maxBgColor,

@@ -161,6 +161,6 @@ MyColorIndicator colorPickerIcon(Color color, void Function() onSelect) {
     hasBorder: true,
     borderColor: color == Colors.transparent ? Colors.black : MyColors.primaryColor,
     elevation: 5,
-    selectedIcon: color == Colors.transparent ? Icons.cancel : Icons.blur_on_rounded,
+    selectedIcon: color == Colors.transparent ? Icons.cancel : Icons.rectangle,
   );
 }
