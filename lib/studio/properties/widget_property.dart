@@ -22,6 +22,7 @@ import 'package:acc_design7/studio/properties/properties_frame.dart';
 import 'package:acc_design7/common/buttons/dial_button.dart';
 import 'package:acc_design7/common/slider/opacity/opacity_slider.dart';
 import 'package:acc_design7/common/colorPicker/my_color_indicator.dart';
+import 'package:acc_design7/common/neumorphic/neumorphic.dart';
 
 class ExapandableModel {
   ExapandableModel({
@@ -71,9 +72,7 @@ class ExapandableModel {
               if (titleLineWidget != null) titleLineWidget,
               IconButton(
                 onPressed: setStateFunction,
-                icon: Icon(isSelected
-                    ? Icons.keyboard_arrow_up
-                    : Icons.keyboard_arrow_down),
+                icon: Icon(isSelected ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down),
               ),
             ],
           ),
@@ -118,10 +117,9 @@ class WidgetProperty extends PropertySelector {
   }
 }
 
-class WidgetPropertyState extends State<WidgetProperty>
-    with SingleTickerProviderStateMixin {
-  final ScrollController _scrollController =
-      ScrollController(initialScrollOffset: 0.0);
+class WidgetPropertyState extends State<WidgetProperty> with SingleTickerProviderStateMixin {
+  final ScrollController _scrollController = ScrollController(initialScrollOffset: 0.0);
+  bool _borderColorVisible = false;
 
   late AnimationController _aniIconController;
 
@@ -163,12 +161,12 @@ class WidgetPropertyState extends State<WidgetProperty>
   );
   ExapandableModel rotateModel = ExapandableModel(
     title: MyStrings.rotate,
-    height: 260,
+    height: 270,
     width: 240,
   );
   ExapandableModel borderModel = ExapandableModel(
     title: MyStrings.border,
-    height: 260,
+    height: 290,
     width: 240,
   );
 
@@ -232,7 +230,7 @@ class WidgetPropertyState extends State<WidgetProperty>
                 },
                 titleSize: 100,
                 titleLineWidget: Text(
-                  '${acc.containerOffset.value.dx},${acc.containerOffset.value.dy},${acc.containerSize.value.width} x ${acc.containerSize.value.height}',
+                  '${acc.containerOffset.value.dx.roundToDouble()},${acc.containerOffset.value.dy.roundToDouble()},${acc.containerSize.value.width.roundToDouble()} x ${acc.containerSize.value.height.roundToDouble()}',
                   style: MyTextStyles.subtitle1,
                 )),
             _divider(),
@@ -249,7 +247,7 @@ class WidgetPropertyState extends State<WidgetProperty>
                     ? Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          _glassIcon(acc, acc.bgColor.value),
+                          glassIcon(acc, acc.bgColor.value),
                           SizedBox(
                             width: 20,
                           ),
@@ -377,8 +375,7 @@ class WidgetPropertyState extends State<WidgetProperty>
     );
   }
 
-  Widget _primaryRow(
-      ACC acc, double left, double top, double right, double bottom) {
+  Widget _primaryRow(ACC acc, double left, double top, double right, double bottom) {
     return Padding(
       padding: EdgeInsets.fromLTRB(left, top, right, bottom),
       child: Row(
@@ -391,10 +388,8 @@ class WidgetPropertyState extends State<WidgetProperty>
             padding: EdgeInsets.fromLTRB(18, 2, 8, 2),
             iconSize: 32.0,
             icon: Icon(
-              acc.primary.value != true
-                  ? Icons.star_outline_outlined
-                  : Icons.star_outlined,
-              color: acc.primary.value != true ? Colors.grey : Colors.red,
+              acc.primary.value != true ? Icons.star_outline_outlined : Icons.star_outlined,
+              color: acc.primary.value != true ? Colors.grey : MyColors.mainColor,
             ),
             onPressed: () {
               accManagerHolder!.setPrimary();
@@ -406,16 +401,13 @@ class WidgetPropertyState extends State<WidgetProperty>
     );
   }
 
-  Widget _sourceRatioRow(
-      ACC acc, double left, double top, double right, double bottom) {
+  Widget _sourceRatioRow(ACC acc, double left, double top, double right, double bottom) {
     return Padding(
       padding: EdgeInsets.fromLTRB(left, top, right, bottom),
       child: Row(
         children: [
           Text(
-            acc.sourceRatio.value == true
-                ? MyStrings.sourceRatio
-                : MyStrings.sourceRatioToggle,
+            acc.sourceRatio.value == true ? MyStrings.sourceRatio : MyStrings.sourceRatioToggle,
             style: MyTextStyles.subtitle2,
           ),
           IconButton(
@@ -425,7 +417,7 @@ class WidgetPropertyState extends State<WidgetProperty>
               acc.sourceRatio.value == true
                   ? Icons.image_aspect_ratio_outlined
                   : Icons.aspect_ratio_outlined,
-              color: acc.sourceRatio.value == true ? Colors.grey : Colors.red,
+              color: acc.sourceRatio.value == true ? Colors.grey : MyColors.mainColor,
             ),
             onPressed: () {
               acc.sourceRatio.set(!acc.sourceRatio.value);
@@ -452,14 +444,15 @@ class WidgetPropertyState extends State<WidgetProperty>
         ),
         myNumberTextField(
           // x 좌표
-          defaultValue: acc.containerOffset.value.dx,
+          defaultValue: acc.containerOffset.value.dx.roundToDouble(),
           controller: xCon,
           onEditingComplete: () {
             logHolder.log("textval = ${xCon.text}");
-            acc.containerOffset.set(
-                Offset(double.parse(xCon.text), acc.containerOffset.value.dy));
-
-            acc.setState();
+            setState(() {
+              acc.containerOffset
+                  .set(Offset(double.parse(xCon.text), acc.containerOffset.value.dy));
+              acc.setState();
+            });
           },
         ),
         SizedBox(
@@ -474,25 +467,25 @@ class WidgetPropertyState extends State<WidgetProperty>
         ),
         myNumberTextField(
           // y 좌표
-          defaultValue: acc.containerOffset.value.dy,
+          defaultValue: acc.containerOffset.value.dy.roundToDouble(),
           controller: yCon,
           onEditingComplete: () {
             logHolder.log("textval = ${yCon.text}");
-            acc.containerOffset.set(
-                Offset(acc.containerOffset.value.dx, double.parse(yCon.text)));
-
-            acc.setState();
+            setState(() {
+              acc.containerOffset
+                  .set(Offset(acc.containerOffset.value.dx, double.parse(yCon.text)));
+              acc.setState();
+            });
           },
         ),
         writeButton(
           // x,y 좌표를  Write 하는 icon
           onPressed: () {
             mychangeStack.startTrans();
-            acc.containerOffset
-                .set(Offset(double.parse(xCon.text), double.parse(yCon.text)));
-
+            acc.containerOffset.set(Offset(double.parse(xCon.text), double.parse(yCon.text)));
             mychangeStack.endTrans();
             acc.setState();
+            setState(() {});
           },
         ),
       ],
@@ -512,13 +505,15 @@ class WidgetPropertyState extends State<WidgetProperty>
         ),
         myNumberTextField(
           // 너비
-          defaultValue: acc.containerSize.value.width,
+          defaultValue: acc.containerSize.value.width.roundToDouble(),
           controller: widthCon,
           onEditingComplete: () {
             logHolder.log("textval = ${widthCon.text}");
-            acc.containerSize.set(Size(
-                double.parse(widthCon.text), acc.containerSize.value.height));
-            acc.setState();
+            setState(() {
+              acc.containerSize
+                  .set(Size(double.parse(widthCon.text), acc.containerSize.value.height));
+              acc.setState();
+            });
           },
         ),
         SizedBox(
@@ -533,23 +528,25 @@ class WidgetPropertyState extends State<WidgetProperty>
         ),
         myNumberTextField(
           // 높이
-          defaultValue: acc.containerSize.value.height,
+          defaultValue: acc.containerSize.value.height.roundToDouble(),
           controller: heightCon,
           onEditingComplete: () {
+            setState(() {
+              acc.containerSize
+                  .set(Size(acc.containerSize.value.width, double.parse(heightCon.text)));
+              acc.setState();
+            });
             logHolder.log("textval = ${heightCon.text}");
-            acc.containerSize.set(Size(
-                acc.containerSize.value.width, double.parse(heightCon.text)));
-            acc.setState();
           },
         ),
         writeButton(
           // width,height를  Write 하는 icon
           onPressed: () {
             mychangeStack.startTrans();
-            acc.containerSize.set(Size(
-                double.parse(widthCon.text), double.parse(heightCon.text)));
+            acc.containerSize.set(Size(double.parse(widthCon.text), double.parse(heightCon.text)));
             mychangeStack.endTrans();
             acc.setState();
+            setState(() {});
           },
         ),
       ],
@@ -580,18 +577,44 @@ class WidgetPropertyState extends State<WidgetProperty>
   }
 
   Widget _rotateRow(BuildContext context, ACC acc) {
-    return Container(
-        alignment: Alignment.center,
-        child: DialView(
-          angle: acc.rotate.value,
-          size: Size(200, 200),
-          onValueChanged: (value) {
-            //logHolder.log('onValueChanged: $value');
-            acc.rotate.set(value);
-            acc.setState();
-            setState(() {});
-          },
-        ));
+    return Column(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+      Container(
+          alignment: Alignment.center,
+          child: DialView(
+            angle: acc.rotate.value,
+            size: Size(190, 190),
+            onValueChanged: (value) {
+              //logHolder.log('onValueChanged: $value');
+              acc.rotate.set(value);
+              acc.setState();
+              setState(() {});
+            },
+          )),
+      Row(
+        children: [
+          Text(
+            MyStrings.contentsRotate,
+            style: MyTextStyles.subtitle2,
+          ),
+          IconButton(
+            padding: EdgeInsets.fromLTRB(18, 2, 8, 2),
+            iconSize: 32.0,
+            icon: Icon(
+              acc.contentRotate.value == true
+                  ? Icons.task_alt_outlined
+                  : Icons.radio_button_unchecked_outlined,
+              color: acc.contentRotate.value == true ? MyColors.mainColor : Colors.grey,
+            ),
+            onPressed: () {
+              acc.contentRotate.set(!acc.contentRotate.value);
+              acc.setState();
+              //acc.invalidateContents();
+              setState(() {});
+            },
+          )
+        ],
+      ),
+    ]);
   }
 
   void _editComplete(ACC acc) {
@@ -631,8 +654,7 @@ class WidgetPropertyState extends State<WidgetProperty>
               context: context,
               value: acc.bgColor.value,
               list: [
-                for (int i = 0; i < currentUser.maxBgColor; i++)
-                  currentUser.bgColorList1[i],
+                for (int i = 0; i < currentUser.maxBgColor; i++) currentUser.bgColorList1[i],
               ],
               onPressed: (bg) {
                 acc.setBgColor(bg);
@@ -711,12 +733,12 @@ class WidgetPropertyState extends State<WidgetProperty>
                 style: MyTextStyles.subtitle2,
               ),
               SizedBox(width: 32),
-              _glassIcon(acc, acc.bgColor.value),
+              glassIcon(acc, acc.bgColor.value),
               // CircleAvatar(
               //   radius: 18,
               //   foregroundColor: acc.bgColor.value,
               //   backgroundColor: MyColors.secondaryColor,
-              //   child: _glassIcon(
+              //   child: glassIcon(
               //       0, acc, acc.bgColor.value), //Icon(Icons.circle, size: 32),
               // ),
             ]),
@@ -734,7 +756,110 @@ class WidgetPropertyState extends State<WidgetProperty>
   }
 
   Widget _borderRow(BuildContext context, ACC acc) {
-    return Container(alignment: Alignment.topCenter, child: null);
+    return Container(
+        alignment: Alignment.topCenter,
+        child: Column(children: [
+          borderColorPicker(acc.borderColor.value, () {
+            setState(() {
+              _borderColorVisible = !_borderColorVisible;
+            });
+          }),
+          _borderColorVisible
+              ? ColorPicker(
+                  subheading: _smallDivider(),
+                  pickersEnabled: const <ColorPickerType, bool>{
+                    ColorPickerType.both: false,
+                    ColorPickerType.primary: true,
+                    ColorPickerType.accent: true,
+                    ColorPickerType.bw: false,
+                    ColorPickerType.custom: false,
+                    ColorPickerType.wheel: false
+                  },
+                  pickerTypeLabels: <ColorPickerType, String>{
+                    ColorPickerType.primary: MyStrings.basicColor,
+                    ColorPickerType.accent: MyStrings.accentColor,
+                    //ColorPickerType.wheel: MyStrings.customColor
+                  },
+                  color: acc.borderColor.value,
+                  onColorChanged: (bg) {},
+                  onColorChangeEnd: (bg) {
+                    acc.borderColor.set(bg);
+                    acc.setState();
+                    setState(() {});
+                  },
+                  width: 22,
+                  height: 22,
+                  padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                  showColorName: false,
+                  showRecentColors: false,
+                  //maxRecentColors: currentUser.maxBgColor,
+                  //recentColors: currentUser.bgColorList1,
+                  //onRecentColorsChanged: (list) {
+                  //  currentUser.bgColorList1 = list;
+                  //},
+                )
+              : Column(children: [
+                  depthSelector(
+                      depth: acc.depth.value,
+                      onChanged: (value) {
+                        setState(() {
+                          autoChangeBgColor(acc);
+                          acc.depth.set(value);
+                          acc.setState();
+                        });
+                      }),
+                  intensitySelector(
+                      intensity: acc.intensity.value,
+                      onChanged: (value) {
+                        setState(() {
+                          autoChangeBgColor(acc);
+                          acc.intensity.set(value);
+                          acc.setState();
+                        });
+                      }),
+                  borderWidthSelector(
+                      borderWidth: acc.borderWidth.value,
+                      onChanged: (value) {
+                        setState(() {
+                          autoChangeBgColor(acc);
+                          acc.borderWidth.set(value);
+                          acc.setState();
+                        });
+                      }),
+                  lightSourceDxWidgets(
+                      lightSourceDx: acc.lightSource.value.dx,
+                      onChanged: (value) {
+                        setState(() {
+                          autoChangeBgColor(acc);
+                          acc.lightSource.set(acc.lightSource.value.copyWith(dx: value));
+                          acc.setState();
+                        });
+                      }),
+                  lightSourceDyWidgets(
+                      lightSourceDy: acc.lightSource.value.dy,
+                      onChanged: (value) {
+                        setState(() {
+                          autoChangeBgColor(acc);
+                          acc.lightSource.set(acc.lightSource.value.copyWith(dy: value));
+                          acc.setState();
+                        });
+                      }),
+                ]),
+          // ]),
+        ]));
+  }
+
+  void autoChangeBgColor(ACC acc) {
+    // 투명하거나,  유리질이거나, bg에 opacity 같은 것들이 잡혀있으면,
+    // 보더 값이 먹지 않으므로, 자동으로 해제해 준다.
+    if (acc.bgColor.value == Colors.transparent) {
+      acc.bgColor.set(MyColors.bgColor);
+    } else {
+      // if (acc.bgColor.value.opacity > 0) {
+      //   acc.bgColor.value.withOpacity(0);
+      // }
+    }
+    acc.glass.set(false);
   }
 
   Widget _cornerRow(BuildContext context, ACC acc) {
@@ -826,7 +951,7 @@ class WidgetPropertyState extends State<WidgetProperty>
     }
   }
 
-  MyColorIndicator _glassIcon(ACC acc, Color bg) {
+  MyColorIndicator glassIcon(ACC acc, Color bg) {
     return MyColorIndicator(
       color: bg == Color(0x00000000) ? Color(0xFFFFFFFF) : bg,
       onSelect: () {
@@ -845,8 +970,7 @@ class WidgetPropertyState extends State<WidgetProperty>
       height: 30,
       borderRadius: 0,
       hasBorder: true,
-      borderColor:
-          bg == Color(0x00000000) ? Colors.black : MyColors.primaryColor,
+      borderColor: bg == Color(0x00000000) ? Colors.black : MyColors.primaryColor,
       elevation: 5,
       selectedIcon: Icons.blur_on_rounded,
     );

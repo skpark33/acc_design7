@@ -8,3 +8,6 @@ const double layoutPageWidth = 324;
 const double layoutPropertiesWidth = 328;
 
 const double minAccSize = 10;
+const double accBorder = 3;
+
+const double magnetic = 4;

@@ -68,6 +68,7 @@ dev_dependencies:
   carousel_slider: ^4.0.0
   uuid: ^3.0.5
   flex_color_picker: ^2.2.0
+  flutter_neumorphic_null_safety: ^3.2.4
   
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

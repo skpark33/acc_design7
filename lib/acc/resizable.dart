@@ -20,8 +20,8 @@ List<CursorType> cursorList = [
 List<CursorType> radiusList = [
   CursorType.neRadius,
   CursorType.nwRadius,
-  CursorType.seRadius,
   CursorType.swRadius,
+  CursorType.seRadius,
 ];
 
 class ResiablePainter extends CustomPainter {
@@ -61,7 +61,7 @@ class ResiablePainter extends CustomPainter {
       this.radiusBottomLeft,
       this.radiusBottomRight)
       : super() {
-    bgPaint.color = Colors.grey.withOpacity(.8);
+    bgPaint.color = MyColors.gray02.withOpacity(.7);
     fgPaint.color = Colors.white;
     selectPaint.color = MyColors.primaryColor;
 
@@ -71,7 +71,7 @@ class ResiablePainter extends CustomPainter {
 
     bgPaint.strokeWidth = 2.0;
     fgPaint.strokeWidth = 2.0;
-    selectPaint.strokeWidth = 2.0;
+    selectPaint.strokeWidth = 3.0;
 
     // shader example !!!!
     // ..shader = LinearGradient(
@@ -94,6 +94,9 @@ class ResiablePainter extends CustomPainter {
     if (!resizable) {
       return;
     }
+
+    //logHolder.log('paint $size', level: 6);
+
     if (isHover || isCornered) {
       List<Offset> centerList = getCornerCenters(size);
       int i = 0;
@@ -103,28 +106,46 @@ class ResiablePainter extends CustomPainter {
       }
     }
     if (isHover || isRadiused) {
-      List<Offset> angleList = [
+      List<Offset> bigList = [
         const Offset(1.0 * pi, 0.5 * pi),
         const Offset(1.5 * pi, 0.5 * pi),
         const Offset(0.0 * pi, 0.5 * pi),
         const Offset(0.5 * pi, 0.5 * pi),
       ];
+      List<Offset> smallList = [
+        const Offset(1.1 * pi, 0.3 * pi),
+        const Offset(1.6 * pi, 0.3 * pi),
+        const Offset(0.1 * pi, 0.3 * pi),
+        const Offset(0.6 * pi, 0.3 * pi),
+      ];
       List<Rect> arcList =
           getRadiusRect(size, radiusTopLeft, radiusTopRight, radiusBottomRight, radiusBottomLeft);
       for (int i = 0; i < 4; i++) {
-        drawArcHandle(canvas, arcList[i], angleList[i].dx, angleList[i].dy, isRadiusHover[i]);
+        drawArcHandle(canvas, arcList[i], bigList[i].dx, bigList[i].dy, smallList[i].dx,
+            smallList[i].dy, isRadiusHover[i]);
       }
     }
   }
 
   void drawCircleHandle(Canvas canvas, Offset center, double radius, bool isSelected) {
-    canvas.drawCircle(center, radius, isSelected ? selectPaint : bgPaint);
-    canvas.drawCircle(center, radius - 2, fgPaint);
+    if (isSelected) {
+      canvas.drawCircle(center, radius, selectPaint);
+      canvas.drawCircle(center, radius - 2, fgPaint);
+    } else {
+      canvas.drawCircle(center, radius / 2, bgPaint);
+      canvas.drawCircle(center, radius / 2 - 1, fgPaint);
+    }
   }
 
-  void drawArcHandle(Canvas canvas, Rect rect, double start, double end, bool isSelected) {
-    canvas.drawArc(rect, start, end, true, isSelected ? selectPaint : bgPaint);
-    canvas.drawArc(rect, start, end, true, fgPaint);
+  void drawArcHandle(Canvas canvas, Rect rect, double bigStart, double bigEnd, double smallStart,
+      double smallEnd, bool isSelected) {
+    if (isSelected) {
+      canvas.drawArc(rect, bigStart, bigEnd, true, selectPaint);
+      canvas.drawArc(rect, bigStart, bigEnd, true, fgPaint);
+    } else {
+      canvas.drawArc(rect, smallStart, smallEnd, true, bgPaint);
+      canvas.drawArc(rect, smallStart, smallEnd, true, fgPaint);
+    }
   }
 
   @override
@@ -181,12 +202,12 @@ class ResiablePainter extends CustomPainter {
   static List<Rect> getRadiusRect(Size size, double radiusTopLeft, double radiusTopRight,
       double radiusBottomRight, double radiusBottomLeft) {
     double r = resizeButtonSize; // size of handle
-    double padding = r / 2; // mousePadding
+    //double padding = r / 2; // mousePadding
 
-    double left = padding;
-    double top = padding;
-    double right = size.width - padding - r;
-    double bottom = size.height - padding - r;
+    double left = resizeButtonSize;
+    double top = resizeButtonSize;
+    double right = size.width - resizeButtonSize - r;
+    double bottom = size.height - resizeButtonSize - r;
 
     double ne = getRadiusPos(radiusTopLeft);
     double nw = getRadiusPos(radiusTopRight);

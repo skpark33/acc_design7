@@ -1,7 +1,7 @@
 // ignore_for_file: prefer_final_fields
-import 'package:flutter/material.dart';
 import '../common/undo/undo.dart';
 import '../constants/styles.dart';
+import 'package:flutter_neumorphic_null_safety/flutter_neumorphic.dart';
 
 enum CursorType {
   pointer,
@@ -27,6 +27,14 @@ enum AnimeType {
   flip,
 }
 
+enum BoxType {
+  rect,
+  rountRect,
+  cicle,
+  beveled,
+  stadium,
+}
+
 //class ACCProperty extends ChangeNotifier {
 class ACCProperty {
   bool _dirty = false;
@@ -44,6 +52,7 @@ class ACCProperty {
   UndoAble<Offset> _containerOffset = UndoAble<Offset>(const Offset(100, 100));
   UndoAble<Size> _containerSize = UndoAble<Size>(const Size(400, 400));
   UndoAble<double> _rotate = UndoAble<double>(0);
+  UndoAble<bool> _contentRotate = UndoAble<bool>(false);
   UndoAble<double> _opacity = UndoAble<double>(1);
   UndoAble<bool> _sourceRatio = UndoAble<bool>(false);
   UndoAble<bool> _glass = UndoAble<bool>(true);
@@ -63,6 +72,7 @@ class ACCProperty {
   UndoAble<Offset> get containerOffset => _containerOffset;
   UndoAble<Size> get containerSize => _containerSize;
   UndoAble<double> get rotate => _rotate;
+  UndoAble<bool> get contentRotate => _contentRotate;
   UndoAble<double> get opacity => _opacity;
   UndoAble<bool> get glass => _glass;
   UndoAble<bool> get sourceRatio => _sourceRatio;
@@ -78,10 +88,14 @@ class ACCProperty {
   UndoAble<Color> get borderColor => _borderColor;
   UndoAble<double> _borderWidth = UndoAble<double>(0);
   UndoAble<double> get borderWidth => _borderWidth;
-  UndoAble<int> _borderType = UndoAble<int>(0);
-  UndoAble<int> get borderType => _borderType;
-  UndoAble<int> _borderEffect = UndoAble<int>(0);
-  UndoAble<int> get borderEffect => _borderEffect;
+  UndoAble<LightSource> _lightSource = UndoAble<LightSource>(LightSource.topLeft);
+  UndoAble<LightSource> get lightSource => _lightSource;
+  UndoAble<double> _depth = UndoAble<double>(0);
+  UndoAble<double> get depth => _depth;
+  UndoAble<double> _intensity = UndoAble<double>(0.8);
+  UndoAble<double> get intensity => _intensity;
+  UndoAble<BoxType> _boxType = UndoAble<BoxType>(BoxType.rountRect);
+  UndoAble<BoxType> get boxType => _boxType;
 
   void setDirty(bool p) {
     _dirty = p;

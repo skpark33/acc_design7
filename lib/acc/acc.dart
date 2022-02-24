@@ -1,11 +1,14 @@
 // ignore_for_file: prefer_final_fields
 import 'dart:math';
+//import 'package:flutter/material.dart';
+import 'package:flutter_neumorphic_null_safety/flutter_neumorphic.dart';
 import 'package:acc_design7/common/util/my_utils.dart';
-import 'package:flutter/material.dart';
+
 import 'resizable.dart';
 import 'acc_property.dart';
 import 'acc_manager.dart';
 import '../common/drag_and_drop/drop_zone_widget.dart';
+import '../common/neumorphic/neumorphic.dart';
 import '../common/util/logger.dart';
 import '../common/undo/undo.dart';
 import '../widgets/base_widget.dart';
@@ -30,10 +33,12 @@ class ACC with ACCProperty {
   final BaseWidget accChild;
   final int index;
   PageModel? page;
-  bool isStart = false;
+  //bool isStart = false;
 
   OverlayEntry? entry;
 
+  bool hasContents = false;
+  bool actionStart = false;
   bool isHover = false;
   bool isCornered = false;
   bool isRadiused = false;
@@ -125,14 +130,70 @@ class ACC with ACCProperty {
   }
 
   void _setContainerOffset(Offset offset) {
-    containerOffset.set(offset);
+    // 자석기능
+    double dx = offset.dx;
+    double dy = offset.dy;
+    if (dx <= magnetic) {
+      dx = 0;
+    }
+    if (dy <= magnetic) {
+      dy = 0;
+    }
+
+    double pw = page!.width.value.toDouble();
+    double ph = page!.height.value.toDouble();
+
+    if (dx + containerSize.value.width > pw - magnetic) {
+      dx = pw - containerSize.value.width;
+    }
+    if (dy + containerSize.value.height > ph - magnetic) {
+      dy = ph - containerSize.value.height;
+    }
+
+    containerOffset.set(Offset(dx, dy));
     accManagerHolder?.notify();
   }
 
   void _setContainerOffsetAndSize(Offset offset, Size size) {
-    containerOffset.set(offset);
-    containerSize.set(size);
+    double dx = offset.dx;
+    double dy = offset.dy;
+    if (dx <= magnetic) {
+      dx = 0;
+    }
+    if (dy <= magnetic) {
+      dy = 0;
+    }
+    double w = size.width;
+    double h = size.height;
+    double pw = page!.width.value.toDouble();
+    double ph = page!.height.value.toDouble();
+    if (w >= pw - magnetic) {
+      w = pw;
+    }
+    if (h >= ph - magnetic) {
+      h = ph;
+    }
+
+    if (dx + w > pw - magnetic) {
+      w = pw - dx;
+    }
+    if (dy + h > ph - magnetic) {
+      h = ph - dy;
+    }
+
+    containerOffset.set(Offset(dx, dy));
+    containerSize.set(Size(w, h));
     accManagerHolder?.notify();
+  }
+
+  double _getBorderThickness(bool isSelected) {
+    if (isSelected || !hasContents) {
+      return accBorder > borderWidth.value ? accBorder : borderWidth.value;
+    }
+    if (hasContents) {
+      return borderWidth.value;
+    }
+    return accBorder;
   }
 
   void _showACCMenu(BuildContext context) {
@@ -148,13 +209,15 @@ class ACC with ACCProperty {
   }
 
   Widget showOverlay(BuildContext context) {
-    //logHolder.log('showOverlay:${rotate.value}');
     Size ratio = getRealRatio();
     Offset realOffset = getRealOffsetWithGivenRatio(ratio);
     Size realSize = getRealSize();
     bool isSelected = accManagerHolder!.isCurrentIndex(index);
     double mouseMargin = resizeButtonSize / 2;
-    Size marginSize = Size(realSize.width + mouseMargin, realSize.height + mouseMargin);
+    Size marginSize = Size(realSize.width + resizeButtonSize, realSize.height + resizeButtonSize);
+
+    //logHolder.log('showOverlay:$marginSize', level: 6);
+
     return Visibility(
         visible: (visible && !removed.value),
         child: Positioned(
@@ -164,15 +227,28 @@ class ACC with ACCProperty {
           // width: realSize.width,
           left: realOffset.dx - mouseMargin,
           top: realOffset.dy - mouseMargin,
-          height: realSize.height + mouseMargin,
-          width: realSize.width + mouseMargin,
+          height: realSize.height + resizeButtonSize,
+          width: realSize.width + resizeButtonSize,
+
           child: GestureDetector(
-            onTapDown: (details) {
+            onPanDown: (details) {
               accManagerHolder!.setCurrentIndex(index);
-              logHolder.log('onTapDown:${details.localPosition}', level: 5);
+              logHolder.log('onPanDown:${details.localPosition}', level: 5);
               _showACCMenu(context);
             },
+            onTap: () {
+              logHolder.log('onTap', level: 6);
+            },
+            onTapUp: (details) {
+              logHolder.log('onTapUp', level: 6);
+            },
+            onTapDown: (details) {
+              // accManagerHolder!.setCurrentIndex(index);
+              // logHolder.log('onTapDown:${details.localPosition}', level: 5);
+              // _showACCMenu(context);
+            },
             onPanStart: (details) {
+              actionStart = true;
               logHolder.log('onPanStart:${details.localPosition}', level: 5);
               //if (isCorners(details.localPosition, realSize, resizeButtonSize)) {
               if (isCorners(details.localPosition, marginSize, resizeButtonSize)) {
@@ -180,7 +256,7 @@ class ACC with ACCProperty {
                 isCornered = true;
                 isRadiused = false;
                 //} else if (isRadius(details.localPosition, realSize, resizeButtonSize / 4)) {
-              } else if (isRadius(details.localPosition, marginSize, resizeButtonSize / 4)) {
+              } else if (isRadius(details.localPosition, marginSize, resizeButtonSize / 2)) {
                 isRadiused = true;
                 isHover = false;
                 isCornered = false;
@@ -195,18 +271,19 @@ class ACC with ACCProperty {
               accManagerHolder!.unshowMenu(context);
             },
             onPanUpdate: (details) {
-              double dx = details.delta.dx / ratio.width;
-              double dy = details.delta.dy / ratio.height;
-              if (!resizeWidget(dx, dy, ratio)) {
-                if (_validationCheck(false, dx, dy, cursor)) {
-                  _setContainerOffset(Offset((containerOffset.value.dx + dx).roundToDouble(),
-                      (containerOffset.value.dy + dy).roundToDouble()));
+              double dx = (details.delta.dx / ratio.width);
+              double dy = (details.delta.dy / ratio.height);
+              if (!resizeWidget(dx, dy, ratio, isSelected)) {
+                if (_validationCheck(false, dx, dy, cursor, isSelected, ratio)) {
+                  _setContainerOffset(
+                      Offset((containerOffset.value.dx + dx), (containerOffset.value.dy + dy)));
                 }
               }
               entry!.markNeedsBuild();
               //invalidateContents();
             },
             onPanEnd: (details) {
+              actionStart = false;
               logHolder.log('onPanEnd:', level: 5);
               mychangeStack.endTrans();
               invalidateContents();
@@ -216,33 +293,49 @@ class ACC with ACCProperty {
                 Padding(
                   padding: EdgeInsets.all(mouseMargin),
                   child: Transform.rotate(
-                    angle: rotate.value * (pi / 180),
+                    angle: contentRotate.value ? 0 : rotate.value * (pi / 180),
                     child: Opacity(
                       opacity: opacity.value,
                       child: Stack(children: [
                         glassMorphic(
                           isGlass: glass.value,
-                          child: Container(
-                            clipBehavior: Clip.hardEdge,
-                            decoration: BoxDecoration(
-                              color: bgColor.value.withOpacity(glass.value
-                                  ? 0.5
-                                  : bgColor.value == Colors.transparent
-                                      ? 0
-                                      : 1),
-                              borderRadius: BorderRadius.only(
-                                topRight: Radius.circular(radiusTopRight.value),
-                                topLeft: Radius.circular(radiusTopLeft.value),
-                                bottomRight: Radius.circular(radiusBottomRight.value),
-                                bottomLeft: Radius.circular(radiusBottomLeft.value),
-                              ),
-                              border: _drawBorder(isSelected),
+                          child: myNeumorphicButton(
+                            boxShape: _getBoxShape(),
+                            borderColor: _getBorderColor(isSelected),
+                            borderWidth: _getBorderWidth(isSelected),
+                            intensity: intensity.value,
+                            lightSource: lightSource.value,
+                            depth: depth.value,
+                            bgColor: bgColor.value.withOpacity(glass.value
+                                ? 0.5
+                                : bgColor.value == Colors.transparent
+                                    ? 0
+                                    : 1),
+                            onPressed: () {},
+
+                            //glassMorphic(
+                            //isGlass: glass.value,
+                            // child: Container(
+                            //   clipBehavior: Clip.hardEdge,
+                            //   decoration: BoxDecoration(
+                            //     color: bgColor.value.withOpacity(glass.value
+                            //         ? 0.5
+                            //         : bgColor.value == Colors.transparent
+                            //             ? 0
+                            //             : 1),
+                            //     borderRadius: BorderRadius.only(
+                            //       topRight: Radius.circular(radiusTopRight.value),
+                            //       topLeft: Radius.circular(radiusTopLeft.value),
+                            //       bottomRight: Radius.circular(radiusBottomRight.value),
+                            //       bottomLeft: Radius.circular(radiusBottomLeft.value),
+                            //     ),
+                            //     border: _drawBorder(isSelected),
+                            //   ),
+
+                            child: Transform.rotate(
+                              angle: contentRotate.value ? rotate.value * (pi / 180) : 0,
+                              child: accChild,
                             ),
-                            //child: Transform.rotate(
-                            //  angle: rotate.value * (pi / 180),
-                            //  child: accChild,
-                            //),
-                            child: accChild,
                           ),
                         ),
                         Visibility(
@@ -263,7 +356,7 @@ class ACC with ACCProperty {
                           visible: primary.value,
                           child: const Icon(
                             Icons.star,
-                            color: Colors.red,
+                            color: MyColors.mainColor,
                             semanticLabel: 'Primary',
                           ),
                         ),
@@ -297,7 +390,7 @@ class ACC with ACCProperty {
                         entry!.markNeedsBuild();
                         //} else if (isRadius(details.localPosition, realSize, resizeButtonSize / 4)) {
                       } else if (isRadius(
-                          details.localPosition, marginSize, resizeButtonSize / 4)) {
+                          details.localPosition, marginSize, resizeButtonSize / 2)) {
                         isCornered = false;
                         isRadiused = true;
                         isHover = false;
@@ -319,11 +412,13 @@ class ACC with ACCProperty {
                     },
                     onExit: (details) {
                       //logHolder.log('Exit', level: 5);
-                      isHover = false;
-                      isCornered = false;
-                      isRadiused = false;
-                      clearCornerHover();
-                      entry!.markNeedsBuild();
+                      if (!actionStart) {
+                        isHover = false;
+                        isCornered = false;
+                        isRadiused = false;
+                        clearCornerHover();
+                        entry!.markNeedsBuild();
+                      }
                     },
                     child: DropZoneWidget(
                       onDroppedFile: (model) {
@@ -339,8 +434,33 @@ class ACC with ACCProperty {
         ));
   }
 
-  Border _drawBorder(bool isSelected) {
-    bool hasContents = false;
+  NeumorphicBoxShape _getBoxShape() {
+    switch (boxType.value) {
+      case BoxType.rountRect:
+        return NeumorphicBoxShape.roundRect(BorderRadius.only(
+            topLeft: Radius.circular(radiusTopLeft.value),
+            topRight: Radius.circular(radiusTopRight.value),
+            bottomLeft: Radius.circular(radiusBottomLeft.value),
+            bottomRight: Radius.circular(radiusBottomRight.value)));
+      case BoxType.cicle:
+        return const NeumorphicBoxShape.circle();
+      case BoxType.rect:
+        return const NeumorphicBoxShape.rect();
+      case BoxType.stadium:
+        return const NeumorphicBoxShape.stadium();
+      case BoxType.beveled:
+        return NeumorphicBoxShape.beveled(BorderRadius.only(
+            topLeft: Radius.circular(radiusTopLeft.value),
+            topRight: Radius.circular(radiusTopRight.value),
+            bottomLeft: Radius.circular(radiusBottomLeft.value),
+            bottomRight: Radius.circular(radiusBottomRight.value)));
+      default:
+        break;
+    }
+    return defaultBoxShape;
+  }
+
+  double _getBorderWidth(bool isSelected) {
     if (accChild.playManager != null) {
       if (accChild.playManager!.playList.value.isNotEmpty) {
         hasContents = true;
@@ -348,17 +468,48 @@ class ACC with ACCProperty {
     }
 
     if (hasContents && !isSelected && borderWidth.value == 0) {
-      return Border.all(style: BorderStyle.none);
+      return 0;
+    }
+    return (borderWidth.value == 0) ? accBorder : borderWidth.value;
+  }
+
+  Color _getBorderColor(bool isSelected) {
+    if (accChild.playManager != null) {
+      if (accChild.playManager!.playList.value.isNotEmpty) {
+        hasContents = true;
+      }
     }
 
-    return Border.all(
-        width: (borderWidth.value == 0) ? 3 : borderWidth.value,
-        color: isSelected
-            ? MyColors.mainColor
-            : (borderWidth.value == 0)
-                ? MyColors.primaryColor
-                : borderColor.value);
+    if (hasContents && !isSelected && borderWidth.value == 0) {
+      return Colors.transparent;
+    }
+
+    return isSelected
+        ? MyColors.mainColor
+        : (borderWidth.value == 0)
+            ? MyColors.primaryColor
+            : borderColor.value;
   }
+
+  // Border _drawBorder(bool isSelected) {
+  //   if (accChild.playManager != null) {
+  //     if (accChild.playManager!.playList.value.isNotEmpty) {
+  //       hasContents = true;
+  //     }
+  //   }
+
+  //   if (hasContents && !isSelected && borderWidth.value == 0) {
+  //     return Border.all(style: BorderStyle.none);
+  //   }
+
+  //   return Border.all(
+  //       width: (borderWidth.value == 0) ? accBorder : borderWidth.value,
+  //       color: isSelected
+  //           ? MyColors.mainColor
+  //           : (borderWidth.value == 0)
+  //               ? MyColors.primaryColor
+  //               : borderColor.value);
+  // }
 
   void invalidateContents() {
     //logHolder.log('invalidateContents');
@@ -370,7 +521,7 @@ class ACC with ACCProperty {
     await accChild.pauseAllExceptCurrent();
   }
 
-  bool resizeWidget(double dx, double dy, Size ratio) {
+  bool resizeWidget(double dx, double dy, Size ratio, bool isSelected) {
     if (dx == 0 && dy == 0) return false;
 
     switch (cursor) {
@@ -382,21 +533,21 @@ class ACC with ACCProperty {
       case CursorType.scResize:
       case CursorType.seResize:
       case CursorType.meResize:
-        return _sizeChanged(dx, dy, ratio);
+        return _sizeChanged(dx, dy, ratio, isSelected);
       default:
         break;
     }
     return _radiusChanged(dx, dy);
   }
 
-  bool _sizeChanged(double dx, double dy, Size ratio) {
+  bool _sizeChanged(double dx, double dy, Size ratio, bool isSelected) {
     double w = containerSize.value.width;
     double h = containerSize.value.height;
     double cx = containerOffset.value.dx;
     double cy = containerOffset.value.dy;
 
-    if (!_validationCheck(true, dx, dy, cursor)) {
-      return false;
+    if (!_validationCheck(true, dx, dy, cursor, isSelected, ratio)) {
+      return true;
     }
 
     Size afterSize = Size(w, h);
@@ -437,8 +588,7 @@ class ACC with ACCProperty {
     if (afterSize.width * ratio.width > minAccSize &&
         afterSize.height * ratio.height > minAccSize) {
       _setContainerOffsetAndSize(
-          Offset(afterOffset.dx.roundToDouble(), afterOffset.dy.roundToDouble()),
-          Size(afterSize.width.roundToDouble(), afterSize.height.roundToDouble()));
+          Offset(afterOffset.dx, afterOffset.dy), Size(afterSize.width, afterSize.height));
     }
     return true;
   }
@@ -518,14 +668,15 @@ class ACC with ACCProperty {
     }
     List<Rect> rectList = ResiablePainter.getRadiusRect(widgetSize, radiusTopLeft.value,
         radiusTopRight.value, radiusBottomRight.value, radiusBottomLeft.value);
+
     int i = 0;
     for (Rect rect in rectList) {
       if (ResiablePainter.isCorner(point, Offset(rect.left + r, rect.top + r), r)) {
         cursor = radiusList[i];
         isRadiusHover[i] = true;
-        i++;
         return true;
       }
+      i++;
     }
     cursor = CursorType.move;
     return false;
@@ -582,16 +733,18 @@ class ACC with ACCProperty {
     accManagerHolder!.notify();
   }
 
-  bool _validationCheck(bool isSizeCheck, double dx, double dy, CursorType cursor) {
+  bool _validationCheck(
+      bool isSizeCheck, double dx, double dy, CursorType cursor, bool isSelected, Size ratio) {
     if (page == null) {
       return true;
     }
+
     Offset realOffset = getRealOffset();
     double realX = realOffset.dx;
     double realY = realOffset.dy;
     Size realSize = getRealSize();
-    double realHeight = realSize.height - resizeButtonSize / 2;
-    double realWidth = realSize.width - resizeButtonSize / 2;
+    double realHeight = realSize.height; //-resizeButtonSize;
+    double realWidth = realSize.width; //-resizeButtonSize;
 
     //CursorType newCursor = resetCornerPosition(rotate.value, cursor);
 
@@ -600,10 +753,14 @@ class ACC with ACCProperty {
     double pageRight = pageLeft + page!.realSize.width;
     double pageBottom = pageTop + page!.realSize.height;
 
-    double left = realX + dx;
-    double top = realY + dy;
-    double right = realX + realWidth + dx;
-    double bottom = realY + realHeight + dy;
+    double border = _getBorderThickness(isSelected);
+    double borderW = border * ratio.width;
+    double borderH = border * ratio.height;
+
+    double left = realX + dx + borderW;
+    double top = realY + dy + borderH;
+    double right = left + realWidth - (borderW * 2);
+    double bottom = top + realHeight - (borderH * 2);
 
     List<bool> sizeConditions = [
       (dx < 0 && left < pageLeft) || (dy < 0 && top < pageTop), // neResize

@@ -25,17 +25,14 @@ class MyStrings {
   static String newBook = Locale.isKr() ? "새로만들기" : 'New Book';
   static String open = Locale.isKr() ? "열기" : 'Open Book';
   static String recent = Locale.isKr() ? "최근 파일 열기" : 'Open Recently Edited';
-  static String bring =
-      Locale.isKr() ? "다른 패키지에서 불러오기" : 'Bring from Another Book';
+  static String bring = Locale.isKr() ? "다른 패키지에서 불러오기" : 'Bring from Another Book';
   static String save = Locale.isKr() ? "저장" : 'Save';
   static String saveas = Locale.isKr() ? "다른이름 저장" : 'Save as';
   static String publish = Locale.isKr() ? "발행하기" : 'Publish';
-  static String bookPropChange =
-      Locale.isKr() ? "콘텐츠북 속성 변경" : 'Contents Book Properties';
+  static String bookPropChange = Locale.isKr() ? "콘텐츠북 속성 변경" : 'Contents Book Properties';
   static String pageAdd = Locale.isKr() ? "페이지 추가" : 'Add Page';
   static String pagePropTitle = Locale.isKr() ? " [ 페이지 설정 ]" : 'Page Settings';
-  static String widgetPropTitle =
-      Locale.isKr() ? " [ 위젯 설정 ]" : 'Widget Settings';
+  static String widgetPropTitle = Locale.isKr() ? " [ 위젯 설정 ]" : 'Widget Settings';
   static String pageDesc = Locale.isKr() ? " 페이지명" : 'Page description';
   static String title = Locale.isKr() ? "제목" : 'Title';
   static String landscape = Locale.isKr() ? "가로" : 'Landscape';
@@ -52,10 +49,8 @@ class MyStrings {
   static String mainTitle = Locale.isKr() ? '컬러 선택' : 'Color Picker';
   static String opacity = Locale.isKr() ? '투명도' : 'Opacity';
   static String glass = Locale.isKr() ? '유리느낌' : 'Glass Feel';
-  static String sourceRatio =
-      Locale.isKr() ? '원본 비율대로 보기' : 'Keep source ratio';
-  static String sourceRatioToggle =
-      Locale.isKr() ? '꽉찬 화면으로 보기' : 'Follow frame ratio';
+  static String sourceRatio = Locale.isKr() ? '원본 비율대로 보기' : 'Keep source ratio';
+  static String sourceRatioToggle = Locale.isKr() ? '꽉찬 화면으로 보기' : 'Follow frame ratio';
   static String red = Locale.isKr() ? '빨강' : 'Red';
   static String green = Locale.isKr() ? '초록' : 'Green';
   static String blue = Locale.isKr() ? '파랑' : 'Blue';
@@ -81,6 +76,8 @@ class MyStrings {
   static String no = Locale.isKr() ? '아니오' : "No";
 
   static String rotate = Locale.isKr() ? '회전' : "Rotate";
+  static String contentsRotate = Locale.isKr() ? '콘텐츠만 회전' : 'Rotate Contents Only';
+
   static String anime = Locale.isKr() ? '애니메이션' : "Animation";
   static String border = Locale.isKr() ? '경계선' : "Border";
   static String radius = Locale.isKr() ? '코너 라운딩' : "Corner Roundings";
@@ -93,4 +90,13 @@ class MyStrings {
   static String customColor = Locale.isKr() ? '커스텀' : "Wheel";
   static String bwColor = Locale.isKr() ? '흑백' : "black&White";
   static String bgColorCodeInput = Locale.isKr() ? '색상 코드로 입력' : "Color Code";
+
+  static String depth = Locale.isKr() ? '깊이  ' : "Depth";
+  static String intensity = Locale.isKr() ? '강도  ' : "Intensity";
+  static String thickness = Locale.isKr() ? '두께  ' : "Thickness";
+  static String color = Locale.isKr() ? '색상  ' : "Color";
+  static String efffect = Locale.isKr() ? '효과  ' : "Effect";
+  static String boxType = Locale.isKr() ? '박스 종류' : "Box Type";
+  static String lightSourceDx = Locale.isKr() ? '조명 x' : "Light x";
+  static String lightSourceDy = Locale.isKr() ? '조명 y' : "Light y";
 }
