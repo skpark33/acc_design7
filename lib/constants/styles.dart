@@ -55,16 +55,11 @@ class MyButtonStyle {
 
 class MyTextStyles {
   /// Declare a base style for each Family
-  static const TextStyle f1 =
-      TextStyle(fontFamily: MyFonts.f1, fontWeight: FontWeight.normal);
-  static const TextStyle f2 =
-      TextStyle(fontFamily: MyFonts.f2, fontWeight: FontWeight.normal);
-  static const TextStyle f3 =
-      TextStyle(fontFamily: MyFonts.f3, fontWeight: FontWeight.normal);
-  static const TextStyle f4 =
-      TextStyle(fontFamily: MyFonts.f4, fontWeight: FontWeight.normal);
-  static const TextStyle f5 =
-      TextStyle(fontFamily: MyFonts.f5, fontWeight: FontWeight.normal);
+  static const TextStyle f1 = TextStyle(fontFamily: MyFonts.f1, fontWeight: FontWeight.normal);
+  static const TextStyle f2 = TextStyle(fontFamily: MyFonts.f2, fontWeight: FontWeight.normal);
+  static const TextStyle f3 = TextStyle(fontFamily: MyFonts.f3, fontWeight: FontWeight.normal);
+  static const TextStyle f4 = TextStyle(fontFamily: MyFonts.f4, fontWeight: FontWeight.normal);
+  static const TextStyle f5 = TextStyle(fontFamily: MyFonts.f5, fontWeight: FontWeight.normal);
 
   static TextStyle myTextStyle = f1.copyWith(color: MyColors.primaryText);
 
@@ -89,26 +84,22 @@ class MyTextStyles {
       letterSpacing: 0,
       fontWeight: FontWeight.w500);
 
-  static TextStyle get h3Eng => myTextStyle.copyWith(
-      fontFamily: MyFonts.raleway, fontSize: MyFontsSize.s48, height: 72 / 48);
-  static TextStyle get h3 =>
-      myTextStyle.copyWith(fontSize: MyFontsSize.s48, height: 72 / 48);
-  static TextStyle get h5 => myTextStyle.copyWith(
-      fontSize: MyFontsSize.s24, fontWeight: FontWeight.w500, height: 36 / 24);
+  static TextStyle get h3Eng =>
+      myTextStyle.copyWith(fontFamily: MyFonts.raleway, fontSize: MyFontsSize.s48, height: 72 / 48);
+  static TextStyle get h3 => myTextStyle.copyWith(fontSize: MyFontsSize.s48, height: 72 / 48);
+  static TextStyle get h5 =>
+      myTextStyle.copyWith(fontSize: MyFontsSize.s24, fontWeight: FontWeight.w500, height: 36 / 24);
   static TextStyle get h6 => myTextStyle.copyWith(
-      fontSize: MyFontsSize.s20,
-      fontWeight: FontWeight.w500,
-      height: 30 / 20,
-      letterSpacing: 0.15);
-  static TextStyle get subtitle1 => myTextStyle.copyWith(
-      fontSize: MyFontsSize.s16, height: 24 / 16, letterSpacing: 0.15);
-  static TextStyle get subtitle2 => myTextStyle.copyWith(
-      fontSize: MyFontsSize.s14, height: 21 / 14, letterSpacing: 0.1);
+      fontSize: MyFontsSize.s20, fontWeight: FontWeight.w500, height: 30 / 20, letterSpacing: 0.15);
+  static TextStyle get subtitle1 =>
+      myTextStyle.copyWith(fontSize: MyFontsSize.s16, height: 24 / 16, letterSpacing: 0.15);
+  static TextStyle get subtitle2 =>
+      myTextStyle.copyWith(fontSize: MyFontsSize.s14, height: 21 / 14, letterSpacing: 0.1);
 
-  static TextStyle get body1 => myTextStyle.copyWith(
-      fontSize: MyFontsSize.s16, height: 24 / 16, letterSpacing: 0.5);
-  static TextStyle get body2 => myTextStyle.copyWith(
-      fontSize: MyFontsSize.s14, height: 21 / 14, letterSpacing: 0.25);
+  static TextStyle get body1 =>
+      myTextStyle.copyWith(fontSize: MyFontsSize.s16, height: 24 / 16, letterSpacing: 0.5);
+  static TextStyle get body2 =>
+      myTextStyle.copyWith(fontSize: MyFontsSize.s14, height: 21 / 14, letterSpacing: 0.25);
   static TextStyle get deco1 => myTextStyle.copyWith(
       fontSize: MyFontsSize.s24,
       height: 24 / 16,
@@ -121,7 +112,8 @@ class MyColors {
   static const Color divide = Color(0xffD9D9D9);
   static const Color artBoardBgColor = Color(0xFFE3E3E3);
   static const Color pageBg = white;
-  static const Color accBg = Color(0xff9E9E9E);
+  //static const Color accBg = Color(0xff9E9E9E);
+  static const Color accBg = Color(0xffD9D9D9);
   static const Color buttonBorder = border;
   static const Color buttonFG = Color(0xFF722ED1);
   static const Color buttonBG = secondaryColor;
@@ -213,10 +205,7 @@ class Strokes {
 
 class Shadows {
   static List<BoxShadow> get universal => [
-        BoxShadow(
-            color: const Color(0xff333333).withOpacity(.15),
-            spreadRadius: 0,
-            blurRadius: 10),
+        BoxShadow(color: const Color(0xff333333).withOpacity(.15), spreadRadius: 0, blurRadius: 10),
       ];
   static List<BoxShadow> get small => [
         BoxShadow(
@@ -234,20 +223,15 @@ class Shadows {
 ///
 BorderSide basicBorderSide = const BorderSide(color: MyColors.secondaryColor);
 
-BoxDecoration simpleDeco(
-    double radius, double width, Color bgColor, Color borderColor) {
+BoxDecoration simpleDeco(double radius, double width, Color bgColor, Color borderColor) {
   return BoxDecoration(
     color: bgColor,
     borderRadius: BorderRadius.all(Radius.circular(radius)),
     border: Border(
-      left: BorderSide(
-          width: width, color: borderColor, style: BorderStyle.solid),
-      top: BorderSide(
-          width: width, color: borderColor, style: BorderStyle.solid),
-      right: BorderSide(
-          width: width, color: borderColor, style: BorderStyle.solid),
-      bottom: BorderSide(
-          width: width, color: borderColor, style: BorderStyle.solid),
+      left: BorderSide(width: width, color: borderColor, style: BorderStyle.solid),
+      top: BorderSide(width: width, color: borderColor, style: BorderStyle.solid),
+      right: BorderSide(width: width, color: borderColor, style: BorderStyle.solid),
+      bottom: BorderSide(width: width, color: borderColor, style: BorderStyle.solid),
     ),
   );
 }
@@ -315,8 +299,7 @@ Widget borderText(
 Widget myLikeButton() {
   return LikeButton(
       size: MySizes.buttonHeight,
-      circleColor:
-          const CircleColor(start: Color(0xff00ddff), end: Color(0xff0099cc)),
+      circleColor: const CircleColor(start: Color(0xff00ddff), end: Color(0xff0099cc)),
       bubblesColor: const BubblesColor(
         dotPrimaryColor: Color(0xff33b5e5),
         dotSecondaryColor: Color(0xff0099cc),
@@ -368,8 +351,7 @@ Widget animatedButton(String name, ImageIcon icon) {
         icon,
         Text(
           name,
-          style: TextStyle(
-              fontSize: 20.0, fontWeight: FontWeight.bold, color: Colors.black),
+          style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold, color: Colors.black),
         ),
       ]),
     ),

@@ -23,11 +23,26 @@ class CurrentData {
   bool mute = false;
 }
 
+SelectedModel? selectedModelHolder;
+
+class SelectedModel extends ChangeNotifier {
+  ContentsModel? _model;
+
+  ContentsModel? getModel() {
+    return _model;
+  }
+
+  void setModel(ContentsModel m) {
+    _model = m;
+    notifyListeners();
+  }
+}
+
 class PlayManager {
   PlayManager(this.baseWidget);
 
   BaseWidget baseWidget;
-  UndoAbleList<AbsPlayWidget> playList = UndoAbleList([]);
+  final UndoAbleList<AbsPlayWidget> _playList = UndoAbleList([]);
   int _currentIndex = -1;
   final Lock _lock = Lock();
   double _currentPlaySec = 0.0;
@@ -42,7 +57,7 @@ class PlayManager {
   final Lock _animelock = Lock();
 
   bool isValid() {
-    return currentIndex >= 0 && playList.value.isNotEmpty;
+    return currentIndex >= 0 && _playList.value.isNotEmpty;
   }
 
   Future<AbsPlayWidget> waitBuild() async {
@@ -54,8 +69,8 @@ class PlayManager {
     bool isReady = false;
     while (!isReady) {
       await _lock.synchronized(() async {
-        if (_currentIndex >= 0 && _currentIndex < playList.value.length) {
-          if (playList.value[_currentIndex].isInit()) {
+        if (_currentIndex >= 0 && _currentIndex < _playList.value.length) {
+          if (_playList.value[_currentIndex].isInit()) {
             isReady = true;
             return;
           }
@@ -63,7 +78,7 @@ class PlayManager {
         return;
       });
       if (isReady) {
-        retval = playList.value[_currentIndex];
+        retval = _playList.value[_currentIndex];
         break;
       }
       await Future.delayed(const Duration(seconds: 1));
@@ -80,7 +95,7 @@ class PlayManager {
   }
 
   void clear() {
-    playList.value.clear();
+    _playList.value.clear();
     if (_timer != null) {
       _timer!.cancel();
     }
@@ -89,9 +104,9 @@ class PlayManager {
   Future<void> resetCarousel() async {
     await _lock.synchronized(() async {
       if (currentIndex >= 0) {
-        int len = playList.value.length;
+        int len = _playList.value.length;
         for (int i = 0; i < len; i++) {
-          playList.value[i].autoStart = (i == currentIndex);
+          _playList.value[i].autoStart = (i == currentIndex);
         }
       }
     });
@@ -100,7 +115,7 @@ class PlayManager {
   Future<void> setAutoStart() async {
     await _lock.synchronized(() async {
       if (_currentIndex >= 0) {
-        playList.value[_currentIndex].autoStart = true;
+        _playList.value[_currentIndex].autoStart = true;
       }
     });
   }
@@ -116,8 +131,8 @@ class PlayManager {
   Future<ContentsType> getCurrentContentsType() async {
     ContentsType type = ContentsType.free;
     await _lock.synchronized(() async {
-      if (_currentIndex >= 0 && _currentIndex < playList.value.length) {
-        type = playList.value[_currentIndex].model!.type;
+      if (_currentIndex >= 0 && _currentIndex < _playList.value.length) {
+        type = _playList.value[_currentIndex].model!.type;
       }
     });
     return type;
@@ -126,8 +141,8 @@ class PlayManager {
   Future<PlayState> getCurrentPlayState() async {
     PlayState state = PlayState.none;
     await _lock.synchronized(() async {
-      if (_currentIndex >= 0 && _currentIndex < playList.value.length) {
-        state = playList.value[_currentIndex].model!.state;
+      if (_currentIndex >= 0 && _currentIndex < _playList.value.length) {
+        state = _playList.value[_currentIndex].model!.state;
       }
     });
     return state;
@@ -136,8 +151,8 @@ class PlayManager {
   Future<bool> getCurrentMute() async {
     bool mute = false;
     await _lock.synchronized(() async {
-      if (_currentIndex >= 0 && _currentIndex < playList.value.length) {
-        mute = playList.value[_currentIndex].model!.mute;
+      if (_currentIndex >= 0 && _currentIndex < _playList.value.length) {
+        mute = _playList.value[_currentIndex].model!.mute;
       }
     });
     return mute;
@@ -146,8 +161,8 @@ class PlayManager {
   Future<bool> getCurrentAutoStart() async {
     bool autoStart = false;
     await _lock.synchronized(() async {
-      if (_currentIndex >= 0 && _currentIndex < playList.value.length) {
-        autoStart = playList.value[_currentIndex].autoStart;
+      if (_currentIndex >= 0 && _currentIndex < _playList.value.length) {
+        autoStart = _playList.value[_currentIndex].autoStart;
       }
     });
     return autoStart;
@@ -156,8 +171,7 @@ class PlayManager {
   Future<void> _timerExpired(Timer timer) async {
     ContentsModel? currentModel;
     await _lock.synchronized(() async {
-      //if (baseWidget.isAnime()) return;
-      if (playList.value.isEmpty) return;
+      if (_playList.value.isEmpty) return;
 
       // 아무것도 돌고 있지 않다면,
       if (_currentIndex < 0) {
@@ -165,12 +179,12 @@ class PlayManager {
         return;
       }
 
-      if (false == playList.value[_currentIndex].isInit()) {
+      if (false == _playList.value[_currentIndex].isInit()) {
         logHolder.log('Not yet inited');
         return;
       }
 
-      currentModel = playList.value[_currentIndex].getModel();
+      currentModel = _playList.value[_currentIndex].getModel();
       if (currentModel!.isImage()) {
         // 아직 교체시간이 되지 않았다.
         if (_currentPlaySec < currentModel!.playTime) {
@@ -232,24 +246,24 @@ class PlayManager {
         logHolder.log('Invalid Contents Type error');
         return;
       }
-      playList.value.add(aWidget);
+      _playList.value.add(aWidget);
       if (baseWidget.isAnime()) {
         // 애니타입인 경우, 새로운 데이터를 이해시키기 위해
         baseWidget.invalidate();
       }
-      logHolder.log('push(${model.key})=${playList.value.length}');
+      logHolder.log('push(${model.key})=${_playList.value.length}');
     });
   }
 
   void onVideoAfterEvent() {
     // 타이머에서 처리하므로 여기서는 아무것도 하지 않는다.
-    // if (playList.value.isEmpty) return;
+    // if (_playList.value.isEmpty) return;
     // // 아무것도 돌고 있지 않다면,
     // if (_currentIndex < 0) {
     //   _currentIndex = 0;
     //   return;
     // }
-    // // if (false == playList.value[_currentIndex].isInit()) {
+    // // if (false == _playList.value[_currentIndex].isInit()) {
     // //   logHolder.log('Not yet inited ($_currentIndex)');
     // //   return;
     // // }
@@ -258,13 +272,13 @@ class PlayManager {
   }
 
   void onImageAfterEvent() {
-    // if (playList.value.isEmpty) return;
+    // if (_playList.value.isEmpty) return;
     // // 아무것도 돌고 있지 않다면,
     // if (_currentIndex < 0) {
     //   _currentIndex = 0;
     //   return;
     // }
-    // // if (false == playList.value[_currentIndex].isInit()) {
+    // // if (false == _playList.value[_currentIndex].isInit()) {
     // //   logHolder.log('Not yet inited');
     // //   return;
     // // }
@@ -274,10 +288,10 @@ class PlayManager {
 
   Future<void> remove(int i) async {
     await _lock.synchronized(() async {
-      if (playList.value.isNotEmpty) {
-        if (i < playList.value.length && i >= 0) {
-          playList.value[i].close();
-          playList.value.removeAt(i);
+      if (_playList.value.isNotEmpty) {
+        if (i < _playList.value.length && i >= 0) {
+          _playList.value[i].close();
+          _playList.value.removeAt(i);
         }
       }
     });
@@ -285,7 +299,7 @@ class PlayManager {
 
   Future<void> removeCurrent() async {
     await _lock.synchronized(() async {
-      if (playList.value.isNotEmpty && _currentIndex >= 0) {
+      if (_playList.value.isNotEmpty && _currentIndex >= 0) {
         remove(_currentIndex);
       }
     });
@@ -293,9 +307,9 @@ class PlayManager {
 
   Future<void> removeByModel(ContentsModel model) async {
     await _lock.synchronized(() async {
-      int len = playList.value.length;
+      int len = _playList.value.length;
       for (int i = 0; i < len; i++) {
-        ContentsModel ele = playList.value[i].getModel();
+        ContentsModel ele = _playList.value[i].getModel();
         if (model.key == ele.key) {
           remove(i);
           return;
@@ -309,16 +323,15 @@ class PlayManager {
       _shouldChaneAnimePage = true;
     });
     if (currentIndex >= 0) {
-      int len = playList.value.length;
+      int len = _playList.value.length;
       for (int i = 0; i < len; i++) {
         if (i == _currentIndex) {
-          playList.value[i].autoStart = true;
-          await playList.value[i].play();
-          logHolder.log('anime play ${playList.value[i].model!.name}',
-              level: 5);
+          _playList.value[i].autoStart = true;
+          await _playList.value[i].play();
+          logHolder.log('anime play ${_playList.value[i].model!.name}', level: 5);
         } else {
-          playList.value[i].autoStart = false;
-          await playList.value[i].pause();
+          _playList.value[i].autoStart = false;
+          await _playList.value[i].pause();
         }
       }
     }
@@ -337,9 +350,9 @@ class PlayManager {
 
   Future<void> play() async {
     await _lock.synchronized(() async {
-      if (playList.value.isNotEmpty) {
+      if (_playList.value.isNotEmpty) {
         if (_currentIndex >= 0) {
-          await playList.value[_currentIndex].play();
+          await _playList.value[_currentIndex].play();
         }
       }
     });
@@ -347,16 +360,16 @@ class PlayManager {
 
   Future<void> next({bool pause = false}) async {
     await _lock.synchronized(() async {
-      if (playList.value.isNotEmpty) {
+      if (_playList.value.isNotEmpty) {
         int prevIndex = _currentIndex;
         if (_currentIndex >= 0) {
           if (pause) {
             logHolder.log('pause($_currentIndex)');
-            await playList.value[_currentIndex].pause();
+            await _playList.value[_currentIndex].pause();
           }
         }
         _currentIndex++;
-        if (_currentIndex >= playList.value.length) {
+        if (_currentIndex >= _playList.value.length) {
           _currentIndex = 0;
         }
         //logHolder.log('play($_currentIndex)--');
@@ -367,29 +380,29 @@ class PlayManager {
           if (prevIndex != _currentIndex) {
             baseWidget.invalidate();
           } else {
-            await playList.value[_currentIndex].play();
+            await _playList.value[_currentIndex].play();
           }
         } else {
           await _changeAnimePage();
         } // skpark carousel problem
-        accManagerHolder!.resizeMenu(playList.value[_currentIndex].model!.type);
+        accManagerHolder!.resizeMenu(_playList.value[_currentIndex].model!.type);
       }
     });
   }
 
   Future<void> prev({bool pause = false}) async {
     await _lock.synchronized(() async {
-      if (playList.value.isNotEmpty) {
+      if (_playList.value.isNotEmpty) {
         int prevIndex = _currentIndex;
         if (_currentIndex >= 0) {
           if (pause) {
             logHolder.log('pause($_currentIndex)');
-            await playList.value[_currentIndex].pause();
+            await _playList.value[_currentIndex].pause();
           }
         }
         _currentIndex--;
         if (_currentIndex < 0) {
-          _currentIndex = playList.value.length - 1;
+          _currentIndex = _playList.value.length - 1;
         }
 //        logHolder.log('play($_currentIndex)');
         _currentPlaySec = 0;
@@ -399,35 +412,73 @@ class PlayManager {
           if (prevIndex != _currentIndex) {
             baseWidget.invalidate();
           } else {
-            await playList.value[_currentIndex].play();
+            await _playList.value[_currentIndex].play();
           }
         } else {
           await _changeAnimePage();
         } // skpark carousel problem
-        accManagerHolder!.resizeMenu(playList.value[_currentIndex].model!.type);
+        accManagerHolder!.resizeMenu(_playList.value[_currentIndex].model!.type);
       }
     });
   }
 
   Future<void> mute() async {
     await _lock.synchronized(() async {
-      await playList.value[_currentIndex].mute();
+      await _playList.value[_currentIndex].mute();
     });
   }
 
   Future<void> pause() async {
     await _lock.synchronized(() async {
-      await playList.value[_currentIndex].pause();
+      await _playList.value[_currentIndex].pause();
     });
   }
 
   Future<void> invalidate() async {
     await _lock.synchronized(() async {
-      if (_currentIndex >= 0 && _currentIndex < playList.value.length) {
-        if (playList.value[_currentIndex].isInit()) {
-          playList.value[_currentIndex].invalidate();
+      if (_currentIndex >= 0 && _currentIndex < _playList.value.length) {
+        if (_playList.value[_currentIndex].isInit()) {
+          _playList.value[_currentIndex].invalidate();
         }
       }
     });
+  }
+
+  Future<void> pauseAllExceptCurrent() async {
+    await _lock.synchronized(() async {
+      int len = _playList.value.length;
+      for (int i = 0; i < len; i++) {
+        if (i == currentIndex) {
+          continue;
+        }
+        await _playList.value[i].pause();
+      }
+    });
+  }
+
+  bool isValidCarousel() {
+    return _playList.value.length >= minCarouselCount;
+  }
+
+  bool isNotEmpty() {
+    return _playList.value.isNotEmpty;
+  }
+
+  bool isEmpty() {
+    return _playList.value.isEmpty;
+  }
+
+  Future<ContentsModel?> getCurrentModel() async {
+    ContentsModel? retval;
+    await _lock.synchronized(() async {
+      if (currentIndex >= 0) {
+        retval = _playList.value[currentIndex].model;
+      }
+    });
+    return retval;
+  }
+
+  List<AbsPlayWidget> getPlayWidgetList() {
+    return _playList.value;
   }
 }

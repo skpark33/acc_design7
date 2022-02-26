@@ -30,7 +30,7 @@ enum AnimeType {
 enum BoxType {
   rect,
   rountRect,
-  cicle,
+  circle,
   beveled,
   stadium,
 }
@@ -42,6 +42,7 @@ class ACCProperty {
   bool _resizable = true;
 
   UndoAble<AnimeType> _animeType = UndoAble<AnimeType>(AnimeType.none);
+  UndoAble<double> _radiusAll = UndoAble<double>(0);
   UndoAble<double> _radiusTopLeft = UndoAble<double>(0);
   UndoAble<double> _radiusTopRight = UndoAble<double>(0);
   UndoAble<double> _radiusBottomLeft = UndoAble<double>(0);
@@ -55,13 +56,14 @@ class ACCProperty {
   UndoAble<bool> _contentRotate = UndoAble<bool>(false);
   UndoAble<double> _opacity = UndoAble<double>(1);
   UndoAble<bool> _sourceRatio = UndoAble<bool>(false);
-  UndoAble<bool> _glass = UndoAble<bool>(true);
+  UndoAble<bool> _glass = UndoAble<bool>(false);
   //UndoAbleList<ContentsModel> _contents = UndoAbleList<ContentsModel>([]);
 
   bool get visible => _visible;
   bool get resizable => _resizable;
   bool get dirty => _dirty;
   UndoAble<AnimeType> get animeType => _animeType;
+  UndoAble<double> get radiusAll => _radiusAll;
   UndoAble<double> get radiusTopLeft => _radiusTopLeft;
   UndoAble<double> get radiusTopRight => _radiusTopRight;
   UndoAble<double> get radiusBottomLeft => _radiusBottomLeft;

@@ -1,8 +1,10 @@
 // ignore_for_file: prefer_final_fields
 import 'dart:math';
 //import 'package:flutter/material.dart';
+import 'package:acc_design7/player/play_manager.dart';
 import 'package:flutter_neumorphic_null_safety/flutter_neumorphic.dart';
 import 'package:acc_design7/common/util/my_utils.dart';
+import 'package:acc_design7/studio/pages/page_manager.dart';
 
 import 'resizable.dart';
 import 'acc_property.dart';
@@ -37,8 +39,9 @@ class ACC with ACCProperty {
 
   OverlayEntry? entry;
 
-  bool hasContents = false;
   bool actionStart = false;
+  bool radiusActionStart = false;
+  bool sizeActionStart = false;
   bool isHover = false;
   bool isCornered = false;
   bool isRadiused = false;
@@ -221,20 +224,24 @@ class ACC with ACCProperty {
           width: realSize.width + resizeButtonSize,
 
           child: GestureDetector(
-            onPanDown: (details) {
-              accManagerHolder!.setCurrentIndex(index);
-              logHolder.log('onPanDown:${details.localPosition}', level: 5);
-              _showACCMenu(context);
-            },
-            onTap: () {
-              logHolder.log('onTap', level: 6);
-            },
-            onTapUp: (details) {
-              logHolder.log('onTapUp', level: 6);
+            onPanDown: (details) async {
+              ContentsModel? model = await accChild.playManager!.getCurrentModel();
+              if (model != null &&
+                  !isCorners(details.localPosition, marginSize, resizeButtonSize) &&
+                  !isRadius(details.localPosition, marginSize, resizeButtonSize / 2)) {
+                logHolder.log('Its contents click!!! ${model.key}', level: 5);
+                pageManagerHolder!.setAsContents();
+                selectedModelHolder!.setModel(model);
+              } else {
+                accManagerHolder!.setCurrentIndex(index);
+                logHolder.log('onPanDown:${details.localPosition}', level: 5);
+                _showACCMenu(context);
+              }
             },
             onTapDown: (details) {
               // accManagerHolder!.setCurrentIndex(index);
-              // logHolder.log('onTapDown:${details.localPosition}', level: 5);
+              logHolder.log('onTapDown:${details.localPosition}', level: 5);
+
               // _showACCMenu(context);
             },
             onPanStart: (details) {
@@ -245,15 +252,19 @@ class ACC with ACCProperty {
                 isHover = false;
                 isCornered = true;
                 isRadiused = false;
+                sizeActionStart = true;
                 //} else if (isRadius(details.localPosition, realSize, resizeButtonSize / 4)) {
               } else if (isRadius(details.localPosition, marginSize, resizeButtonSize / 2)) {
                 isRadiused = true;
                 isHover = false;
                 isCornered = false;
+                radiusActionStart = true;
               } else {
                 isCornered = false;
                 isRadiused = false;
                 isHover = true;
+                sizeActionStart = true;
+                radiusActionStart = false;
               }
               logHolder.log('onPanStart : ${details.localPosition}');
               mychangeStack.startTrans();
@@ -274,6 +285,8 @@ class ACC with ACCProperty {
             },
             onPanEnd: (details) {
               actionStart = false;
+              sizeActionStart = false;
+              radiusActionStart = false;
               logHolder.log('onPanEnd:', level: 5);
               mychangeStack.endTrans();
               invalidateContents();
@@ -291,16 +304,12 @@ class ACC with ACCProperty {
                           isGlass: glass.value,
                           child: myNeumorphicButton(
                             boxShape: _getBoxShape(),
-                            borderColor: _getBorderColor(),
+                            borderColor: borderColor.value,
                             borderWidth: borderWidth.value,
                             intensity: intensity.value,
                             lightSource: lightSource.value,
                             depth: depth.value,
-                            bgColor: bgColor.value.withOpacity(glass.value
-                                ? 0.5
-                                : bgColor.value == Colors.transparent
-                                    ? 0
-                                    : 1),
+                            bgColor: glass.value ? bgColor.value.withOpacity(0.5) : bgColor.value,
                             onPressed: () {},
                             child: Transform.rotate(
                               angle: contentRotate.value ? rotate.value * (pi / 180) : 0,
@@ -337,8 +346,9 @@ class ACC with ACCProperty {
                 CustomPaint(
                   painter: ResiablePainter(
                       isAccSelected, //accManagerHolder!.isCurrentIndex(index),
+                      isInvisibleColorACC(),
                       bgColor.value,
-                      borderColor.value,
+                      //borderColor.value,
                       resizable,
                       realSize,
                       isCornered,
@@ -394,7 +404,7 @@ class ACC with ACCProperty {
                     },
                     child: DropZoneWidget(
                       onDroppedFile: (model) {
-                        logHolder.log('contents added ${model.key}');
+                        logHolder.log('contents added  ${model.key}');
                         accChild.playManager!.push(this, model);
                       },
                     ),
@@ -409,12 +419,14 @@ class ACC with ACCProperty {
   NeumorphicBoxShape _getBoxShape() {
     switch (boxType.value) {
       case BoxType.rountRect:
-        return NeumorphicBoxShape.roundRect(BorderRadius.only(
-            topLeft: Radius.circular(radiusTopLeft.value),
-            topRight: Radius.circular(radiusTopRight.value),
-            bottomLeft: Radius.circular(radiusBottomLeft.value),
-            bottomRight: Radius.circular(radiusBottomRight.value)));
-      case BoxType.cicle:
+        return radiusAll.value == 0
+            ? NeumorphicBoxShape.roundRect(BorderRadius.only(
+                topLeft: Radius.circular(radiusTopLeft.value),
+                topRight: Radius.circular(radiusTopRight.value),
+                bottomLeft: Radius.circular(radiusBottomLeft.value),
+                bottomRight: Radius.circular(radiusBottomRight.value)))
+            : NeumorphicBoxShape.roundRect(BorderRadius.circular(radiusAll.value));
+      case BoxType.circle:
         return const NeumorphicBoxShape.circle();
       case BoxType.rect:
         return const NeumorphicBoxShape.rect();
@@ -432,20 +444,6 @@ class ACC with ACCProperty {
     return defaultBoxShape;
   }
 
-  Color _getBorderColor() {
-    if (accChild.playManager != null) {
-      if (accChild.playManager!.playList.value.isNotEmpty) {
-        hasContents = true;
-      }
-    }
-
-    if (hasContents && borderWidth.value == 0) {
-      return Colors.transparent;
-    }
-
-    return (borderWidth.value == 0) ? MyColors.primaryColor : borderColor.value;
-  }
-
   void invalidateContents() {
     //logHolder.log('invalidateContents');
     accChild.invalidate();
@@ -453,7 +451,7 @@ class ACC with ACCProperty {
 
   Future<void> pauseAllExceptCurrent() async {
     //logHolder.log('invalidateContents');
-    await accChild.pauseAllExceptCurrent();
+    await accChild.playManager!.pauseAllExceptCurrent();
   }
 
   bool resizeWidget(double dx, double dy, Size ratio, bool isAccSelected) {
@@ -535,18 +533,22 @@ class ACC with ACCProperty {
       case CursorType.neRadius:
         direction = (dx >= 0 && dy >= 0) ? 1 : -1;
         newRadius = radiusTopLeft.value;
+        radiusAll.set(0);
         break;
       case CursorType.seRadius:
         direction = (dx >= 0 && dy <= 0) ? 1 : -1;
         newRadius = radiusBottomLeft.value;
+        radiusAll.set(0);
         break;
       case CursorType.nwRadius:
         direction = (dx <= 0 && dy >= 0) ? 1 : -1;
         newRadius = radiusTopRight.value;
+        radiusAll.set(0);
         break;
       case CursorType.swRadius:
         direction = (dx <= 0 && dy <= 0) ? 1 : -1;
         newRadius = radiusBottomRight.value;
+        radiusAll.set(0);
         break;
       default:
         return false;
@@ -554,25 +556,27 @@ class ACC with ACCProperty {
 
     //newRadius += (dx.abs() + dy.abs()) * pi * direction;
     newRadius += asin(dy.abs() / sqrt(dx * dx + dy * dy)) * (180 / pi) * direction;
-    logHolder.log("newRadius=$newRadius", level: 6);
-    if (newRadius > pi * 180) {
-      return true;
-    }
+    //logHolder.log("newRadius=$newRadius", level: 6);
+
     if (newRadius < 0) newRadius = 0;
-    if (newRadius > pi * 180) newRadius = pi * 180;
+    if (newRadius > 359) newRadius = 359;
 
     switch (cursor) {
       case CursorType.neRadius:
         radiusTopLeft.set(newRadius);
+        accManagerHolder?.notify();
         return true;
       case CursorType.seRadius:
         radiusBottomLeft.set(newRadius);
+        accManagerHolder?.notify();
         return true;
       case CursorType.nwRadius:
         radiusTopRight.set(newRadius);
+        accManagerHolder?.notify();
         return true;
       case CursorType.swRadius:
         radiusBottomRight.set(newRadius);
+        accManagerHolder?.notify();
         return true;
       default:
         break;
@@ -793,5 +797,26 @@ class ACC with ACCProperty {
       }
     }
     return fullscreen.value;
+  }
+
+  bool isInvisibleColorACC() {
+    bool hasContents = false;
+    if (accChild.playManager != null) {
+      if (accChild.playManager!.isNotEmpty()) {
+        hasContents = true;
+      }
+    }
+    if (hasContents) {
+      return false;
+    }
+    if (bgColor.value != Colors.transparent && bgColor.value != MyColors.pageBg) {
+      return false;
+    }
+    if (borderWidth.value > 0 &&
+        borderColor.value != Colors.transparent &&
+        borderColor.value != MyColors.pageBg) {
+      return false;
+    }
+    return true;
   }
 }

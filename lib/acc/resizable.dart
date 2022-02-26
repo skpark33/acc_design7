@@ -1,4 +1,6 @@
 //import 'dart:ui' as ui;
+// ignore_for_file: prefer_const_constructors
+
 import 'dart:math';
 //import 'package:acc_design7/common/util/logger.dart';
 import 'package:flutter/material.dart';
@@ -26,8 +28,9 @@ List<CursorType> radiusList = [
 
 class ResiablePainter extends CustomPainter {
   bool isAccSelected = false;
+  bool isInvisibleColorACC = false;
   Color bgColor;
-  Color borderColor;
+
   bool resizable = true;
   final Size widgetSize;
   final bool isCornered;
@@ -49,11 +52,12 @@ class ResiablePainter extends CustomPainter {
   Paint fgPaint = Paint();
   Paint selectPaint = Paint();
   Paint linePaint = Paint();
+  Paint linePaintBg = Paint();
 
   ResiablePainter(
       this.isAccSelected,
+      this.isInvisibleColorACC,
       this.bgColor,
-      this.borderColor,
       this.resizable,
       this.widgetSize,
       this.isCornered,
@@ -69,18 +73,20 @@ class ResiablePainter extends CustomPainter {
     bgPaint.color = MyColors.gray02.withOpacity(.7);
     fgPaint.color = Colors.white;
     selectPaint.color = MyColors.primaryColor;
-    linePaint.color =
-        (bgColor == Colors.white || borderColor == Colors.white) ? MyColors.gray01 : Colors.white;
+    linePaint.color = MyColors.primaryColor;
+    linePaintBg.color = MyColors.accBg;
 
     bgPaint.style = PaintingStyle.fill;
     fgPaint.style = PaintingStyle.stroke;
     selectPaint.style = PaintingStyle.fill;
     linePaint.style = PaintingStyle.stroke;
+    linePaintBg.style = PaintingStyle.stroke;
 
     bgPaint.strokeWidth = 2.0;
     fgPaint.strokeWidth = 2.0;
     selectPaint.strokeWidth = 3.0;
-    linePaint.strokeWidth = 2.0;
+    linePaint.strokeWidth = 3.0;
+    linePaintBg.strokeWidth = 1.0;
 
     // shader example !!!!
     // ..shader = LinearGradient(
@@ -105,18 +111,29 @@ class ResiablePainter extends CustomPainter {
     }
 
     //logHolder.log('paint $size', level: 6);
+    double margin = resizeButtonSize / 2 + 4;
+    Rect rect = Rect.fromLTWH(
+        margin, margin, size.width - resizeButtonSize - 8, size.height - resizeButtonSize - 8);
     if (isAccSelected) {
-      //List<Offset> centerList = getCornerCenters(size);
-      double margin = resizeButtonSize / 2 + 4;
-
       canvas.drawRect(
-          Rect.fromLTWH(margin, margin, size.width - resizeButtonSize - 8,
-              size.height - resizeButtonSize - 8),
-          linePaint);
-      // canvas.drawLine(centerList[0], centerList[2], selectPaint);
-      // canvas.drawLine(centerList[2], centerList[4], selectPaint);
-      // canvas.drawLine(centerList[4], centerList[6], selectPaint);
-      // canvas.drawLine(centerList[6], centerList[0], selectPaint);
+          Rect.fromLTRB(
+            rect.left - 3,
+            rect.top - 3,
+            rect.right + 3,
+            rect.bottom + 3,
+          ),
+          linePaintBg);
+      canvas.drawRect(rect, linePaint);
+      canvas.drawRect(
+          Rect.fromLTRB(
+            rect.left + 3,
+            rect.top + 3,
+            rect.right - 3,
+            rect.bottom - 3,
+          ),
+          linePaintBg);
+    } else if (isInvisibleColorACC) {
+      dotRect(canvas, rect, strokeWidth: 2, color: MyColors.accBg, gap: 5);
     }
 
     if (isHover || isCornered) {
@@ -130,16 +147,16 @@ class ResiablePainter extends CustomPainter {
     }
     if (isHover || isRadiused) {
       List<Offset> bigList = [
-        const Offset(1.0 * pi, 0.5 * pi),
-        const Offset(1.5 * pi, 0.5 * pi),
-        const Offset(0.0 * pi, 0.5 * pi),
-        const Offset(0.5 * pi, 0.5 * pi),
+        Offset(1.0 * pi, 0.5 * pi),
+        Offset(1.5 * pi, 0.5 * pi),
+        Offset(0.0 * pi, 0.5 * pi),
+        Offset(0.5 * pi, 0.5 * pi),
       ];
       List<Offset> smallList = [
-        const Offset(1.1 * pi, 0.3 * pi),
-        const Offset(1.6 * pi, 0.3 * pi),
-        const Offset(0.1 * pi, 0.3 * pi),
-        const Offset(0.6 * pi, 0.3 * pi),
+        Offset(1.1 * pi, 0.3 * pi),
+        Offset(1.6 * pi, 0.3 * pi),
+        Offset(0.1 * pi, 0.3 * pi),
+        Offset(0.6 * pi, 0.3 * pi),
       ];
       List<Rect> arcList =
           getRadiusRect(size, radiusTopLeft, radiusTopRight, radiusBottomRight, radiusBottomLeft);
@@ -169,6 +186,78 @@ class ResiablePainter extends CustomPainter {
       canvas.drawArc(rect, smallStart, smallEnd, true, bgPaint);
       canvas.drawArc(rect, smallStart, smallEnd, true, fgPaint);
     }
+  }
+
+  void dotRect(Canvas canvas, Rect rect,
+      {double strokeWidth = 5.0, Color color = Colors.red, double gap = 5.0}) {
+    Paint dashedPaint = Paint()
+      ..color = color
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke;
+
+    double left = rect.left;
+    double top = rect.top;
+    double right = rect.right;
+    double bottom = rect.bottom;
+
+    Path _topPath = getDashedPath(
+      a: Point(left, top),
+      b: Point(right, top),
+      gap: gap,
+    );
+
+    Path _rightPath = getDashedPath(
+      a: Point(right, top),
+      b: Point(right, bottom),
+      gap: gap,
+    );
+
+    Path _bottomPath = getDashedPath(
+      a: Point(left, bottom),
+      b: Point(right, bottom),
+      gap: gap,
+    );
+
+    Path _leftPath = getDashedPath(
+      a: Point(left, top),
+      b: Point(left + 0.001, bottom),
+      gap: gap,
+    );
+
+    canvas.drawPath(_topPath, dashedPaint);
+    canvas.drawPath(_rightPath, dashedPaint);
+    canvas.drawPath(_bottomPath, dashedPaint);
+    canvas.drawPath(_leftPath, dashedPaint);
+  }
+
+  Path getDashedPath({
+    required Point<double> a,
+    required Point<double> b,
+    required gap,
+  }) {
+    Size size = Size(b.x - a.x, b.y - a.y);
+    Path path = Path();
+    path.moveTo(a.x, a.y);
+    bool shouldDraw = true;
+    Point currentPoint = Point(a.x, a.y);
+
+    num radians = atan(size.height / size.width);
+
+    num dx = cos(radians) * gap < 0 ? cos(radians) * gap * -1 : cos(radians) * gap;
+
+    num dy = sin(radians) * gap < 0 ? sin(radians) * gap * -1 : sin(radians) * gap;
+
+    while (currentPoint.x <= b.x && currentPoint.y <= b.y) {
+      shouldDraw
+          ? path.lineTo(currentPoint.x.toDouble(), currentPoint.y.toDouble())
+          : path.moveTo(currentPoint.x.toDouble(), currentPoint.y.toDouble());
+      shouldDraw = !shouldDraw;
+      currentPoint = Point(
+        currentPoint.x + dx,
+        currentPoint.y + dy,
+      );
+    }
+    return path;
   }
 
   @override

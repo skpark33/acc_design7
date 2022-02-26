@@ -33,6 +33,7 @@ class MyStrings {
   static String pageAdd = Locale.isKr() ? "페이지 추가" : 'Add Page';
   static String pagePropTitle = Locale.isKr() ? " [ 페이지 설정 ]" : 'Page Settings';
   static String widgetPropTitle = Locale.isKr() ? " [ 위젯 설정 ]" : 'Widget Settings';
+  static String contentsPropTitle = Locale.isKr() ? " [ 콘텐츠 설정 ]" : 'Widget Settings';
   static String pageDesc = Locale.isKr() ? " 페이지명" : 'Page description';
   static String title = Locale.isKr() ? "제목" : 'Title';
   static String landscape = Locale.isKr() ? "가로" : 'Landscape';
@@ -80,7 +81,7 @@ class MyStrings {
 
   static String anime = Locale.isKr() ? '애니메이션' : "Animation";
   static String border = Locale.isKr() ? '경계선' : "Border";
-  static String radius = Locale.isKr() ? '코너 라운딩' : "Corner Roundings";
+  static String radius = Locale.isKr() ? '코너 라운드' : "Corner Roundings";
 
   static String animeCarousel = Locale.isKr() ? '카로셀' : "Carousel";
   static String animeFlip = Locale.isKr() ? '플립' : "Flip";
@@ -91,7 +92,7 @@ class MyStrings {
   static String bwColor = Locale.isKr() ? '흑백' : "black&White";
   static String bgColorCodeInput = Locale.isKr() ? '색상 코드로 입력' : "Color Code";
 
-  static String depth = Locale.isKr() ? '깊이  ' : "Depth";
+  static String depth = Locale.isKr() ? '그림자' : "Depth";
   static String intensity = Locale.isKr() ? '강도  ' : "Intensity";
   static String thickness = Locale.isKr() ? '두께  ' : "Thickness";
   static String color = Locale.isKr() ? '색상  ' : "Color";
@@ -99,4 +100,10 @@ class MyStrings {
   static String boxType = Locale.isKr() ? '박스 종류' : "Box Type";
   static String lightSourceDx = Locale.isKr() ? '조명 x' : "Light x";
   static String lightSourceDy = Locale.isKr() ? '조명 y' : "Light y";
+
+  static String radiusAll = Locale.isKr() ? '전체라운드' : "All Rounded ";
+  static String radiusTopLeft = Locale.isKr() ? '왼쪽상단  ' : "left top    ";
+  static String radiusTopRight = Locale.isKr() ? '오른쪽상단' : "right top   ";
+  static String radiusBottomLeft = Locale.isKr() ? '왼쪽하단  ' : "left bottom ";
+  static String radiusBottomRight = Locale.isKr() ? '오른쪽하단' : "right bottom";
 }

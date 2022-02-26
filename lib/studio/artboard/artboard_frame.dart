@@ -9,6 +9,8 @@ import 'package:acc_design7/acc/acc_manager.dart';
 import 'package:acc_design7/studio/pages/page_manager.dart';
 import 'package:acc_design7/model/pages.dart';
 import 'package:acc_design7/common/util/logger.dart';
+import 'package:acc_design7/common/drag_and_drop/drop_zone_widget.dart';
+
 //import 'package:acc_design7/common/cursor/cursor_manager.dart';
 import 'package:acc_design7/studio/sidebar/my_widget_menu.dart';
 
@@ -29,6 +31,7 @@ class _ArtBoardScreenState extends State<ArtBoardScreen> {
   double pageWidth = 0;
 
   Widget? menuStick;
+  Offset mousePosition = Offset.zero;
 
   //int _page = 0;
   final GlobalKey<MyMenuStickState> _widgetMenuKey = GlobalKey();
@@ -73,79 +76,83 @@ class _ArtBoardScreenState extends State<ArtBoardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(children: [
-      GestureDetector(onTapDown: (details) {
-        accManagerHolder!.setCurrentIndex(-1);
-        accManagerHolder!.setState();
-        logHolder.log('artboard onTapDown : ${details.localPosition}');
-        accManagerHolder!.unshowMenu(context);
-      }, child: Consumer<PageManager>(builder: (context, pageManager, child) {
-        onPageSelected(pageManager.getSelected());
-        return LayoutBuilder(
-            builder: (BuildContext context, BoxConstraints constraints) {
-          width = constraints.maxWidth * (7 / 8);
-          height = constraints.maxHeight * (7 / 8);
+    return Consumer<PageManager>(builder: (context, pageManager, child) {
+      onPageSelected(pageManager.getSelected());
+      return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+        width = constraints.maxWidth * (7 / 8);
+        height = constraints.maxHeight * (7 / 8);
 
-          if (pageRatio > 1) {
-            // 세로형
-            pageHeight = height;
-            pageWidth = pageHeight * (1 / pageRatio);
-            if (height > width) {
-              if (pageWidth > width) {
-                pageWidth = width;
-                pageHeight = pageWidth * pageRatio;
-              }
-            }
-          } else {
-            // 가로형
-            pageWidth = width;
-            pageHeight = pageWidth * pageRatio;
-            if (height < width) {
-              if (pageHeight > height) {
-                pageHeight = height;
-                pageWidth = pageHeight * (1 / pageRatio);
-              }
+        if (pageRatio > 1) {
+          // 세로형
+          pageHeight = height;
+          pageWidth = pageHeight * (1 / pageRatio);
+          if (height > width) {
+            if (pageWidth > width) {
+              pageWidth = width;
+              pageHeight = pageWidth * pageRatio;
             }
           }
-          logHolder.log("ab:width=$width, height=$height, ratio=$pageRatio");
-          logHolder.log("ab:pageWidth=$pageWidth, pageHeight=$pageHeight");
+        } else {
+          // 가로형
+          pageWidth = width;
+          pageHeight = pageWidth * pageRatio;
+          if (height < width) {
+            if (pageHeight > height) {
+              pageHeight = height;
+              pageWidth = pageHeight * (1 / pageRatio);
+            }
+          }
+        }
+        logHolder.log("ab:width=$width, height=$height, ratio=$pageRatio");
+        logHolder.log("ab:pageWidth=$pageWidth, pageHeight=$pageHeight");
 
-          PageModel model = pageManagerHolder!.getSelected()!;
+        PageModel model = pageManagerHolder!.getSelected()!;
 
-          return SafeArea(
+        return SafeArea(
+          child: Container(
+            padding: EdgeInsets.only(left: 20),
+            color: MyColors.bgColor,
+            alignment: Alignment.center,
             child: Container(
-              padding: EdgeInsets.only(left: 20),
-              color: MyColors.bgColor,
-              alignment: Alignment.center,
-              child: Container(
-                // real page area
-                key: model.key,
-                height: pageHeight,
-                width: pageWidth,
-                color: pageManagerHolder!.getSelected() == null
-                    ? MyColors.bgColor
-                    : pageManagerHolder!.getSelected()!.bgColor.value,
-                child: GestureDetector(
-                  onTapDown: (details) {
-                    logHolder.log("page onTapDown");
-                    if (pageManagerHolder != null) {
-                      pageManagerHolder!.setAsPage();
-                    }
+              // real page area
+              key: model.key,
+              height: pageHeight,
+              width: pageWidth,
+              color: pageManagerHolder!.getSelected() == null
+                  ? MyColors.bgColor
+                  : pageManagerHolder!.getSelected()!.bgColor.value,
+              child: GestureDetector(
+                onTapUp: (details) {
+                  logHolder.log('artboard onTapUp : ${details.localPosition}', level: 6);
+                },
+                onPanDown: (details) {
+                  if (pageManagerHolder != null) {
+                    accManagerHolder!.setCurrentIndex(-1);
+                    accManagerHolder!.setState();
+                    logHolder.log('artboard onPanDown : ${details.localPosition}', level: 6);
+                    accManagerHolder!.unshowMenu(context);
+                    pageManagerHolder!.setAsPage();
+                  }
+                },
+                child: DropZoneWidget(
+                  onDroppedFile: (model) {
+                    logHolder.log('contents added ${model.key}', level: 6);
+                    MyMenuStickState.createACC(context, model);
+                    //accChild.playManager!.push(this, model);
                   },
                 ),
               ),
             ),
+          ),
 
-            // child: SingleChildScrollView(
-            //   padding: const EdgeInsets.all(defaultPadding),
-            //   child: Container(
-            //     color: MyColors.white,
-            //   ),
-            // ),
-          );
-        });
-      })),
-      //MyMenuStick(key: _widgetMenuKey),
-    ]);
+          // child: SingleChildScrollView(
+          //   padding: const EdgeInsets.all(defaultPadding),
+          //   child: Container(
+          //     color: MyColors.white,
+          //   ),
+          // ),
+        );
+      });
+    });
   }
 }

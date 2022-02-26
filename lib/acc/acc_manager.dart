@@ -48,8 +48,7 @@ class ACCManager extends ChangeNotifier {
     return accMap[_currentAccIndex];
   }
 
-  void createACC(
-      int keyIdx, BuildContext context, BaseWidget widget, PageModel page) {
+  ACC createACC(int keyIdx, BuildContext context, BaseWidget widget, PageModel page) {
     accIndex = keyIdx;
     logHolder.log("createACC($accIndex)");
     ACC acc = ACC(page: page, accChild: widget, index: accIndex);
@@ -60,6 +59,7 @@ class ACCManager extends ChangeNotifier {
     orderMap[acc.order.value] = acc;
 
     widget.setParentAcc(acc);
+    return acc;
   }
 
   void setPrimary() {

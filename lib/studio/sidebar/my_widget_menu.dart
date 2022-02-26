@@ -1,4 +1,5 @@
 // ignore_for_file: prefer_const_constructors
+import 'package:acc_design7/model/contents.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
@@ -11,6 +12,7 @@ import 'package:acc_design7/common/util/my_text.dart';
 import 'package:acc_design7/common/util/my_utils.dart';
 import 'package:acc_design7/common/util/logger.dart';
 import 'package:acc_design7/acc/acc_manager.dart';
+import 'package:acc_design7/acc/acc.dart';
 import 'package:acc_design7/widgets/base_widget.dart';
 import 'package:acc_design7/studio/pages/page_manager.dart';
 
@@ -56,6 +58,17 @@ class MyMenuStickState extends State<MyMenuStick> {
     MenuModel(Icons.brush, MyStrings.brush, []),
   ];
 
+  static void createACC(BuildContext context, ContentsModel model) {
+    const uuid = Uuid();
+    GlobalObjectKey<BaseWidgetState> baseWidgetKey = GlobalObjectKey<BaseWidgetState>(uuid.v1());
+    ACC acc = accManagerHolder!.createACC(_keyIdx, context,
+        BaseWidget(baseWidgetKey: baseWidgetKey), pageManagerHolder!.getSelected()!);
+    _keyIdx++;
+    if (acc.accChild.playManager != null) {
+      acc.accChild.playManager!.push(acc, model);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -94,8 +107,7 @@ class MyMenuStickState extends State<MyMenuStick> {
                       ? narrowWidth + subWidth
                       : narrowWidth,
               child: row(),
-              color: Colors.white
-                  .withOpacity(0.5) //MyColors.compexDrawerCanvasColor,
+              color: Colors.white.withOpacity(0.5) //MyColors.compexDrawerCanvasColor,
               ),
           //),
         ),
@@ -133,8 +145,7 @@ class MyMenuStickState extends State<MyMenuStick> {
                       height: 45,
                       onPressed: () {
                         setState(() {
-                          isSubMenuOpen =
-                              menuModelList[index].submenus.isNotEmpty;
+                          isSubMenuOpen = menuModelList[index].submenus.isNotEmpty;
                           selectedIndex = index;
                         });
                         menuModel.onPressed!.call();
@@ -206,8 +217,7 @@ class MyMenuStickState extends State<MyMenuStick> {
                         height: 45,
                         onPressed: () {
                           setState(() {
-                            isSubMenuOpen =
-                                menuModelList[index].submenus.isNotEmpty;
+                            isSubMenuOpen = menuModelList[index].submenus.isNotEmpty;
                             selectedIndex = index;
                           });
                           menuModelList[index].onPressed!.call();
@@ -259,8 +269,7 @@ class MyMenuStickState extends State<MyMenuStick> {
 
                   bool selected = selectedIndex == index;
                   bool isValidSubMenu = selected && cmd.submenus.isNotEmpty;
-                  return subMenuWidget(
-                      [cmd.title, ...cmd.submenus], isValidSubMenu);
+                  return subMenuWidget([cmd.title, ...cmd.submenus], isValidSubMenu);
                 }),
           ),
         ],
@@ -289,9 +298,7 @@ class MyMenuStickState extends State<MyMenuStick> {
       height: isValidSubMenu ? submenus.length.toDouble() * 37.5 : 45,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-          color: isValidSubMenu
-              ? MyColors.complexDrawerBlueGrey
-              : Colors.transparent,
+          color: isValidSubMenu ? MyColors.complexDrawerBlueGrey : Colors.transparent,
           borderRadius: const BorderRadius.only(
             topRight: Radius.circular(8),
             bottomRight: Radius.circular(8),
@@ -333,12 +340,8 @@ class MyMenuStickState extends State<MyMenuStick> {
   void framePressed() {
     logHolder.log('frame Pressed');
     const uuid = Uuid();
-    GlobalObjectKey<BaseWidgetState> baseWidgetKey =
-        GlobalObjectKey<BaseWidgetState>(uuid.v1());
-    accManagerHolder!.createACC(
-        _keyIdx,
-        context,
-        BaseWidget(baseWidgetKey: baseWidgetKey),
+    GlobalObjectKey<BaseWidgetState> baseWidgetKey = GlobalObjectKey<BaseWidgetState>(uuid.v1());
+    accManagerHolder!.createACC(_keyIdx, context, BaseWidget(baseWidgetKey: baseWidgetKey),
         pageManagerHolder!.getSelected()!);
     _keyIdx++;
   }

@@ -13,8 +13,7 @@ Widget colorRow(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
       ...[
-        for (int i = 0; i < currentUser.maxBgColor; i++)
-          currentUser.bgColorList1[i],
+        for (int i = 0; i < currentUser.maxBgColor; i++) currentUser.bgColorList1[i],
       ].map((bg) {
         //TinyColor tinyColor = TinyColor(bg);
         return MyColorIndicator(
@@ -28,8 +27,7 @@ Widget colorRow(
           height: 25,
           borderRadius: 0,
           hasBorder: true,
-          borderColor:
-              bg == Color(0x00000000) ? Colors.black : MyColors.primaryColor,
+          borderColor: bg == Color(0x00000000) ? Colors.black : MyColors.primaryColor,
           elevation: 5,
         );
         // CircleAvatar(

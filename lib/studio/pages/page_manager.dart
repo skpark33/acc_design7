@@ -26,6 +26,10 @@ class PageManager extends ChangeNotifier {
   SortedMap<int, PageModel> orderMap = SortedMap<int, PageModel>();
 
   PropertyType _propertyType = PropertyType.page;
+  PropertyType get propertyType => _propertyType;
+  void setPropertyType(PropertyType p) {
+    _propertyType = p;
+  }
 
   void setAsAcc() {
     _propertyType = PropertyType.acc;

@@ -5,6 +5,7 @@ import 'package:acc_design7/model/pages.dart';
 import 'package:acc_design7/studio/pages/page_manager.dart';
 import 'package:acc_design7/studio/properties/page_property.dart';
 import 'package:acc_design7/studio/properties/widget_property.dart';
+import 'package:acc_design7/studio/properties/contents_property.dart';
 import 'package:acc_design7/studio/properties/properties_frame.dart';
 import 'package:acc_design7/common/util/logger.dart';
 
@@ -48,36 +49,6 @@ class PropertySelector extends StatefulWidget {
 }
 
 class PropertySelectorState extends State<PropertySelector> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container();
-  }
-}
-
-class ContentsProperty extends PropertySelector {
-  ContentsProperty(
-    Key? key,
-    PageModel? pselectedPage,
-    bool pisNarrow,
-    bool pisLandscape,
-    PropertiesFrameState parent,
-  ) : super(
-          key: key,
-          selectedPage: pselectedPage,
-          isNarrow: pisNarrow,
-          isLandscape: pisLandscape,
-          parent: parent,
-        );
-  @override
-  State<ContentsProperty> createState() => ContentsPropertyState();
-}
-
-class ContentsPropertyState extends State<ContentsProperty> {
   @override
   void initState() {
     super.initState();

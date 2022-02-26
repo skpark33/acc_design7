@@ -17,13 +17,13 @@ import '../studio/artboard/artboard_frame.dart';
 import '../studio/pages/pages_frame.dart';
 import '../studio/pages/page_manager.dart';
 import '../studio/properties/properties_frame.dart';
+import 'package:acc_design7/player/play_manager.dart';
 import '../constants/constants.dart';
 //import '../common/cursor/cursor_manager.dart';
 //import 'side_menu.dart';
 
 class StudioMainScreen extends StatefulWidget {
-  const StudioMainScreen(
-      {Key? key, required this.contentsBoookName, required this.user})
+  const StudioMainScreen({Key? key, required this.contentsBoookName, required this.user})
       : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
@@ -81,13 +81,13 @@ class _MainScreenState extends State<StudioMainScreen> {
               return pageManagerHolder!;
             },
           ),
-
-          // ChangeNotifierProvider<CursorManager>(
-          //   create: (context) {
-          //     cursorManagerHolder = CursorManager();
-          //     return cursorManagerHolder!;
-          //   },
-          // ),
+          ChangeNotifierProvider<SelectedModel>(
+            create: (context) {
+              logHolder.log('ChangeNotifierProvider<SelectedModel>', level: 5);
+              selectedModelHolder = SelectedModel();
+              return selectedModelHolder!;
+            },
+          ),
         ],
         child: RawKeyboardListener(
             autofocus: true,
@@ -97,11 +97,10 @@ class _MainScreenState extends State<StudioMainScreen> {
               //key: context.read<MenuController>().scaffoldKey,
               appBar: buildAppBar(),
               //drawer: const SideMenu(),
-              body: LayoutBuilder(
-                  builder: (BuildContext context, BoxConstraints constraints) {
+              body: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
                 bool isNarrow = (constraints.maxWidth <= minWindowWidth);
-                bool isShort = (constraints.maxHeight <=
-                    (isNarrow ? minWindowHeight : minWindowHeight / 2));
+                bool isShort =
+                    (constraints.maxHeight <= (isNarrow ? minWindowHeight : minWindowHeight / 2));
 
                 return SafeArea(
                   child: Column(children: [
@@ -112,9 +111,7 @@ class _MainScreenState extends State<StudioMainScreen> {
                         SideBar(),
                       ]),
                     ),
-                    logHolder.showLog
-                        ? DebugBar(key: logHolder.veiwerKey)
-                        : SizedBox(height: 1),
+                    logHolder.showLog ? DebugBar(key: logHolder.veiwerKey) : SizedBox(height: 1),
                   ]),
                 );
               }),
@@ -270,8 +267,7 @@ class _MainScreenState extends State<StudioMainScreen> {
       ElevatedButton(
           style: ButtonStyle(
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              backgroundColor:
-                  MaterialStateProperty.all(MyColors.primaryColor)),
+              backgroundColor: MaterialStateProperty.all(MyColors.primaryColor)),
           onPressed: () {},
           child: Row(mainAxisSize: MainAxisSize.min, children: const [
             ImageIcon(
@@ -287,8 +283,7 @@ class _MainScreenState extends State<StudioMainScreen> {
             Text('publish'),
           ])),
       ElevatedButton(
-        style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all(MyColors.primaryColor)),
+        style: ButtonStyle(backgroundColor: MaterialStateProperty.all(MyColors.primaryColor)),
         onPressed: () {},
         child: const Icon(Icons.settings),
       ),

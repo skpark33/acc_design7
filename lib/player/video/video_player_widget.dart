@@ -19,12 +19,7 @@ class VideoPlayerWidget extends AbsPlayWidget {
     required ContentsModel model,
     required ACC acc,
     bool autoStart = true,
-  }) : super(
-            key: key,
-            onAfterEvent: onAfterEvent,
-            acc: acc,
-            model: model,
-            autoStart: autoStart) {
+  }) : super(key: key, onAfterEvent: onAfterEvent, acc: acc, model: model, autoStart: autoStart) {
     globalKey = key;
   }
 
@@ -40,10 +35,8 @@ class VideoPlayerWidget extends AbsPlayWidget {
       ..initialize().then((_) {
         logHolder.log('initialize complete(${model!.name})');
         //setState(() {});
-        logHolder.log(
-            'initialize complete(${wcontroller!.value.duration.inMilliseconds})');
+        logHolder.log('initialize complete(${wcontroller!.value.duration.inMilliseconds})');
 
-        model!.setState(PlayState.init);
         model!.playTime = wcontroller!.value.duration.inMilliseconds;
         wcontroller!.setLooping(false);
         wcontroller!.onAfterVideoEvent = (event) {
@@ -76,14 +69,20 @@ class VideoPlayerWidget extends AbsPlayWidget {
 
   @override
   Future<void> play() async {
-    logHolder.log('play  ${model!.name}');
+    // while (model!.state == PlayState.disposed) {
+    //   await Future.delayed(const Duration(milliseconds: 100));
+    // }
+    logHolder.log('play  ${model!.name}', level: 6);
     model!.setState(PlayState.start);
     await wcontroller!.play();
   }
 
   @override
   Future<void> pause() async {
-    logHolder.log('pause');
+    // while (model!.state == PlayState.disposed) {
+    //   await Future.delayed(const Duration(milliseconds: 100));
+    // }
+    logHolder.log('pause', level: 6);
     model!.setState(PlayState.pause);
     await wcontroller!.pause();
   }
@@ -134,7 +133,8 @@ class VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     super.initState();
 
     WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-      logHolder.log('initState video');
+      logHolder.log('initState video', level: 6);
+      widget.model!.setState(PlayState.init);
       //   if (autoStart) {
       //     logHolder.log('initState play');
       //     widget.play();
@@ -143,10 +143,10 @@ class VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
   @override
   void dispose() {
-    logHolder.log("video widget dispose,${widget.model!.name}");
+    logHolder.log("video widget dispose,${widget.model!.name}", level: 6);
     //widget.wcontroller!.dispose();
-    widget.model!.setState(PlayState.disposed);
     super.dispose();
+    widget.model!.setState(PlayState.disposed);
   }
 
   Future<bool> waitInit() async {
@@ -174,10 +174,6 @@ class VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     double outerHeight = realSize.height;
 
     if (!widget.acc.sourceRatio.value) {
-      logHolder.log(
-          'before ${outerWidth.round()},${outerHeight.round()}, aspectRatio=${videoRatio.toStringAsFixed(2)}',
-          level: 6);
-
       if (videoRatio >= 1.0) {
         outerWidth = videoRatio * outerWidth;
         outerHeight = outerWidth * (1.0 / videoRatio);
@@ -185,10 +181,6 @@ class VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         outerHeight = (1.0 / videoRatio) * outerHeight;
         outerWidth = videoRatio * outerHeight;
       }
-      double areaRatio = outerWidth / outerHeight;
-      logHolder.log(
-          'after ${outerWidth.round()},${outerHeight.round()}, ${areaRatio.toStringAsFixed(2)}, aspectRatio=${videoRatio.toStringAsFixed(2)}',
-          level: 6);
     }
     return FutureBuilder(
         future: waitInit(),
@@ -197,8 +189,7 @@ class VideoPlayerWidgetState extends State<VideoPlayerWidget> {
               borderRadius: BorderRadius.only(
                 topRight: Radius.circular(widget.acc.radiusTopRight.value),
                 topLeft: Radius.circular(widget.acc.radiusTopLeft.value),
-                bottomRight:
-                    Radius.circular(widget.acc.radiusBottomRight.value),
+                bottomRight: Radius.circular(widget.acc.radiusBottomRight.value),
                 bottomLeft: Radius.circular(widget.acc.radiusBottomLeft.value),
               ),
               child: //// widget.wcontroller!.value.isInitialized ?
@@ -210,8 +201,7 @@ class VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                       //height: realSize.height,
                       width: outerWidth,
                       height: outerHeight,
-                      child: VideoPlayer(widget.wcontroller!,
-                          key: ValueKey(widget.model!.url)),
+                      child: VideoPlayer(widget.wcontroller!, key: ValueKey(widget.model!.url)),
                       //child: VideoPlayer(controller: widget.wcontroller!),
                     )),
               )

@@ -42,13 +42,15 @@ Widget myNeumorphicButton({
       child: child);
 }
 
-Widget _doubleSlider(
-    {required String title,
-    required double value,
-    required double min,
-    required double max,
-    String? valueString,
-    required void Function(double) onChanged}) {
+Widget _doubleSlider({
+  required String title,
+  required double value,
+  required double min,
+  required double max,
+  String? valueString,
+  required void Function(double) onChanged,
+  required void Function(double) onChangeStart,
+}) {
   return Row(
     children: <Widget>[
       Text(
@@ -60,6 +62,7 @@ Widget _doubleSlider(
           min: min,
           max: max,
           value: value,
+          onChangeStart: onChangeStart,
           onChanged: (val) {
             onChanged.call(val);
             // setState(() {
@@ -67,7 +70,7 @@ Widget _doubleSlider(
             // });
           },
           activeColor: MyColors.mainColor,
-          thumbColor: MyColors.accBg,
+          thumbColor: MyColors.white,
           inactiveColor: MyColors.primaryColor,
         ),
       ),
@@ -79,21 +82,29 @@ Widget _doubleSlider(
   );
 }
 
-Widget depthSelector({required double depth, required void Function(double) onChanged}) {
+Widget depthSelector(
+    {required double depth,
+    required void Function(double) onChanged,
+    required void Function(double) onChangeStart}) {
   return _doubleSlider(
     title: MyStrings.depth,
     value: depth,
     onChanged: onChanged,
+    onChangeStart: onChangeStart,
     min: Neumorphic.MIN_DEPTH,
     max: Neumorphic.MAX_DEPTH,
   );
 }
 
-Widget intensitySelector({required double intensity, required void Function(double) onChanged}) {
+Widget intensitySelector(
+    {required double intensity,
+    required void Function(double) onChanged,
+    required void Function(double) onChangeStart}) {
   return _doubleSlider(
     title: MyStrings.intensity,
     value: intensity,
     onChanged: onChanged,
+    onChangeStart: onChangeStart,
     min: Neumorphic.MIN_INTENSITY,
     max: Neumorphic.MAX_INTENSITY,
     valueString: ((intensity * 100).floor() / 100).toString(),
@@ -101,22 +112,28 @@ Widget intensitySelector({required double intensity, required void Function(doub
 }
 
 Widget borderWidthSelector(
-    {required double borderWidth, required void Function(double) onChanged}) {
+    {required double borderWidth,
+    required void Function(double) onChanged,
+    required void Function(double) onChangeStart}) {
   return _doubleSlider(
     title: MyStrings.thickness,
     value: borderWidth,
     onChanged: onChanged,
+    onChangeStart: onChangeStart,
     min: 0,
     max: 10,
   );
 }
 
 Widget lightSourceDxWidgets(
-    {required double lightSourceDx, required void Function(double) onChanged}) {
+    {required double lightSourceDx,
+    required void Function(double) onChanged,
+    required void Function(double) onChangeStart}) {
   return _doubleSlider(
     title: MyStrings.lightSourceDx,
     value: lightSourceDx,
     onChanged: onChanged,
+    onChangeStart: onChangeStart,
     min: -1,
     max: 1,
     valueString: ((lightSourceDx * 100).floor() / 100).toString(),
@@ -124,11 +141,14 @@ Widget lightSourceDxWidgets(
 }
 
 Widget lightSourceDyWidgets(
-    {required double lightSourceDy, required void Function(double) onChanged}) {
+    {required double lightSourceDy,
+    required void Function(double) onChanged,
+    required void Function(double) onChangeStart}) {
   return _doubleSlider(
     title: MyStrings.lightSourceDy,
     value: lightSourceDy,
     onChanged: onChanged,
+    onChangeStart: onChangeStart,
     min: -1,
     max: 1,
     valueString: ((lightSourceDy * 100).floor() / 100).toString(),
@@ -155,12 +175,27 @@ MyColorIndicator colorPickerIcon(Color color, void Function() onSelect) {
     color: color == Colors.transparent ? const Color(0xFFFFFFFF) : color,
     onSelect: onSelect,
     isSelected: true,
-    width: 30,
-    height: 30,
+    width: 24,
+    height: 24,
     borderRadius: 0,
     hasBorder: true,
     borderColor: color == Colors.transparent ? Colors.black : MyColors.primaryColor,
     elevation: 5,
-    selectedIcon: color == Colors.transparent ? Icons.cancel : Icons.rectangle,
+    selectedIcon: color == Colors.transparent ? Icons.clear_outlined : Icons.rectangle,
+  );
+}
+
+Widget radiusWidget(
+    {required double radius,
+    required String title,
+    required void Function(double) onChanged,
+    required void Function(double) onChangeStart}) {
+  return _doubleSlider(
+    title: title,
+    value: radius,
+    onChanged: onChanged,
+    onChangeStart: onChangeStart,
+    min: 0,
+    max: 360,
   );
 }
