@@ -106,4 +106,10 @@ class MyStrings {
   static String radiusTopRight = Locale.isKr() ? '오른쪽상단' : "right top   ";
   static String radiusBottomLeft = Locale.isKr() ? '왼쪽하단  ' : "left bottom ";
   static String radiusBottomRight = Locale.isKr() ? '오른쪽하단' : "right bottom";
+
+  static String seconds = Locale.isKr() ? '초' : "seconds";
+  static String minutes = Locale.isKr() ? '분' : "minutes";
+  static String hours = Locale.isKr() ? '시' : "hours  ";
+  static String forever = Locale.isKr() ? '영구히' : "forever";
+  static String playTime = Locale.isKr() ? '플레이 타임 설정' : "playTime";
 }

@@ -34,6 +34,67 @@ double percentToRadius(double radiusPercent, Size realSize) {
   return (radiusPercent * maxR) / 100;
 }
 
+Divider divider() {
+  return const Divider(
+    height: 5,
+    thickness: 1,
+    color: MyColors.divide,
+    indent: 14,
+    endIndent: 14,
+  );
+}
+
+Divider smallDivider(
+    {double height = 4, thickness = 1, double indent = 24, double endIndent = 24}) {
+  return Divider(
+    height: height,
+    thickness: thickness,
+    color: MyColors.divide,
+    indent: indent,
+    endIndent: endIndent,
+  );
+}
+
+Widget doubleSlider({
+  required String title,
+  required double value,
+  required double min,
+  required double max,
+  String? valueString,
+  required void Function(double) onChanged,
+  required void Function(double) onChangeStart,
+}) {
+  return Row(
+    children: <Widget>[
+      Text(
+        title,
+        style: MyTextStyles.subtitle2,
+      ),
+      Expanded(
+        child: Slider(
+          min: min,
+          max: max,
+          value: value,
+          onChangeStart: onChangeStart,
+          onChanged: (val) {
+            onChanged.call(val);
+            // setState(() {
+            //   borderWidth = value;
+            // });
+          },
+          activeColor: MyColors.mainColor,
+          thumbColor: MyColors.white,
+          inactiveColor: MyColors.primaryColor,
+        ),
+      ),
+      SizedBox(
+        width: 60,
+        child: Text(valueString ?? value.floor().toString()),
+      ),
+    ],
+  );
+}
+
 Widget frostedEdged({required Widget child, double radius = 15.0, double sigma = 10.0}) {
   return ClipRRect(
       borderRadius: BorderRadius.circular(radius),

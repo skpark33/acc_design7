@@ -232,11 +232,12 @@ class ACC with ACCProperty {
                 logHolder.log('Its contents click!!! ${model.key}', level: 5);
                 pageManagerHolder!.setAsContents();
                 selectedModelHolder!.setModel(model);
+                accManagerHolder!.setCurrentIndex(index, setAsAcc: false);
               } else {
                 accManagerHolder!.setCurrentIndex(index);
                 logHolder.log('onPanDown:${details.localPosition}', level: 5);
-                _showACCMenu(context);
               }
+              _showACCMenu(context);
             },
             onTapDown: (details) {
               // accManagerHolder!.setCurrentIndex(index);
@@ -778,12 +779,12 @@ class ACC with ACCProperty {
         default:
           break;
       }
-      if (realWidth + dx < minAccSize) {
-        return false;
-      }
-      if (realHeight + dy < minAccSize) {
-        return false;
-      }
+      // if (realWidth + dx < minAccSize) {
+      //   return false;
+      // }
+      // if (realHeight + dy < minAccSize) {
+      //   return false;
+      // }
     } else {
       List<bool> offsetConditions = [
         (dx < 0 && left < pageLeft),
@@ -821,8 +822,8 @@ class ACC with ACCProperty {
 
   bool isFullscreen() {
     if (page != null) {
-      if (containerSize.value.width.round() == page!.width.value &&
-          containerSize.value.height.round() == page!.height.value) {
+      if (containerSize.value.width.floor() == page!.width.value &&
+          containerSize.value.height.floor() == page!.height.value) {
         fullscreen.set(true);
       } else {
         fullscreen.set(false);

@@ -13,6 +13,7 @@ Widget myTextField(String value,
     String hintText = '',
     int limit = 128,
     int maxValue = 360,
+    int minValue = 0,
     TextInputType keyboardType = TextInputType.none,
     TextStyle? style,
     bool hasDeleteButton = true,
@@ -79,8 +80,8 @@ Widget myTextField(String value,
                   onPressed: () {
                     int newVal = int.parse(controller.text);
                     newVal--;
-                    if (maxValue > 0) {
-                      newVal = newVal % maxValue;
+                    if (minValue < 0) {
+                      newVal = minValue;
                     }
                     controller.text = newVal.toString();
                     if (onEditingComplete != null) {
@@ -121,16 +122,20 @@ Widget myNumberTextField({
   hasBorder = true,
   enabled = true,
   textAlign = TextAlign.end,
+  maxValue = 360,
+  minValue = 0,
   TextAlignVertical textAlignVertical = TextAlignVertical.top,
 }) {
   //logHolder.log('_myNumberTextField($defaultValue)');
-  int digit = defaultValue.round();
+  int digit = defaultValue.floor();
   String val = digit.toString();
   return Container(
     padding: EdgeInsets.zero,
     width: width,
     height: 30,
     child: myTextField(val,
+        maxValue: maxValue,
+        minValue: minValue,
         enabled: enabled,
         hasBorder: hasBorder,
         keyboardType: TextInputType.number,

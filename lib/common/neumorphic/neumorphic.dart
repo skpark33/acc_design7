@@ -2,6 +2,7 @@ import 'package:flutter_neumorphic_null_safety/flutter_neumorphic.dart';
 import 'package:acc_design7/constants/strings.dart';
 import 'package:acc_design7/constants/styles.dart';
 import 'package:acc_design7/common/colorPicker/my_color_indicator.dart';
+import 'package:acc_design7/common/util/my_utils.dart';
 
 const NeumorphicBoxShape defaultBoxShape = NeumorphicBoxShape.rect();
 
@@ -42,51 +43,11 @@ Widget myNeumorphicButton({
       child: child);
 }
 
-Widget _doubleSlider({
-  required String title,
-  required double value,
-  required double min,
-  required double max,
-  String? valueString,
-  required void Function(double) onChanged,
-  required void Function(double) onChangeStart,
-}) {
-  return Row(
-    children: <Widget>[
-      Text(
-        title,
-        style: MyTextStyles.subtitle2,
-      ),
-      Expanded(
-        child: Slider(
-          min: min,
-          max: max,
-          value: value,
-          onChangeStart: onChangeStart,
-          onChanged: (val) {
-            onChanged.call(val);
-            // setState(() {
-            //   borderWidth = value;
-            // });
-          },
-          activeColor: MyColors.mainColor,
-          thumbColor: MyColors.white,
-          inactiveColor: MyColors.primaryColor,
-        ),
-      ),
-      SizedBox(
-        width: 60,
-        child: Text(valueString ?? value.floor().toString()),
-      ),
-    ],
-  );
-}
-
 Widget depthSelector(
     {required double depth,
     required void Function(double) onChanged,
     required void Function(double) onChangeStart}) {
-  return _doubleSlider(
+  return doubleSlider(
     title: MyStrings.depth,
     value: depth,
     onChanged: onChanged,
@@ -100,7 +61,7 @@ Widget intensitySelector(
     {required double intensity,
     required void Function(double) onChanged,
     required void Function(double) onChangeStart}) {
-  return _doubleSlider(
+  return doubleSlider(
     title: MyStrings.intensity,
     value: intensity,
     onChanged: onChanged,
@@ -115,7 +76,7 @@ Widget borderWidthSelector(
     {required double borderWidth,
     required void Function(double) onChanged,
     required void Function(double) onChangeStart}) {
-  return _doubleSlider(
+  return doubleSlider(
     title: MyStrings.thickness,
     value: borderWidth,
     onChanged: onChanged,
@@ -129,7 +90,7 @@ Widget lightSourceDxWidgets(
     {required double lightSourceDx,
     required void Function(double) onChanged,
     required void Function(double) onChangeStart}) {
-  return _doubleSlider(
+  return doubleSlider(
     title: MyStrings.lightSourceDx,
     value: lightSourceDx,
     onChanged: onChanged,
@@ -144,7 +105,7 @@ Widget lightSourceDyWidgets(
     {required double lightSourceDy,
     required void Function(double) onChanged,
     required void Function(double) onChangeStart}) {
-  return _doubleSlider(
+  return doubleSlider(
     title: MyStrings.lightSourceDy,
     value: lightSourceDy,
     onChanged: onChanged,
@@ -190,7 +151,7 @@ Widget radiusWidget(
     required String title,
     required void Function(double) onChanged,
     required void Function(double) onChangeStart}) {
-  return _doubleSlider(
+  return doubleSlider(
     title: title,
     value: radius,
     onChanged: onChanged,

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 //import 'package:carousel_slider/carousel_slider.dart';
 
 import 'package:acc_design7/common/util/logger.dart';
+import 'package:acc_design7/constants/constants.dart';
 import 'package:acc_design7/common/util/my_utils.dart';
 import 'package:acc_design7/player/play_manager.dart';
 //import 'package:acc_design7/model/contents.dart';
@@ -121,7 +122,7 @@ class BaseWidgetState extends State<BaseWidget> {
                     widget.playManager!.getPlayWidgetList(),
                     (index, reason) {}, // onPageChanged
                     widget.playManager!.animePageChanger,
-                    1 << 63, // 가장 큰 수를 넣는다.
+                    maxInteger, // 가장 큰 수를 넣는다.
                     widget.playManager!.currentIndex); // 0은 첫번째 index(즉 0번째)가 가운데로 들어오라는 뜻이다.
 
               case AnimeType.flip:

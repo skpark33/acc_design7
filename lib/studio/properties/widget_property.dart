@@ -226,11 +226,11 @@ class WidgetPropertyState extends State<WidgetProperty> with SingleTickerProvide
           controller: _scrollController,
           children: [
             _titleRow(25, 15, 12, 10),
-            _divider(),
+            divider(),
             _primaryRow(acc, 25, 5, 12, 5),
-            _divider(),
+            divider(),
             _sourceRatioRow(acc, 25, 5, 12, 5),
-            _divider(),
+            divider(),
             sizePosModel.expandArea(
                 // open: acc.sizeActionStart,
                 // closeOthers: () {
@@ -248,7 +248,7 @@ class WidgetPropertyState extends State<WidgetProperty> with SingleTickerProvide
                   '${acc.containerOffset.value.dx.roundToDouble()},${acc.containerOffset.value.dy.roundToDouble()},${acc.containerSize.value.width.roundToDouble()} x ${acc.containerSize.value.height.roundToDouble()}',
                   style: MyTextStyles.subtitle1,
                 )),
-            _divider(),
+            divider(),
             bgColorModel.expandArea(
                 child: _bgColorRow(context, acc),
                 setStateFunction: () {
@@ -276,7 +276,7 @@ class WidgetPropertyState extends State<WidgetProperty> with SingleTickerProvide
                     ),
                   ],
                 )),
-            _divider(),
+            divider(),
             opacityModel.expandArea(
                 child: _opacityRow(context, acc),
                 titleLineWidget: Row(children: [
@@ -291,7 +291,7 @@ class WidgetPropertyState extends State<WidgetProperty> with SingleTickerProvide
                     opacityModel.toggleSelected();
                   });
                 }),
-            _divider(),
+            divider(),
             rotateModel.expandArea(
                 child: _rotateRow(context, acc),
                 titleLineWidget: Text(
@@ -304,7 +304,7 @@ class WidgetPropertyState extends State<WidgetProperty> with SingleTickerProvide
                     rotateModel.toggleSelected();
                   });
                 }),
-            _divider(),
+            divider(),
             animeModel.expandArea(
                 child: _animeRow(context, acc),
                 titleLineWidget: acc.animeType.value != AnimeType.none
@@ -343,7 +343,7 @@ class WidgetPropertyState extends State<WidgetProperty> with SingleTickerProvide
                     animeModel.toggleSelected();
                   });
                 }),
-            _divider(),
+            divider(),
             borderModel.expandArea(
                 child: _borderRow(context, acc),
                 titleLineWidget: colorPickerIcon(acc.borderColor.value, () {
@@ -367,7 +367,7 @@ class WidgetPropertyState extends State<WidgetProperty> with SingleTickerProvide
                     accManagerHolder!.unshowMenu(context); // border 를 잘 보기 위해 unshow 한다.
                   });
                 }),
-            _divider(),
+            divider(),
             cornerModel.expandArea(
                 //open: acc.radiusActionStart,
                 // closeOthers: () {
@@ -387,26 +387,6 @@ class WidgetPropertyState extends State<WidgetProperty> with SingleTickerProvide
           ],
         );
       }),
-    );
-  }
-
-  Divider _divider() {
-    return Divider(
-      height: 5,
-      thickness: 1,
-      color: MyColors.divide,
-      indent: 14,
-      endIndent: 14,
-    );
-  }
-
-  Divider _smallDivider() {
-    return Divider(
-      height: 4,
-      thickness: 1,
-      color: MyColors.divide,
-      indent: 24,
-      endIndent: 24,
     );
   }
 
@@ -710,7 +690,7 @@ class WidgetPropertyState extends State<WidgetProperty> with SingleTickerProvide
               height: 10,
             ),
             ColorPicker(
-              subheading: _smallDivider(),
+              subheading: smallDivider(),
               pickersEnabled: const <ColorPickerType, bool>{
                 ColorPickerType.both: false,
                 ColorPickerType.primary: true,
@@ -816,7 +796,7 @@ class WidgetPropertyState extends State<WidgetProperty> with SingleTickerProvide
         child: Column(children: [
           SizedBox(height: 10),
           ColorPicker(
-            subheading: _smallDivider(),
+            subheading: smallDivider(),
             pickersEnabled: const <ColorPickerType, bool>{
               ColorPickerType.both: false,
               ColorPickerType.primary: true,

@@ -31,9 +31,9 @@ class ACCManager extends ChangeNotifier {
   int _currentAccIndex = -1;
 
   //static int get currentAccIndex => _currentAccIndex;
-  void setCurrentIndex(int i) {
+  void setCurrentIndex(int i, {bool setAsAcc = true}) {
     _currentAccIndex = i;
-    if (_currentAccIndex >= 0 && pageManagerHolder != null) {
+    if (setAsAcc && _currentAccIndex >= 0 && pageManagerHolder != null) {
       pageManagerHolder!.setAsAcc();
     }
     setState();

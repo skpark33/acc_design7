@@ -26,7 +26,7 @@ class ContentsModel {
   final String mime;
   //mime, ex : video/mp4, image/png, 등등 xls 파일은 application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
   //ContentsType _type = ContentsType.FREE;
-  int playTime = 5000; // 1000 분의 1초 milliseconds
+  double playTime = 5000; // 1000 분의 1초 milliseconds
   bool mute = false;
   double volume = 100;
   ContentsType type = ContentsType.free;
@@ -43,11 +43,7 @@ class ContentsModel {
     _state = s;
   }
 
-  ContentsModel(
-      {required this.name,
-      required this.mime,
-      required this.bytes,
-      required this.url}) {
+  ContentsModel({required this.name, required this.mime, required this.bytes, required this.url}) {
     const uuid = Uuid();
     key = uuid.v1() + '/' + bytes.toString();
     genType();
@@ -57,12 +53,10 @@ class ContentsModel {
     final kb = bytes / 1024;
     final mb = kb / 1024;
 
-    return mb > 1
-        ? '${mb.toStringAsFixed(2)} MB'
-        : '${kb.toStringAsFixed(2)} KB';
+    return mb > 1 ? '${mb.toStringAsFixed(2)} MB' : '${kb.toStringAsFixed(2)} KB';
   }
 
-  void setPlayTime(int t) => playTime = t;
+  void setPlayTime(double t) => playTime = t;
 
   void genType() {
     if (mime.startsWith('video')) {

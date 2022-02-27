@@ -9,3 +9,6 @@ const double layoutPropertiesWidth = 328;
 
 const double minAccSize = 10;
 const double magnetic = 4;
+
+const int maxInteger = (1 << 63);
+const double playTimeForever = -1;

@@ -37,7 +37,7 @@ class VideoPlayerWidget extends AbsPlayWidget {
         //setState(() {});
         logHolder.log('initialize complete(${wcontroller!.value.duration.inMilliseconds})');
 
-        model!.playTime = wcontroller!.value.duration.inMilliseconds;
+        model!.playTime = wcontroller!.value.duration.inMilliseconds.toDouble();
         wcontroller!.setLooping(false);
         wcontroller!.onAfterVideoEvent = (event) {
           logHolder.log(

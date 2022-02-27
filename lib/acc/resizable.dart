@@ -73,7 +73,7 @@ class ResiablePainter extends CustomPainter {
     bgPaint.color = MyColors.gray02.withOpacity(.7);
     fgPaint.color = Colors.white;
     selectPaint.color = MyColors.primaryColor;
-    linePaint.color = MyColors.primaryColor;
+    linePaint.color = Colors.white;
     linePaintBg.color = MyColors.accBg;
 
     bgPaint.style = PaintingStyle.fill;
@@ -85,8 +85,8 @@ class ResiablePainter extends CustomPainter {
     bgPaint.strokeWidth = 2.0;
     fgPaint.strokeWidth = 2.0;
     selectPaint.strokeWidth = 3.0;
-    linePaint.strokeWidth = 3.0;
-    linePaintBg.strokeWidth = 1.0;
+    linePaint.strokeWidth = 2.0;
+    linePaintBg.strokeWidth = linePaint.strokeWidth;
 
     // shader example !!!!
     // ..shader = LinearGradient(
@@ -111,27 +111,30 @@ class ResiablePainter extends CustomPainter {
     }
 
     //logHolder.log('paint $size', level: 6);
-    double margin = resizeButtonSize / 2 + 4;
+    double margin = resizeButtonSize / 2 + linePaint.strokeWidth;
     Rect rect = Rect.fromLTWH(
-        margin, margin, size.width - resizeButtonSize - 8, size.height - resizeButtonSize - 8);
+        margin,
+        margin,
+        size.width - resizeButtonSize - linePaint.strokeWidth * 2,
+        size.height - resizeButtonSize - linePaint.strokeWidth * 2);
     if (isAccSelected) {
       canvas.drawRect(
           Rect.fromLTRB(
-            rect.left - 3,
-            rect.top - 3,
-            rect.right + 3,
-            rect.bottom + 3,
+            rect.left + linePaint.strokeWidth / 2,
+            rect.top + linePaint.strokeWidth / 2,
+            rect.right - linePaint.strokeWidth / 2,
+            rect.bottom - linePaint.strokeWidth / 2,
           ),
           linePaintBg);
       canvas.drawRect(rect, linePaint);
-      canvas.drawRect(
-          Rect.fromLTRB(
-            rect.left + 3,
-            rect.top + 3,
-            rect.right - 3,
-            rect.bottom - 3,
-          ),
-          linePaintBg);
+      // canvas.drawRect(
+      //     Rect.fromLTRB(
+      //       rect.left + 3,
+      //       rect.top + 3,
+      //       rect.right - 3,
+      //       rect.bottom - 3,
+      //     ),
+      //     linePaintBg);
     } else if (isInvisibleColorACC) {
       dotRect(canvas, rect, strokeWidth: 2, color: MyColors.accBg, gap: 5);
     }
