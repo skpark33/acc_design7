@@ -196,6 +196,6 @@ Widget radiusWidget(
     onChanged: onChanged,
     onChangeStart: onChangeStart,
     min: 0,
-    max: 360,
+    max: 100,
   );
 }

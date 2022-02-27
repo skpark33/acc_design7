@@ -5,26 +5,48 @@ import 'package:acc_design7/constants/styles.dart';
 import 'package:acc_design7/common/util/logger.dart';
 //import 'package:acc_design7/constants/constants.dart';
 
-Widget frostedEdged(
-    {required Widget child, double radius = 15.0, double sigma = 10.0}) {
+double getDeltaRadiusPercent(Size realSize, double dx, double dy, double direction) {
+  if (dx == 0 && dy == 0) return 0;
+
+  //  움직인 거리를 구한후, Radius 를 퍼센트로 환산한 값을 구한다.
+  // DB 에는 이 퍼센트값으로 저장된다.
+
+  // height 가 짧은 직사각형으로 정규화한다.
+  // 짧은 쪽이다.
+  double height = realSize.height >= realSize.width ? realSize.width / 2 : realSize.height / 2;
+  double maxR = sqrt(2) * height; //  rr = xx + yy 인데, x = y 이므로  rr = 2yy 이다.
+
+  // 움직인 거리 move는
+  double delta = sqrt(dx * dx + dy * dy);
+
+  if (delta >= maxR) {
+    return 100 * direction;
+  }
+  return (delta * 100) / maxR * direction;
+}
+
+double percentToRadius(double radiusPercent, Size realSize) {
+  // height 가 짧은 직사각형으로 정규화한다.
+  // 짧은 쪽이다.
+  double height = realSize.height >= realSize.width ? realSize.width / 2 : realSize.height / 2;
+  double maxR = sqrt(2) * height; //  rr = xx + yy 인데, x = y 이므로  rr = 2yy 이다.
+
+  return (radiusPercent * maxR) / 100;
+}
+
+Widget frostedEdged({required Widget child, double radius = 15.0, double sigma = 10.0}) {
   return ClipRRect(
       borderRadius: BorderRadius.circular(radius),
-      child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
-          child: child));
+      child: BackdropFilter(filter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma), child: child));
 }
 
 Widget glassMorphic(
-    {required bool isGlass,
-    required Widget child,
-    double radius = 0,
-    double sigma = 10.0}) {
+    {required bool isGlass, required Widget child, double radius = 0, double sigma = 10.0}) {
   return isGlass
       ? ClipRRect(
           borderRadius: BorderRadius.circular(radius),
-          child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
-              child: child))
+          child:
+              BackdropFilter(filter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma), child: child))
       : child;
 }
 
@@ -44,10 +66,7 @@ Widget infoCard(BuildContext context, String title, String msg, Color color) {
                   padding: const EdgeInsets.only(bottom: 8.0),
                   child: Text(
                     title,
-                    style: TextStyle(
-                        fontSize: 20.0,
-                        color: color,
-                        fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 20.0, color: color, fontWeight: FontWeight.bold),
                   ),
                 ),
                 Text(
@@ -65,9 +84,7 @@ void simpleDialog(BuildContext context, String title, String msg, Color color) {
       builder: (context) {
         return Dialog(
           child: SizedBox(
-              height: 200,
-              width: 400,
-              child: Center(child: infoCard(context, title, msg, color))),
+              height: 200, width: 400, child: Center(child: infoCard(context, title, msg, color))),
         );
       });
 }
@@ -160,8 +177,7 @@ double getRoundMoveAngle(Offset localPosition, double radius) {
     rx = radius - dy;
     ry = dx - radius;
     divide = 0;
-  } else if ((radius <= dx && dx < radius * 2) &&
-      (radius <= dy && dy < radius * 2)) {
+  } else if ((radius <= dx && dx < radius * 2) && (radius <= dy && dy < radius * 2)) {
     // 2/4 분면
     ry = dy - radius;
     rx = dx - radius;

@@ -158,8 +158,8 @@ class ResiablePainter extends CustomPainter {
         Offset(0.1 * pi, 0.3 * pi),
         Offset(0.6 * pi, 0.3 * pi),
       ];
-      List<Rect> arcList =
-          getRadiusRect(size, radiusTopLeft, radiusTopRight, radiusBottomRight, radiusBottomLeft);
+      List<Rect> arcList = getRadiusRect(
+          size, radiusTopLeft, radiusTopRight, radiusBottomRight, radiusBottomLeft, widgetSize);
       for (int i = 0; i < 4; i++) {
         drawArcHandle(canvas, arcList[i], bigList[i].dx, bigList[i].dy, smallList[i].dx,
             smallList[i].dy, isRadiusHover[i]);
@@ -312,7 +312,7 @@ class ResiablePainter extends CustomPainter {
   }
 
   static List<Rect> getRadiusRect(Size size, double radiusTopLeft, double radiusTopRight,
-      double radiusBottomRight, double radiusBottomLeft) {
+      double radiusBottomRight, double radiusBottomLeft, Size realSize) {
     double r = resizeButtonSize; // size of handle
     //double padding = r / 2; // mousePadding
 
@@ -321,10 +321,10 @@ class ResiablePainter extends CustomPainter {
     double right = size.width - resizeButtonSize - r;
     double bottom = size.height - resizeButtonSize - r;
 
-    double ne = getRadiusPos(radiusTopLeft);
-    double nw = getRadiusPos(radiusTopRight);
-    double sw = getRadiusPos(radiusBottomRight, minus: -1);
-    double se = getRadiusPos(radiusBottomLeft);
+    double ne = getRadiusPos(percentToRadius(radiusTopLeft, realSize));
+    double nw = getRadiusPos(percentToRadius(radiusTopRight, realSize));
+    double sw = getRadiusPos(percentToRadius(radiusBottomRight, realSize), minus: -1);
+    double se = getRadiusPos(percentToRadius(radiusBottomLeft, realSize));
 
     List<Rect> arcList = [
       // left,top,width,height

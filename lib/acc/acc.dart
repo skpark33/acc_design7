@@ -228,7 +228,7 @@ class ACC with ACCProperty {
               ContentsModel? model = await accChild.playManager!.getCurrentModel();
               if (model != null &&
                   !isCorners(details.localPosition, marginSize, resizeButtonSize) &&
-                  !isRadius(details.localPosition, marginSize, resizeButtonSize / 2)) {
+                  !isRadius(details.localPosition, marginSize, resizeButtonSize / 2, realSize)) {
                 logHolder.log('Its contents click!!! ${model.key}', level: 5);
                 pageManagerHolder!.setAsContents();
                 selectedModelHolder!.setModel(model);
@@ -254,7 +254,8 @@ class ACC with ACCProperty {
                 isRadiused = false;
                 sizeActionStart = true;
                 //} else if (isRadius(details.localPosition, realSize, resizeButtonSize / 4)) {
-              } else if (isRadius(details.localPosition, marginSize, resizeButtonSize / 2)) {
+              } else if (isRadius(
+                  details.localPosition, marginSize, resizeButtonSize / 2, realSize)) {
                 isRadiused = true;
                 isHover = false;
                 isCornered = false;
@@ -274,7 +275,7 @@ class ACC with ACCProperty {
             onPanUpdate: (details) {
               double dx = (details.delta.dx / ratio.width);
               double dy = (details.delta.dy / ratio.height);
-              if (!resizeWidget(dx, dy, ratio, isAccSelected)) {
+              if (!resizeWidget(dx, dy, realSize, ratio, isAccSelected)) {
                 if (_validationCheck(false, dx, dy, cursor, isAccSelected, ratio)) {
                   _setContainerOffset(
                       Offset((containerOffset.value.dx + dx), (containerOffset.value.dy + dy)));
@@ -303,7 +304,7 @@ class ACC with ACCProperty {
                         glassMorphic(
                           isGlass: glass.value,
                           child: myNeumorphicButton(
-                            boxShape: _getBoxShape(),
+                            boxShape: _getBoxShape(realSize),
                             borderColor: borderColor.value,
                             borderWidth: borderWidth.value,
                             intensity: intensity.value,
@@ -372,7 +373,7 @@ class ACC with ACCProperty {
                         entry!.markNeedsBuild();
                         //} else if (isRadius(details.localPosition, realSize, resizeButtonSize / 4)) {
                       } else if (isRadius(
-                          details.localPosition, marginSize, resizeButtonSize / 2)) {
+                          details.localPosition, marginSize, resizeButtonSize / 2, realSize)) {
                         isCornered = false;
                         isRadiused = true;
                         isHover = false;
@@ -416,16 +417,17 @@ class ACC with ACCProperty {
         ));
   }
 
-  NeumorphicBoxShape _getBoxShape() {
+  NeumorphicBoxShape _getBoxShape(Size realSize) {
     switch (boxType.value) {
       case BoxType.rountRect:
         return radiusAll.value == 0
             ? NeumorphicBoxShape.roundRect(BorderRadius.only(
-                topLeft: Radius.circular(radiusTopLeft.value),
-                topRight: Radius.circular(radiusTopRight.value),
-                bottomLeft: Radius.circular(radiusBottomLeft.value),
-                bottomRight: Radius.circular(radiusBottomRight.value)))
-            : NeumorphicBoxShape.roundRect(BorderRadius.circular(radiusAll.value));
+                topLeft: Radius.circular(percentToRadius(radiusTopLeft.value, realSize)),
+                topRight: Radius.circular(percentToRadius(radiusTopRight.value, realSize)),
+                bottomLeft: Radius.circular(percentToRadius(radiusBottomLeft.value, realSize)),
+                bottomRight: Radius.circular(percentToRadius(radiusBottomRight.value, realSize))))
+            : NeumorphicBoxShape.roundRect(
+                BorderRadius.circular(percentToRadius(radiusAll.value, realSize)));
       case BoxType.circle:
         return const NeumorphicBoxShape.circle();
       case BoxType.rect:
@@ -434,10 +436,10 @@ class ACC with ACCProperty {
         return const NeumorphicBoxShape.stadium();
       case BoxType.beveled:
         return NeumorphicBoxShape.beveled(BorderRadius.only(
-            topLeft: Radius.circular(radiusTopLeft.value),
-            topRight: Radius.circular(radiusTopRight.value),
-            bottomLeft: Radius.circular(radiusBottomLeft.value),
-            bottomRight: Radius.circular(radiusBottomRight.value)));
+            topLeft: Radius.circular(percentToRadius(radiusTopLeft.value, realSize)),
+            topRight: Radius.circular(percentToRadius(radiusTopRight.value, realSize)),
+            bottomLeft: Radius.circular(percentToRadius(radiusBottomLeft.value, realSize)),
+            bottomRight: Radius.circular(percentToRadius(radiusBottomRight.value, realSize))));
       default:
         break;
     }
@@ -454,7 +456,7 @@ class ACC with ACCProperty {
     await accChild.playManager!.pauseAllExceptCurrent();
   }
 
-  bool resizeWidget(double dx, double dy, Size ratio, bool isAccSelected) {
+  bool resizeWidget(double dx, double dy, Size realSize, Size ratio, bool isAccSelected) {
     if (dx == 0 && dy == 0) return false;
 
     switch (cursor) {
@@ -470,7 +472,7 @@ class ACC with ACCProperty {
       default:
         break;
     }
-    return _radiusChanged(dx, dy);
+    return _radiusChanged(dx, dy, realSize);
   }
 
   bool _sizeChanged(double dx, double dy, Size ratio, bool isAccSelected) {
@@ -526,7 +528,7 @@ class ACC with ACCProperty {
     return true;
   }
 
-  bool _radiusChanged(double dx, double dy) {
+  bool _radiusChanged(double dx, double dy, Size realSize) {
     double direction = 1;
     double newRadius = 0;
     switch (cursor) {
@@ -555,11 +557,12 @@ class ACC with ACCProperty {
     }
 
     //newRadius += (dx.abs() + dy.abs()) * pi * direction;
-    newRadius += asin(dy.abs() / sqrt(dx * dx + dy * dy)) * (180 / pi) * direction;
+    //newRadius += asin(dy.abs() / sqrt(dx * dx + dy * dy)) * (180 / pi) * direction;
     //logHolder.log("newRadius=$newRadius", level: 6);
+    newRadius += getDeltaRadiusPercent(realSize, dx, dy, direction);
 
     if (newRadius < 0) newRadius = 0;
-    if (newRadius > 359) newRadius = 359;
+    if (newRadius > 100) newRadius = 100;
 
     switch (cursor) {
       case CursorType.neRadius:
@@ -601,12 +604,12 @@ class ACC with ACCProperty {
     return false;
   }
 
-  bool isRadius(Offset point, Size widgetSize, double r) {
+  bool isRadius(Offset point, Size widgetSize, double r, Size realSize) {
     for (int i = 0; i < 4; i++) {
       isRadiusHover[i] = false;
     }
     List<Rect> rectList = ResiablePainter.getRadiusRect(widgetSize, radiusTopLeft.value,
-        radiusTopRight.value, radiusBottomRight.value, radiusBottomLeft.value);
+        radiusTopRight.value, radiusBottomRight.value, radiusBottomLeft.value, realSize);
 
     int i = 0;
     for (Rect rect in rectList) {
@@ -619,6 +622,35 @@ class ACC with ACCProperty {
     }
     cursor = CursorType.move;
     return false;
+  }
+
+  double getDeltaRadiusPercent(Size realSize, double dx, double dy, double direction) {
+    if (dx == 0 && dy == 0) return 0;
+
+    //  움직인 거리를 구한후, Radius 를 퍼센트로 환산한 값을 구한다.
+    // DB 에는 이 퍼센트값으로 저장된다.
+
+    // height 가 짧은 직사각형으로 정규화한다.
+    // 짧은 쪽이다.
+    double height = realSize.height >= realSize.width ? realSize.width / 2 : realSize.height / 2;
+    double maxR = sqrt(2) * height; //  rr = xx + yy 인데, x = y 이므로  rr = 2yy 이다.
+
+    // 움직인 거리 move는
+    double delta = sqrt(dx * dx + dy * dy);
+
+    if (delta >= maxR) {
+      return 100 * direction;
+    }
+    return (delta * 100) / maxR * direction;
+  }
+
+  double percentToRadius(double radiusPercent, Size realSize) {
+    // height 가 짧은 직사각형으로 정규화한다.
+    // 짧은 쪽이다.
+    double height = realSize.height >= realSize.width ? realSize.width / 2 : realSize.height / 2;
+    double maxR = sqrt(2) * height; //  rr = xx + yy 인데, x = y 이므로  rr = 2yy 이다.
+
+    return (radiusPercent * maxR) / 100;
   }
 
   void clearCornerHover() {
