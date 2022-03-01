@@ -1,5 +1,7 @@
 // ignore: implementation_imports
 // ignore_for_file: prefer_final_fields
+import 'dart:ui';
+import 'package:http/http.dart' as http;
 import 'package:acc_design7/common/util/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:acc_design7/model/contents.dart';
@@ -14,12 +16,7 @@ class ImagePlayerWidget extends AbsPlayWidget {
     required ACC acc,
     void Function()? onAfterEvent,
     bool autoStart = true,
-  }) : super(
-            key: key,
-            onAfterEvent: onAfterEvent,
-            acc: acc,
-            model: model,
-            autoStart: autoStart) {
+  }) : super(key: key, onAfterEvent: onAfterEvent, acc: acc, model: model, autoStart: autoStart) {
     globalKey = key;
   }
 
@@ -83,12 +80,38 @@ class ImagePlayerWidgetState extends State<ImagePlayerWidget> {
     setState(() {});
   }
 
+//Future<Image> _getImageInfo(String url) async {
+  Future<void> _getImageInfo(String url) async {
+    var response = await http.get(Uri.parse(url));
+
+    final bytes = response.bodyBytes;
+    final Codec codec = await instantiateImageCodec(bytes);
+    final FrameInfo frame = await codec.getNextFrame();
+    final uiImage = frame.image; // a ui.Image object, not to be confused with the Image widget
+
+    widget.model!.aspectRatio = uiImage.width / uiImage.height;
+    logHolder.log("getImageInfo = ${widget.model!.aspectRatio}", level: 6); // 200, ideally
+    // Image _image;
+    // _image = Image.memory(bytes);
+    // return _image;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance!.addPostFrameCallback((_) async {
+      await _getImageInfo(widget.model!.url);
+      widget.acc.resize(widget.model!.aspectRatio); // 반드시 aspectorRatio 를 구한뒤에 해야한다.
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     double topLeft = widget.acc.radiusTopLeft.value;
     double topRight = widget.acc.radiusTopRight.value;
     double bottomLeft = widget.acc.radiusBottomLeft.value;
     double bottomRight = widget.acc.radiusBottomRight.value;
+
     return Container(
       decoration: BoxDecoration(
           //shape: BoxShape.circle,
@@ -98,8 +121,8 @@ class ImagePlayerWidgetState extends State<ImagePlayerWidget> {
             bottomLeft: Radius.circular(bottomLeft),
             bottomRight: Radius.circular(bottomRight),
           ),
-          image: DecorationImage(
-              fit: BoxFit.fill, image: NetworkImage(widget.model!.url))),
+          //image: DecorationImage(fit: BoxFit.fill, image: NetworkImage(widget.model!.url))),
+          image: DecorationImage(fit: BoxFit.fill, image: NetworkImage(widget.model!.url))),
     );
   }
 }

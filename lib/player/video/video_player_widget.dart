@@ -37,7 +37,7 @@ class VideoPlayerWidget extends AbsPlayWidget {
         //setState(() {});
         logHolder.log('initialize complete(${wcontroller!.value.duration.inMilliseconds})');
 
-        model!.playTime = wcontroller!.value.duration.inMilliseconds.toDouble();
+        model!.videoPlayTime = wcontroller!.value.duration.inMilliseconds.toDouble();
         wcontroller!.setLooping(false);
         wcontroller!.onAfterVideoEvent = (event) {
           logHolder.log(
@@ -161,6 +161,16 @@ class VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     return true;
   }
 
+  void afterBuild() {
+    if (widget.model!.dynamicSize) {
+      widget.model!.dynamicSize = false;
+      WidgetsBinding.instance!.addPostFrameCallback((_) {
+        logHolder.log("${widget.model!.aspectRatio}-------------------", level: 6);
+        widget.acc.resize(widget.model!.aspectRatio);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     logHolder.log('VideoPlayerWidgetState', level: 5);
@@ -169,7 +179,14 @@ class VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
     // aspectorRatio 는 실제 비디오의  넓이/높이 이다.
     double videoRatio = widget.wcontroller!.value.aspectRatio;
-
+    widget.model!.aspectRatio = videoRatio;
+    afterBuild(); // 반드시 aspectorRatio 를 구한뒤에 해야한다.
+    // if (widget.model!.dynamicSize) {
+    //   widget.model!.dynamicSize = false;
+    //   WidgetsBinding.instance!.addPostFrameCallback((_) {
+    //     widget.acc.resize(widget.model!.aspectRatio);
+    //   });
+    // }
     double outerWidth = realSize.width;
     double outerHeight = realSize.height;
 

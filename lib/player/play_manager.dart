@@ -16,6 +16,7 @@ import 'package:acc_design7/common/undo/undo.dart';
 import 'package:acc_design7/model/contents.dart';
 //import 'package:acc_design7/acc/acc_manager.dart';
 import 'package:acc_design7/widgets/base_widget.dart';
+import 'package:acc_design7/studio/pages/page_manager.dart';
 
 class CurrentData {
   ContentsType type = ContentsType.free;
@@ -186,8 +187,12 @@ class PlayManager {
 
       currentModel = _playList.value[_currentIndex].getModel();
       if (currentModel!.isImage()) {
+        // playTime 이 영구히로 잡혀있다.
+        if (0 > currentModel!.playTime.value) {
+          return;
+        }
         // 아직 교체시간이 되지 않았다.
-        if (_currentPlaySec < currentModel!.playTime) {
+        if (_currentPlaySec < currentModel!.playTime.value) {
           _currentPlaySec += _timeGap;
           return;
         }
@@ -386,6 +391,10 @@ class PlayManager {
           await _changeAnimePage();
         } // skpark carousel problem
         accManagerHolder!.resizeMenu(_playList.value[_currentIndex].model!.type);
+        if (pageManagerHolder!.isContents() &&
+            accManagerHolder!.isCurrentIndex(baseWidget.acc!.index)) {
+          selectedModelHolder!.setModel(_playList.value[_currentIndex].model!);
+        }
       }
     });
   }

@@ -108,6 +108,10 @@ class BaseWidgetState extends State<BaseWidget> {
             logHolder.log(
                 'playTime===${snapshot.data!.model!.playTime}sec, ${snapshot.data!.model!.name}');
 
+            // if (pageManagerHolder!.isContents() &&
+            //     accManagerHolder!.isCurrentIndex(snapshot.data!.acc.index)) {
+            //   selectedModelHolder!.setModel(snapshot.data!.model!);
+            // }
             if (!widget.isAnime()) {
               return snapshot.data!;
             }

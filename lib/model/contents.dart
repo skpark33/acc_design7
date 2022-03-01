@@ -1,5 +1,6 @@
 import 'package:uuid/uuid.dart';
 import '../common/util/logger.dart';
+import '../common/undo/undo.dart';
 
 enum ContentsType {
   free,
@@ -26,11 +27,16 @@ class ContentsModel {
   final String mime;
   //mime, ex : video/mp4, image/png, 등등 xls 파일은 application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
   //ContentsType _type = ContentsType.FREE;
-  double playTime = 5000; // 1000 분의 1초 milliseconds
+  UndoAble<double> playTime = UndoAble<double>(5000); // 1000 분의 1초 milliseconds
+  double videoPlayTime = 5000; // 1000 분의 1초 milliseconds
   bool mute = false;
   double volume = 100;
   ContentsType type = ContentsType.free;
   String key = '';
+  double aspectRatio = 1;
+
+  // 동영상의 크기에 맞게 frame 사이즈를 변경해야 하는 경우
+  bool dynamicSize = false;
 
   // ignore: prefer_final_fields
   PlayState _state = PlayState.none;
@@ -41,6 +47,16 @@ class ContentsModel {
   void setState(PlayState s) {
     _prevState = _state;
     _state = s;
+  }
+
+  //  playTime 이전 값, 영구히 에서 되돌릴때를 대비해서 가지고 있다.
+  double prevPlayTime = 5000;
+  void reservPlayTime() {
+    prevPlayTime = playTime.value;
+  }
+
+  void resetPlayTime() {
+    playTime.set(prevPlayTime);
   }
 
   ContentsModel({required this.name, required this.mime, required this.bytes, required this.url}) {
@@ -55,8 +71,6 @@ class ContentsModel {
 
     return mb > 1 ? '${mb.toStringAsFixed(2)} MB' : '${kb.toStringAsFixed(2)} KB';
   }
-
-  void setPlayTime(double t) => playTime = t;
 
   void genType() {
     if (mime.startsWith('video')) {

@@ -160,7 +160,7 @@ class WidgetPropertyState extends State<WidgetProperty> with SingleTickerProvide
   );
   ExapandableModel sizePosModel = ExapandableModel(
     title: MyStrings.widgetSize,
-    height: 100,
+    height: 130,
     width: 240,
   );
   ExapandableModel cornerModel = ExapandableModel(
@@ -615,30 +615,12 @@ class WidgetPropertyState extends State<WidgetProperty> with SingleTickerProvide
               setState(() {});
             },
           )),
-      Row(
-        children: [
-          Text(
-            MyStrings.contentsRotate,
-            style: MyTextStyles.subtitle2,
-          ),
-          IconButton(
-            padding: EdgeInsets.fromLTRB(18, 2, 8, 2),
-            iconSize: 32.0,
-            icon: Icon(
-              acc.contentRotate.value == true
-                  ? Icons.task_alt_outlined
-                  : Icons.radio_button_unchecked_outlined,
-              color: acc.contentRotate.value == true ? MyColors.mainColor : Colors.grey,
-            ),
-            onPressed: () {
-              acc.contentRotate.set(!acc.contentRotate.value);
-              acc.setState();
-              //acc.invalidateContents();
-              setState(() {});
-            },
-          )
-        ],
-      ),
+      myCheckBox(MyStrings.contentsRotate, acc.contentRotate.value, () {
+        acc.contentRotate.set(!acc.contentRotate.value);
+        acc.setState();
+        //acc.invalidateContents();
+        setState(() {});
+      }, 18, 2, 8, 2),
     ]);
   }
 
@@ -787,6 +769,11 @@ class WidgetPropertyState extends State<WidgetProperty> with SingleTickerProvide
         child: Column(children: [
           _locationRow(acc),
           _sizeRow(acc),
+          myCheckBox(MyStrings.keepRatio, acc.fitToSourceRatio.value, () {
+            acc.fitToSourceRatio.set(!acc.fitToSourceRatio.value);
+            acc.setState();
+            setState(() {});
+          }, 18, 2, 8, 2),
         ]));
   }
 

@@ -1,4 +1,5 @@
 // ignore_for_file: prefer_final_fields
+//import 'package:acc_design7/common/util/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:acc_design7/model/contents.dart';
 import 'package:acc_design7/acc/acc.dart';
@@ -12,11 +13,7 @@ abstract class AbsPlayWidget extends StatefulWidget {
   bool autoStart = true;
 
   AbsPlayWidget(
-      {Key? key,
-      required this.onAfterEvent,
-      required this.acc,
-      this.model,
-      this.autoStart = true})
+      {Key? key, required this.onAfterEvent, required this.acc, this.model, this.autoStart = true})
       : super(key: key);
 
   void Function()? onAfterEvent;

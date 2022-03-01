@@ -51,12 +51,13 @@ class ACCProperty {
   UndoAble<bool> _primary = UndoAble<bool>(false);
   UndoAble<bool> _fullscreen = UndoAble<bool>(false);
   UndoAble<Offset> _containerOffset = UndoAble<Offset>(const Offset(100, 100));
-  UndoAble<Size> _containerSize = UndoAble<Size>(const Size(400, 400));
+  UndoAble<Size> _containerSize = UndoAble<Size>(const Size(640, 480));
   UndoAble<double> _rotate = UndoAble<double>(0);
   UndoAble<bool> _contentRotate = UndoAble<bool>(false);
   UndoAble<double> _opacity = UndoAble<double>(1);
   UndoAble<bool> _sourceRatio = UndoAble<bool>(false);
   UndoAble<bool> _glass = UndoAble<bool>(false);
+  UndoAble<bool> _fitToSourceRatio = UndoAble<bool>(false);
   //UndoAbleList<ContentsModel> _contents = UndoAbleList<ContentsModel>([]);
 
   bool get visible => _visible;
@@ -78,6 +79,8 @@ class ACCProperty {
   UndoAble<double> get opacity => _opacity;
   UndoAble<bool> get glass => _glass;
   UndoAble<bool> get sourceRatio => _sourceRatio;
+  UndoAble<bool> get fitToSourceRatio => _fitToSourceRatio;
+
   //UndoAbleList<ContentsModel> get contents => _contents;
 
   UndoAble<int> _order = UndoAble<int>(0);

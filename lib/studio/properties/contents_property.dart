@@ -58,7 +58,10 @@ class ContentsPropertyState extends State<ContentsProperty> with SingleTickerPro
         isAlwaysShown: true,
         controller: _scrollController,
         child: Consumer<SelectedModel>(builder: (context, selectedModel, child) {
-          double millisec = selectedModel.getModel()!.playTime;
+          double millisec = selectedModel.getModel()!.playTime.value;
+          if (selectedModel.getModel()!.isVideo()) {
+            millisec = selectedModel.getModel()!.videoPlayTime;
+          }
           double sec = (millisec / 1000);
           return ListView(controller: _scrollController, children: [
             _titleRow(25, 15, 12, 10),
@@ -82,10 +85,10 @@ class ContentsPropertyState extends State<ContentsProperty> with SingleTickerPro
                       selectedModel.getModel()!.size,
                       style: MyTextStyles.subtitle1,
                     ),
-                    // Text(
-                    //   '${selectedModel.getModel()!.bytes} bytes',
-                    //   style: MyTextStyles.subtitle2,
-                    // ),
+                    Text(
+                      'width/height.${(selectedModel.getModel()!.aspectRatio * 100).round() / 100}',
+                      style: MyTextStyles.subtitle2,
+                    ),
                     selectedModel.getModel()!.type == ContentsType.image
                         ? Column(
                             mainAxisAlignment: MainAxisAlignment.start,
@@ -99,32 +102,15 @@ class ContentsPropertyState extends State<ContentsProperty> with SingleTickerPro
                               SizedBox(
                                 height: 10,
                               ),
-                              Row(children: [
-                                Text(
-                                  MyStrings.forever,
-                                  style: MyTextStyles.subtitle2,
-                                ),
-                                IconButton(
-                                  padding: const EdgeInsets.fromLTRB(18, 2, 8, 2),
-                                  iconSize: 32.0,
-                                  icon: Icon(
-                                    millisec == playTimeForever // max integer
-                                        ? Icons.task_alt_outlined
-                                        : Icons.radio_button_unchecked_outlined,
-                                    color: millisec == playTimeForever
-                                        ? MyColors.mainColor
-                                        : Colors.grey,
-                                  ),
-                                  onPressed: () {
-                                    if (millisec != playTimeForever) {
-                                      selectedModel.getModel()!.setPlayTime(playTimeForever);
-                                    } else {
-                                      selectedModel.getModel()!.setPlayTime(5 * 1000);
-                                    }
-                                    setState(() {});
-                                  },
-                                ),
-                              ]),
+                              myCheckBox(MyStrings.forever, (millisec == playTimeForever), () {
+                                if (millisec != playTimeForever) {
+                                  selectedModel.getModel()!.reservPlayTime();
+                                  selectedModel.getModel()!.playTime.set(playTimeForever);
+                                } else {
+                                  selectedModel.getModel()!.resetPlayTime();
+                                }
+                                setState(() {});
+                              }, 18, 2, 8, 2),
                               Visibility(
                                 visible: millisec != playTimeForever,
                                 child: Column(
@@ -214,9 +200,10 @@ class ContentsPropertyState extends State<ContentsProperty> with SingleTickerPro
       int sec = int.parse(secCon.text);
       int min = int.parse(minCon.text);
       int hour = int.parse(hourCon.text);
-      selectedModel.getModel()!.setPlayTime((hour * 60 * 60 + min * 60 + sec) * 1000);
+      selectedModel.getModel()!.playTime.set((hour * 60 * 60 + min * 60 + sec) * 1000);
     });
-    logHolder.log('setPlayTime called ${selectedModel.getModel()!.playTime / 1000}', level: 6);
+    logHolder.log('setPlayTime called ${selectedModel.getModel()!.playTime.value / 1000}',
+        level: 6);
   }
 
   String _toTimeString(double sec) {

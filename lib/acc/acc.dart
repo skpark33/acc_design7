@@ -852,4 +852,26 @@ class ACC with ACCProperty {
     }
     return true;
   }
+
+  // ratio 에 맞게 resize 한다.
+  void resize(double ratio) {
+    // 원본에서 ratio = w / h 이다.
+    //width 와 height 중 짧은 쪽을 기준으로 해서,
+    // 반대편을 ratio 만큼 늘린다.
+    if (ratio == 0) return;
+
+    double w = containerSize.value.width;
+    double h = containerSize.value.height;
+    if (ratio >= 1) {
+      // 가로가 더 길다.
+      // w 에 맞추어 h 를 조정한다.
+      h = w / ratio;
+    } else {
+      // h 에 맞추어 w 를 조정한다.
+      w = h * ratio;
+    }
+
+    containerSize.set(Size(w, h));
+    setState();
+  }
 }

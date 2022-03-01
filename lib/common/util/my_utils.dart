@@ -95,6 +95,27 @@ Widget doubleSlider({
   );
 }
 
+Widget myCheckBox(String title, bool value, void Function() onPressed, double left, double top,
+    double right, double bottom) {
+  return Row(
+    children: [
+      Text(
+        title,
+        style: MyTextStyles.subtitle2,
+      ),
+      IconButton(
+        padding: const EdgeInsets.fromLTRB(18, 2, 8, 2),
+        iconSize: 32.0,
+        icon: Icon(
+          value == true ? Icons.task_alt_outlined : Icons.radio_button_unchecked_outlined,
+          color: value == true ? MyColors.mainColor : Colors.grey,
+        ),
+        onPressed: onPressed,
+      )
+    ],
+  );
+}
+
 Widget frostedEdged({required Widget child, double radius = 15.0, double sigma = 10.0}) {
   return ClipRRect(
       borderRadius: BorderRadius.circular(radius),
