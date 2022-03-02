@@ -74,7 +74,7 @@ class ContentsPropertyState extends State<ContentsProperty> with SingleTickerPro
                   children: [
                     Text(
                       selectedModel.getModel()!.name,
-                      style: MyTextStyles.h5,
+                      style: MyTextStyles.h6,
                     ),
                     smallDivider(height: 8, indent: 0, endIndent: 20),
                     Text(
@@ -95,87 +95,73 @@ class ContentsPropertyState extends State<ContentsProperty> with SingleTickerPro
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               smallDivider(height: 8, indent: 0, endIndent: 20),
-                              Text(
-                                MyStrings.playTime,
-                                style: MyTextStyles.subtitle1,
+                              Row(
+                                children: [
+                                  Text(
+                                    MyStrings.playTime,
+                                    style: MyTextStyles.subtitle1,
+                                  ),
+                                  SizedBox(
+                                    width: 15,
+                                  ),
+                                  myCheckBox(MyStrings.forever, (millisec == playTimeForever), () {
+                                    if (millisec != playTimeForever) {
+                                      selectedModel.getModel()!.reservPlayTime();
+                                      selectedModel.getModel()!.playTime.set(playTimeForever);
+                                    } else {
+                                      selectedModel.getModel()!.resetPlayTime();
+                                    }
+                                    setState(() {});
+                                  }, 8, 2, 0, 2),
+                                ],
                               ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              myCheckBox(MyStrings.forever, (millisec == playTimeForever), () {
-                                if (millisec != playTimeForever) {
-                                  selectedModel.getModel()!.reservPlayTime();
-                                  selectedModel.getModel()!.playTime.set(playTimeForever);
-                                } else {
-                                  selectedModel.getModel()!.resetPlayTime();
-                                }
-                                setState(() {});
-                              }, 18, 2, 8, 2),
                               Visibility(
                                 visible: millisec != playTimeForever,
-                                child: Column(
+                                child: Row(
                                   children: [
-                                    Row(
-                                      children: [
-                                        myNumberTextField(
-                                            maxValue: 59,
-                                            width: 120,
-                                            textAlign: TextAlign.end,
-                                            hasDeleteButton: true,
-                                            hasCounterButton: true,
-                                            defaultValue: (sec % 60),
-                                            controller: secCon,
-                                            onEditingComplete: () {
-                                              _updateTime(selectedModel);
-                                            }),
-                                        SizedBox(width: 10),
-                                        Text(
-                                          MyStrings.seconds,
-                                          style: MyTextStyles.subtitle2,
-                                        ),
-                                      ],
+                                    myNumberTextField2(
+                                        width: 50,
+                                        height: 84,
+                                        maxValue: 59,
+                                        defaultValue: (sec % 60),
+                                        controller: secCon,
+                                        onEditingComplete: () {
+                                          _updateTime(selectedModel);
+                                        }),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      MyStrings.seconds,
+                                      style: MyTextStyles.subtitle2,
                                     ),
-                                    SizedBox(height: 10),
-                                    Row(
-                                      children: [
-                                        myNumberTextField(
-                                            maxValue: 59,
-                                            width: 120,
-                                            textAlign: TextAlign.end,
-                                            hasDeleteButton: true,
-                                            hasCounterButton: true,
-                                            defaultValue: (sec % (60 * 60) / 60).floorToDouble(),
-                                            controller: minCon,
-                                            onEditingComplete: () {
-                                              _updateTime(selectedModel);
-                                            }),
-                                        SizedBox(width: 10),
-                                        Text(
-                                          MyStrings.minutes,
-                                          style: MyTextStyles.subtitle2,
-                                        ),
-                                      ],
+                                    SizedBox(width: 10),
+                                    myNumberTextField2(
+                                        width: 50,
+                                        height: 84,
+                                        maxValue: 59,
+                                        defaultValue: (sec % (60 * 60) / 60).floorToDouble(),
+                                        controller: minCon,
+                                        onEditingComplete: () {
+                                          _updateTime(selectedModel);
+                                        }),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      MyStrings.minutes,
+                                      style: MyTextStyles.subtitle2,
                                     ),
-                                    SizedBox(height: 10),
-                                    Row(
-                                      children: [
-                                        myNumberTextField(
-                                            maxValue: 23,
-                                            width: 120,
-                                            textAlign: TextAlign.end,
-                                            hasDeleteButton: true,
-                                            hasCounterButton: true,
-                                            defaultValue: (sec / (60 * 60)).floorToDouble(),
-                                            controller: hourCon,
-                                            onEditingComplete: () {
-                                              _updateTime(selectedModel);
-                                            }),
-                                        SizedBox(width: 10),
-                                        Text(
-                                          MyStrings.hours,
-                                          style: MyTextStyles.subtitle2,
-                                        ),
-                                      ],
+                                    SizedBox(width: 10),
+                                    myNumberTextField2(
+                                        width: 50,
+                                        height: 84,
+                                        maxValue: 23,
+                                        defaultValue: (sec / (60 * 60)).floorToDouble(),
+                                        controller: hourCon,
+                                        onEditingComplete: () {
+                                          _updateTime(selectedModel);
+                                        }),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      MyStrings.hours,
+                                      style: MyTextStyles.subtitle2,
                                     ),
                                   ],
                                 ),

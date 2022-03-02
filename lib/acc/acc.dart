@@ -154,7 +154,7 @@ class ACC with ACCProperty {
     }
 
     containerOffset.set(Offset(dx, dy));
-    accManagerHolder?.notify();
+    //accManagerHolder!.notify();
   }
 
   void _setContainerOffsetAndSize(Offset offset, Size size) {
@@ -186,7 +186,7 @@ class ACC with ACCProperty {
 
     containerOffset.set(Offset(dx, dy));
     containerSize.set(Size(w, h));
-    accManagerHolder?.notify();
+    //accManagerHolder!.notify();
   }
 
   void _showACCMenu(BuildContext context) {
@@ -224,27 +224,46 @@ class ACC with ACCProperty {
           width: realSize.width + resizeButtonSize,
 
           child: GestureDetector(
-            onPanDown: (details) async {
-              ContentsModel? model = await accChild.playManager!.getCurrentModel();
-              if (model != null &&
-                  !isCorners(details.localPosition, marginSize, resizeButtonSize) &&
-                  !isRadius(details.localPosition, marginSize, resizeButtonSize / 2, realSize)) {
-                logHolder.log('Its contents click!!! ${model.key}', level: 5);
-                pageManagerHolder!.setAsContents();
-                selectedModelHolder!.setModel(model);
-                accManagerHolder!.setCurrentIndex(index, setAsAcc: false);
-              } else {
+            onLongPressDown: (details) {
+              logHolder.log("onLongPressDown", level: 7);
+              if (isCorners(details.localPosition, marginSize, resizeButtonSize) ||
+                  isRadius(details.localPosition, marginSize, resizeButtonSize / 2, realSize)) {
                 accManagerHolder!.setCurrentIndex(index);
-                logHolder.log('onPanDown:${details.localPosition}', level: 5);
+                return;
               }
-              _showACCMenu(context);
+              accChild.playManager!.getCurrentModel().then((model) {
+                if (model != null) {
+                  logHolder.log('Its contents click!!! ${model.key}', level: 5);
+                  selectedModelHolder!.setModel(model);
+                  pageManagerHolder!.setAsContents();
+                  accManagerHolder!.setCurrentIndex(index, setAsAcc: false);
+                } else {
+                  accManagerHolder!.setCurrentIndex(index);
+                  logHolder.log('onPanDown:${details.localPosition}', level: 5);
+                }
+                _showACCMenu(context);
+              });
             },
-            onTapDown: (details) {
-              // accManagerHolder!.setCurrentIndex(index);
-              logHolder.log('onTapDown:${details.localPosition}', level: 5);
-
-              // _showACCMenu(context);
-            },
+            // onPanDown: (details) {
+            //   logHolder.log("onPanDown", level: 7);
+            // if (isCorners(details.localPosition, marginSize, resizeButtonSize) ||
+            //     isRadius(details.localPosition, marginSize, resizeButtonSize / 2, realSize)) {
+            //   accManagerHolder!.setCurrentIndex(index);
+            //   return;
+            // }
+            // accChild.playManager!.getCurrentModel().then((model) {
+            //   if (model != null) {
+            //     logHolder.log('Its contents click!!! ${model.key}', level: 5);
+            //     selectedModelHolder!.setModel(model);
+            //     pageManagerHolder!.setAsContents();
+            //     accManagerHolder!.setCurrentIndex(index, setAsAcc: false);
+            //   } else {
+            //     accManagerHolder!.setCurrentIndex(index);
+            //     logHolder.log('onPanDown:${details.localPosition}', level: 5);
+            //   }
+            //   _showACCMenu(context);
+            // });
+            //},
             onPanStart: (details) {
               actionStart = true;
               logHolder.log('onPanStart:${details.localPosition}', level: 5);
@@ -270,7 +289,7 @@ class ACC with ACCProperty {
               }
               logHolder.log('onPanStart : ${details.localPosition}');
               mychangeStack.startTrans();
-              entry!.markNeedsBuild();
+              //entry!.markNeedsBuild();
               accManagerHolder!.unshowMenu(context);
             },
             onPanUpdate: (details) {
@@ -291,6 +310,7 @@ class ACC with ACCProperty {
               radiusActionStart = false;
               logHolder.log('onPanEnd:', level: 5);
               mychangeStack.endTrans();
+              accManagerHolder!.notify();
               invalidateContents();
             },
             child: Stack(
@@ -590,19 +610,19 @@ class ACC with ACCProperty {
     switch (cursor) {
       case CursorType.neRadius:
         radiusTopLeft.set(newRadius);
-        accManagerHolder?.notify();
+        accManagerHolder!.notifyAsync();
         return true;
       case CursorType.seRadius:
         radiusBottomLeft.set(newRadius);
-        accManagerHolder?.notify();
+        accManagerHolder!.notifyAsync();
         return true;
       case CursorType.nwRadius:
         radiusTopRight.set(newRadius);
-        accManagerHolder?.notify();
+        accManagerHolder!.notifyAsync();
         return true;
       case CursorType.swRadius:
         radiusBottomRight.set(newRadius);
-        accManagerHolder?.notify();
+        accManagerHolder!.notifyAsync();
         return true;
       default:
         break;

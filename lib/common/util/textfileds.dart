@@ -18,7 +18,7 @@ Widget myTextField(String value,
     TextStyle? style,
     bool hasDeleteButton = true,
     bool hasCounterButton = false,
-    TextAlign textAlign = TextAlign.start,
+    TextAlign textAlign = TextAlign.end,
     bool enabled = true,
     bool hasBorder = false,
     TextAlignVertical textAlignVertical = TextAlignVertical.top,
@@ -58,8 +58,8 @@ Widget myTextField(String value,
               onPressed: () {
                 int newVal = int.parse(controller.text);
                 newVal++;
-                if (maxValue > 0) {
-                  newVal = newVal % maxValue;
+                if (newVal > maxValue) {
+                  newVal = minValue;
                 }
                 controller.text = newVal.toString();
                 if (onEditingComplete != null) {
@@ -68,6 +68,7 @@ Widget myTextField(String value,
               },
             )
           : null,
+
       suffixIconConstraints: BoxConstraints.tight(Size(24, 24)),
       suffixIcon: hasDeleteButton
           ? hasCounterButton
@@ -80,8 +81,8 @@ Widget myTextField(String value,
                   onPressed: () {
                     int newVal = int.parse(controller.text);
                     newVal--;
-                    if (minValue < 0) {
-                      newVal = minValue;
+                    if (newVal < minValue) {
+                      newVal = maxValue;
                     }
                     controller.text = newVal.toString();
                     if (onEditingComplete != null) {
@@ -108,7 +109,7 @@ Widget myTextField(String value,
     onChanged: onChanged,
     onEditingComplete: onEditingComplete,
     onSubmitted: onSubmitted,
-    style: style,
+    //style: style,
   );
 }
 
@@ -122,8 +123,9 @@ Widget myNumberTextField({
   hasBorder = true,
   enabled = true,
   textAlign = TextAlign.end,
-  maxValue = 360,
+  maxValue = 359,
   minValue = 0,
+  limit = 5,
   TextAlignVertical textAlignVertical = TextAlignVertical.top,
 }) {
   //logHolder.log('_myNumberTextField($defaultValue)');
@@ -140,11 +142,113 @@ Widget myNumberTextField({
         hasBorder: hasBorder,
         keyboardType: TextInputType.number,
         textAlign: textAlign,
-        limit: 5,
+        limit: limit,
         controller: controller,
         style: MyTextStyles.body2,
         hasDeleteButton: hasDeleteButton,
         hasCounterButton: hasCounterButton,
         onEditingComplete: onEditingComplete),
   );
+}
+
+Widget myNumberTextField2({
+  required double defaultValue,
+  required TextEditingController controller,
+  required void Function()? onEditingComplete,
+  width = 75,
+  height = 90,
+  hasBorder = true,
+  enabled = true,
+  textAlign = TextAlign.center,
+  maxValue = 359,
+  minValue = 0,
+  limit = 5,
+  TextAlignVertical textAlignVertical = TextAlignVertical.top,
+}) {
+  int digit = defaultValue.floor();
+  controller.text = digit.toString();
+  return Container(
+      padding: EdgeInsets.zero,
+      width: width,
+      height: height,
+      //color: Colors.blue.withOpacity(0.7),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: width,
+            height: height / 3,
+            child: IconButton(
+              //constraints: BoxConstraints.tight(Size(width, 24)),
+              padding: EdgeInsets.zero,
+              color: MyColors.mainColor,
+              iconSize: 24,
+              icon: Icon(Icons.arrow_circle_up_outlined),
+              onPressed: () {
+                int newVal = int.parse(controller.text);
+                newVal++;
+                if (newVal > maxValue) {
+                  newVal = minValue;
+                }
+                controller.text = newVal.toString();
+                if (onEditingComplete != null) {
+                  onEditingComplete.call();
+                }
+              },
+            ),
+          ),
+          SizedBox(
+            width: width,
+            height: height / 3,
+            child: TextField(
+              enabled: enabled,
+              keyboardType: TextInputType.number,
+              controller: controller,
+              cursorColor: MyColors.mainColor,
+              textAlignVertical: textAlignVertical,
+              textAlign: textAlign,
+              decoration: InputDecoration(
+                border: hasBorder ? OutlineInputBorder(gapPadding: 0) : InputBorder.none,
+                enabledBorder: hasBorder
+                    ? OutlineInputBorder(
+                        borderSide: BorderSide(color: MyColors.primaryColor, width: 2.0),
+                      )
+                    : null,
+                focusedBorder: hasBorder
+                    ? OutlineInputBorder(
+                        borderSide: BorderSide(color: MyColors.mainColor, width: 2.0),
+                      )
+                    : null,
+              ),
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(limit),
+              ],
+              onEditingComplete: onEditingComplete,
+              //style: style,
+            ),
+          ),
+          SizedBox(
+            width: width,
+            height: height / 3,
+            child: IconButton(
+              //constraints: BoxConstraints.tight(Size(width, 24)),
+              padding: EdgeInsets.zero,
+              color: MyColors.mainColor,
+              iconSize: 24,
+              icon: Icon(Icons.arrow_circle_down_outlined),
+              onPressed: () {
+                int newVal = int.parse(controller.text);
+                newVal--;
+                if (newVal < minValue) {
+                  newVal = maxValue;
+                }
+                controller.text = newVal.toString();
+                if (onEditingComplete != null) {
+                  onEditingComplete.call();
+                }
+              },
+            ),
+          ),
+        ],
+      ));
 }

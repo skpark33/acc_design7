@@ -85,7 +85,7 @@ class ACCManager extends ChangeNotifier {
     return acc.primary.value;
   }
 
-  void unshowMenu(BuildContext context) {
+  Future<void> unshowMenu(BuildContext context) async {
     accMenu.unshow(context);
   }
 
@@ -384,6 +384,10 @@ class ACCManager extends ChangeNotifier {
   }
 
   void notify() {
+    notifyListeners();
+  }
+
+  Future<void> notifyAsync() async {
     notifyListeners();
   }
 

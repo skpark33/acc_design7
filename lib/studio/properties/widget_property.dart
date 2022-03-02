@@ -2,7 +2,7 @@
 //import 'dart:html';
 //import 'package:flutter/cupertino.dart';
 //import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
+//import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter_neumorphic_null_safety/flutter_neumorphic.dart';
@@ -783,6 +783,7 @@ class WidgetPropertyState extends State<WidgetProperty> with SingleTickerProvide
                           //acc.setCurrentDynamicSize(true);
                           acc.fixRatio.set(true);
                           acc.resizeCurrent();
+                          accManagerHolder!.unshowMenu(context);
                           setState(() {});
                         },
                         name: MyStrings.fitToContents,
@@ -793,6 +794,7 @@ class WidgetPropertyState extends State<WidgetProperty> with SingleTickerProvide
                   : Container(),
               myCheckBox(MyStrings.fixRatio, acc.fixRatio.value, () {
                 acc.fixRatio.set(!acc.fixRatio.value);
+                accManagerHolder!.unshowMenu(context);
                 acc.setState();
                 setState(() {});
               }, 10, 0, 10, 0),

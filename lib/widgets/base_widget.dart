@@ -106,7 +106,7 @@ class BaseWidgetState extends State<BaseWidget> {
               return errMsgWidget(snapshot);
             }
             logHolder.log(
-                'playTime===${snapshot.data!.model!.playTime}sec, ${snapshot.data!.model!.name}');
+                'playTime===${snapshot.data!.model!.playTime.value} sec, ${snapshot.data!.model!.name}');
 
             // if (pageManagerHolder!.isContents() &&
             //     accManagerHolder!.isCurrentIndex(snapshot.data!.acc.index)) {

@@ -6,7 +6,7 @@ MyLogger logHolder = MyLogger();
 
 class MyLogger {
   bool showLog = false;
-  int levelLimit = 5;
+  int levelLimit = 7;
   int maxMsg = 100;
   final veiwerKey = GlobalKey<DebugBarState>();
   Queue<String> msgList = ListQueue();

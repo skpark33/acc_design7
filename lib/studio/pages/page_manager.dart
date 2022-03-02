@@ -31,17 +31,17 @@ class PageManager extends ChangeNotifier {
     _propertyType = p;
   }
 
-  void setAsAcc() {
+  Future<void> setAsAcc() async {
     _propertyType = PropertyType.acc;
     notifyListeners();
   }
 
-  void setAsPage() {
+  Future<void> setAsPage() async {
     _propertyType = PropertyType.page;
     notifyListeners();
   }
 
-  void setAsContents() {
+  Future<void> setAsContents() async {
     _propertyType = PropertyType.contents;
     notifyListeners();
   }
