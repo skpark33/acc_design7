@@ -462,25 +462,47 @@ class ACC with ACCProperty {
 
     switch (cursor) {
       case CursorType.neResize:
+        return _sizeChanged(dx, dy, ratio, isAccSelected, 1);
       case CursorType.ncResize:
+        return _sizeChanged(0, dy, ratio, isAccSelected, -1);
       case CursorType.nwResize:
+        return _sizeChanged(dx, dy, ratio, isAccSelected, -1);
       case CursorType.mwResize:
+        return _sizeChanged(dx, 0, ratio, isAccSelected, 1);
       case CursorType.swResize:
+        return _sizeChanged(dx, dy, ratio, isAccSelected, 1);
       case CursorType.scResize:
+        return _sizeChanged(0, dy, ratio, isAccSelected, 1);
       case CursorType.seResize:
+        return _sizeChanged(dx, dy, ratio, isAccSelected, -1);
       case CursorType.meResize:
-        return _sizeChanged(dx, dy, ratio, isAccSelected);
+        return _sizeChanged(dx, 0, ratio, isAccSelected, -1);
       default:
         break;
     }
     return _radiusChanged(dx, dy, realSize);
   }
 
-  bool _sizeChanged(double dx, double dy, Size ratio, bool isAccSelected) {
+  bool _sizeChanged(double dx, double dy, Size ratio, bool isAccSelected, double fixedDirection) {
     double w = containerSize.value.width;
     double h = containerSize.value.height;
     double cx = containerOffset.value.dx;
     double cy = containerOffset.value.dy;
+
+    if (fixRatio.value == true) {
+      // dx,dy 중 크게 움직인 것에 따라 작게 움직인것의 비율이 결정된다.
+      double ratio = w / h;
+
+      if (dx.abs() >= dy.abs()) {
+        // x좌표를 끌어당긴 경우
+
+        dy = dx / ratio * fixedDirection;
+      } else {
+        // y좌표를 끌어당긴 경우
+
+        dx = dy * ratio * fixedDirection;
+      }
+    }
 
     if (!_validationCheck(true, dx, dy, cursor, isAccSelected, ratio)) {
       return true;
@@ -490,25 +512,25 @@ class ACC with ACCProperty {
     Offset afterOffset = Offset(cx, cy);
 
     List<Size> afterSizeList = [
-      Size((w - dx), (h - dy)),
-      Size(w, (h - dy)),
-      Size((w + dx), (h - dy)),
-      Size((w + dx), h),
-      Size((w + dx), (h + dy)),
-      Size(w, (h + dy)),
-      Size((w - dx), (h + dy)),
-      Size((w - dx), h)
+      Size((w - dx), (h - dy)), //ne
+      Size(w + dx, (h - dy)), //nc
+      Size((w + dx), (h - dy)), //nw
+      Size((w + dx), h + dy), //mw
+      Size((w + dx), (h + dy)), //sw
+      Size(w + dx, (h + dy)), //sc
+      Size((w - dx), (h + dy)), //se
+      Size((w - dx), h + dy) //me
     ];
 
     List<Offset> afterOffsetList = [
-      Offset((cx + dx), (cy + dy)),
-      Offset(cx, (cy + dy)),
-      Offset(cx, (cy + dy)),
-      Offset(cx, cy),
-      Offset(cx, cy),
-      Offset(cx, cy),
-      Offset((cx + dx), cy),
-      Offset((cx + dx), cy),
+      Offset((cx + dx), (cy + dy)), //ne
+      Offset(cx, (cy + dy)), //nc
+      Offset(cx, (cy + dy)), //nw
+      Offset(cx, cy), //mw
+      Offset(cx, cy), //sw
+      Offset((cx + dx), cy), //sc
+      Offset((cx + dx), cy), //se
+      Offset((cx + dx), cy), //me
     ];
 
     int i = 0;
@@ -677,6 +699,18 @@ class ACC with ACCProperty {
 
   Future<bool> getCurrentMute() {
     return accChild.playManager!.getCurrentMute();
+  }
+
+  Future<double> getCurrentAspectRatio() {
+    return accChild.playManager!.getCurrentAspectRatio();
+  }
+
+  Future<bool> getCurrentDynamicSize() {
+    return accChild.playManager!.getCurrentDynmicSize();
+  }
+
+  Future<void> setCurrentDynamicSize(bool dynamicSize) async {
+    await accChild.playManager!.setCurrentDynmicSize(dynamicSize);
   }
 
   Future<void> next({bool pause = false}) async {
@@ -854,7 +888,7 @@ class ACC with ACCProperty {
   }
 
   // ratio 에 맞게 resize 한다.
-  void resize(double ratio) {
+  void resize(double ratio, {bool invalidate = true}) {
     // 원본에서 ratio = w / h 이다.
     //width 와 height 중 짧은 쪽을 기준으로 해서,
     // 반대편을 ratio 만큼 늘린다.
@@ -862,16 +896,69 @@ class ACC with ACCProperty {
 
     double w = containerSize.value.width;
     double h = containerSize.value.height;
+
+    double pageHeight = page!.height.value.toDouble();
+    double pageWidth = page!.width.value.toDouble();
+
+    double dx = containerOffset.value.dx;
+    double dy = containerOffset.value.dy;
+
+    // ratio = w / h 이다.
     if (ratio >= 1) {
-      // 가로가 더 길다.
-      // w 에 맞추어 h 를 조정한다.
+      // 콘텐츠의 가로가 더 길다.
+      // 이 경우 페이지의 가로에 꽉차게 수정해준다.
+      w = pageWidth;
       h = w / ratio;
+      dx = 0;
+
+      if (h > pageHeight) {
+        h = pageHeight;
+        w = h * ratio;
+        dy = 0;
+      }
+      if (h == pageHeight) {
+        dy = 0;
+      }
     } else {
-      // h 에 맞추어 w 를 조정한다.
+      // 콘텐츠의 세로가 더 길다.
+      // 이 경우 페이지의 세로에 꽉차게 수정해준다.
+      h = pageHeight;
       w = h * ratio;
+      dy = 0;
+      if (w > pageWidth) {
+        w = pageWidth;
+        h = w / ratio;
+        dx = 0;
+      }
+      if (w == pageWidth) {
+        dx = 0;
+      }
     }
 
+    mychangeStack.startTrans();
+    containerOffset.set(Offset(dx, dy));
     containerSize.set(Size(w, h));
-    setState();
+    mychangeStack.endTrans();
+
+    if (invalidate) {
+      setState();
+    }
+  }
+
+  Future<void> resizeCurrent({bool invalidate = true}) async {
+    double ratio = await getCurrentAspectRatio();
+    if (ratio >= 0) {
+      resize(ratio, invalidate: invalidate);
+    }
+  }
+
+  bool hasContents() {
+    //bool hasContents = false;
+    if (accChild.playManager != null) {
+      if (accChild.playManager!.isNotEmpty()) {
+        return true;
+      }
+    }
+    return false;
   }
 }

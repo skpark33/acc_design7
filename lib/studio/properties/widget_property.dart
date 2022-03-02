@@ -1,6 +1,8 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, must_be_immutable
 //import 'dart:html';
 //import 'package:flutter/cupertino.dart';
+//import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter_neumorphic_null_safety/flutter_neumorphic.dart';
@@ -24,6 +26,7 @@ import 'package:acc_design7/common/buttons/dial_button.dart';
 import 'package:acc_design7/common/slider/opacity/opacity_slider.dart';
 import 'package:acc_design7/common/colorPicker/my_color_indicator.dart';
 import 'package:acc_design7/common/neumorphic/neumorphic.dart';
+import 'package:acc_design7/common/buttons/basic_button.dart';
 
 class ExapandableModel {
   ExapandableModel({
@@ -160,7 +163,7 @@ class WidgetPropertyState extends State<WidgetProperty> with SingleTickerProvide
   );
   ExapandableModel sizePosModel = ExapandableModel(
     title: MyStrings.widgetSize,
-    height: 130,
+    height: 180,
     width: 240,
   );
   ExapandableModel cornerModel = ExapandableModel(
@@ -766,15 +769,37 @@ class WidgetPropertyState extends State<WidgetProperty> with SingleTickerProvide
   Widget _sizePosRow(BuildContext context, ACC acc) {
     return Container(
         alignment: Alignment.topCenter,
-        child: Column(children: [
-          _locationRow(acc),
-          _sizeRow(acc),
-          myCheckBox(MyStrings.keepRatio, acc.fitToSourceRatio.value, () {
-            acc.fitToSourceRatio.set(!acc.fitToSourceRatio.value);
-            acc.setState();
-            setState(() {});
-          }, 18, 2, 8, 2),
-        ]));
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _locationRow(acc),
+              _sizeRow(acc),
+              acc.hasContents()
+                  ? Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: basicButton(
+                        onPressed: () {
+                          //acc.setCurrentDynamicSize(true);
+                          acc.fixRatio.set(true);
+                          acc.resizeCurrent();
+                          setState(() {});
+                        },
+                        name: MyStrings.fitToContents,
+                        iconData: Icons.fit_screen_outlined,
+                        alignment: Alignment.centerLeft,
+                      ),
+                    )
+                  : Container(),
+              myCheckBox(MyStrings.fixRatio, acc.fixRatio.value, () {
+                acc.fixRatio.set(!acc.fixRatio.value);
+                acc.setState();
+                setState(() {});
+              }, 10, 0, 10, 0),
+              SizedBox(
+                height: 10,
+              )
+            ]));
   }
 
   Widget _borderRow(BuildContext context, ACC acc) {

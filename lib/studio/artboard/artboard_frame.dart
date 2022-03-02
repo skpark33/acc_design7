@@ -137,7 +137,7 @@ class _ArtBoardScreenState extends State<ArtBoardScreen> {
                 child: DropZoneWidget(
                   onDroppedFile: (model) {
                     logHolder.log('contents added ${model.key}', level: 6);
-                    model.dynamicSize = true; // 동영상에 맞게 frame size 를 조절하라는 뜻
+                    model.dynamicSize.set(true); // 동영상에 맞게 frame size 를 조절하라는 뜻
                     MyMenuStickState.createACC(context, model);
                     //accChild.playManager!.push(this, model);
                   },

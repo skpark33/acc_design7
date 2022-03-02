@@ -112,5 +112,6 @@ class MyStrings {
   static String hours = Locale.isKr() ? '시' : "hours  ";
   static String forever = Locale.isKr() ? '영구히' : "forever";
   static String playTime = Locale.isKr() ? '플레이 타임 설정' : "playTime";
-  static String keepRatio = Locale.isKr() ? '콘텐츠 비율에 맞춤' : "Fit to contents ratio";
+  static String fitToContents = Locale.isKr() ? '콘텐츠 비율에 맞춤' : "Fit to contents ratio";
+  static String fixRatio = Locale.isKr() ? '가로 세로 비를 고정' : "Fixed aspect ratio";
 }

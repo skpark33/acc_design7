@@ -3,25 +3,26 @@
 import 'package:flutter/material.dart';
 import '../../constants/styles.dart';
 
-Widget basicButton(
-    {required void Function() onPressed,
-    required String name,
-    required IconData iconData,
-    AlignmentGeometry alignment = Alignment.bottomRight}) {
+Widget basicButton({
+  required void Function() onPressed,
+  required String name,
+  required IconData iconData,
+  AlignmentGeometry alignment = Alignment.bottomRight,
+}) {
   return Container(
-    height: MySizes.buttonHeight,
     alignment: alignment,
     child: OutlinedButton(
         style: OutlinedButton.styleFrom(
           elevation: 4.0,
           side: BorderSide(width: 1.0, color: MyColors.buttonBorder),
           backgroundColor: MyColors.buttonBG,
-          padding: EdgeInsets.fromLTRB(
-            MySizes.buttonHeight / 4,
-            MySizes.buttonHeight / 4,
-            MySizes.buttonHeight / 3,
-            MySizes.buttonHeight / 3,
-          ),
+          //padding: EdgeInsets.zero,
+          // padding: EdgeInsets.fromLTRB(
+          //   MySizes.buttonHeight / 4,
+          //   MySizes.buttonHeight / 4,
+          //   MySizes.buttonHeight / 3,
+          //   MySizes.buttonHeight / 5,
+          // ),
         ),
         onPressed: onPressed,
         child: Row(

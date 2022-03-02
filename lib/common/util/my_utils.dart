@@ -1,6 +1,8 @@
 import 'dart:ui';
 import 'dart:math';
-import 'package:flutter/material.dart';
+//import 'package:flutter/material.dart';
+import 'package:flutter_neumorphic_null_safety/flutter_neumorphic.dart';
+
 import 'package:acc_design7/constants/styles.dart';
 import 'package:acc_design7/common/util/logger.dart';
 //import 'package:acc_design7/constants/constants.dart';
@@ -95,6 +97,32 @@ Widget doubleSlider({
   );
 }
 
+Widget buildSwitches(String title, bool value, void Function(bool) onChanged) {
+  return Row(children: <Widget>[
+    Text(
+      title,
+      style: MyTextStyles.subtitle2,
+    ),
+    const SizedBox(width: 15),
+    Text(
+      "on ",
+      style: MyTextStyles.buttonText,
+    ),
+    NeumorphicSwitch(
+      value: value,
+      style: const NeumorphicSwitchStyle(
+        activeThumbColor: MyColors.mainColor,
+        thumbShape: NeumorphicShape.concave, // concave or flat with elevation
+      ),
+      onChanged: onChanged,
+    ),
+    Text(
+      " off",
+      style: MyTextStyles.buttonText,
+    ),
+  ]);
+}
+
 Widget myCheckBox(String title, bool value, void Function() onPressed, double left, double top,
     double right, double bottom) {
   return Row(
@@ -104,8 +132,8 @@ Widget myCheckBox(String title, bool value, void Function() onPressed, double le
         style: MyTextStyles.subtitle2,
       ),
       IconButton(
-        padding: const EdgeInsets.fromLTRB(18, 2, 8, 2),
-        iconSize: 32.0,
+        padding: EdgeInsets.fromLTRB(left, top, right, bottom),
+        iconSize: 30.0,
         icon: Icon(
           value == true ? Icons.task_alt_outlined : Icons.radio_button_unchecked_outlined,
           color: value == true ? MyColors.mainColor : Colors.grey,

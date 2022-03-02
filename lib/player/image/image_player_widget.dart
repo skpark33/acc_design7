@@ -101,7 +101,14 @@ class ImagePlayerWidgetState extends State<ImagePlayerWidget> {
     super.initState();
     WidgetsBinding.instance!.addPostFrameCallback((_) async {
       await _getImageInfo(widget.model!.url);
-      widget.acc.resize(widget.model!.aspectRatio); // 반드시 aspectorRatio 를 구한뒤에 해야한다.
+
+      if (widget.model!.dynamicSize.value) {
+        widget.model!.dynamicSize.set(false);
+        WidgetsBinding.instance!.addPostFrameCallback((_) {
+          logHolder.log("${widget.model!.aspectRatio}-------------------", level: 6);
+          widget.acc.resize(widget.model!.aspectRatio);
+        });
+      }
     });
   }
 

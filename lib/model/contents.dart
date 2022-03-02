@@ -36,7 +36,7 @@ class ContentsModel {
   double aspectRatio = 1;
 
   // 동영상의 크기에 맞게 frame 사이즈를 변경해야 하는 경우
-  bool dynamicSize = false;
+  UndoAble<bool> dynamicSize = UndoAble<bool>(false);
 
   // ignore: prefer_final_fields
   PlayState _state = PlayState.none;

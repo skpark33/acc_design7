@@ -139,6 +139,34 @@ class PlayManager {
     return type;
   }
 
+  Future<bool> getCurrentDynmicSize() async {
+    bool state = false;
+    await _lock.synchronized(() async {
+      if (_currentIndex >= 0 && _currentIndex < _playList.value.length) {
+        state = _playList.value[_currentIndex].model!.dynamicSize.value;
+      }
+    });
+    return state;
+  }
+
+  Future<double> getCurrentAspectRatio() async {
+    double aspectRatio = -1;
+    await _lock.synchronized(() async {
+      if (_currentIndex >= 0 && _currentIndex < _playList.value.length) {
+        aspectRatio = _playList.value[_currentIndex].model!.aspectRatio;
+      }
+    });
+    return aspectRatio;
+  }
+
+  Future<void> setCurrentDynmicSize(bool dynamicSize) async {
+    await _lock.synchronized(() async {
+      if (_currentIndex >= 0 && _currentIndex < _playList.value.length) {
+        _playList.value[_currentIndex].model!.dynamicSize.set(dynamicSize);
+      }
+    });
+  }
+
   Future<PlayState> getCurrentPlayState() async {
     PlayState state = PlayState.none;
     await _lock.synchronized(() async {
@@ -257,6 +285,7 @@ class PlayManager {
         baseWidget.invalidate();
       }
       logHolder.log('push(${model.key})=${_playList.value.length}');
+      accManagerHolder!.setState();
     });
   }
 

@@ -56,8 +56,9 @@ class ACCProperty {
   UndoAble<bool> _contentRotate = UndoAble<bool>(false);
   UndoAble<double> _opacity = UndoAble<double>(1);
   UndoAble<bool> _sourceRatio = UndoAble<bool>(false);
+  UndoAble<bool> _fixRatio = UndoAble<bool>(false);
   UndoAble<bool> _glass = UndoAble<bool>(false);
-  UndoAble<bool> _fitToSourceRatio = UndoAble<bool>(false);
+
   //UndoAbleList<ContentsModel> _contents = UndoAbleList<ContentsModel>([]);
 
   bool get visible => _visible;
@@ -79,7 +80,7 @@ class ACCProperty {
   UndoAble<double> get opacity => _opacity;
   UndoAble<bool> get glass => _glass;
   UndoAble<bool> get sourceRatio => _sourceRatio;
-  UndoAble<bool> get fitToSourceRatio => _fitToSourceRatio;
+  UndoAble<bool> get fixRatio => _fixRatio;
 
   //UndoAbleList<ContentsModel> get contents => _contents;
 
