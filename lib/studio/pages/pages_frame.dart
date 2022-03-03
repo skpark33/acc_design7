@@ -6,7 +6,7 @@ import '../../constants/styles.dart';
 import '../../constants/strings.dart';
 import '../../common/util/logger.dart';
 import 'package:acc_design7/common/buttons/basic_button.dart';
-//import 'package:acc_design7/widgets/card_flip.dart';
+import 'package:acc_design7/widgets/card_flip.dart';
 import 'page_list.dart';
 import 'page_manager.dart';
 
@@ -58,38 +58,38 @@ class _PageScreenState extends State<PagesFrame> {
               indent: 0,
               endIndent: 0,
             ),
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.all(5),
-                //color: MyColors.artBoardBgColor,
-                child: isListType
-                    ? PageSwipList(key: GlobalKey<PageSwipListState>())
-                    : Container(
-                        color: Colors.red,
-                        width: 310,
-                        height: 500,
-                        child: Text('second page'),
-                      ),
-              ),
-            ),
-            // TwinCardFlip(
-            //     firstPage: Container(
-            //       color: Colors.blue,
-            //       width: 310,
-            //       height: 500,
-            //       child: Container(
-            //         padding: EdgeInsets.all(5),
-            //         //color: MyColors.artBoardBgColor,
-            //         child: PageSwipList(key: GlobalKey<PageSwipListState>()),
-            //       ),
-            //     ),
-            //     secondPage: Container(
-            //       color: Colors.red,
-            //       width: 310,
-            //       height: 500,
-            //       child: Text('second page'),
-            //     ),
-            //     flip: isListType)
+            // Expanded(
+            //   child: Container(
+            //     padding: EdgeInsets.all(5),
+            //     //color: MyColors.artBoardBgColor,
+            //     child: isListType
+            //         ? PageSwipList(key: GlobalKey<PageSwipListState>())
+            //         : Container(
+            //             color: Colors.red,
+            //             width: 310,
+            //             height: 500,
+            //             child: Text('second page'),
+            //           ),
+            //   ),
+            // ),
+            TwinCardFlip(
+                firstPage: Container(
+                  color: Colors.blue,
+                  width: 310,
+                  height: height - 140,
+                  child: Container(
+                    padding: EdgeInsets.all(5),
+                    //color: MyColors.artBoardBgColor,
+                    child: PageSwipList(key: GlobalKey<PageSwipListState>()),
+                  ),
+                ),
+                secondPage: Container(
+                  color: Colors.red,
+                  width: 310,
+                  height: height - 140,
+                  child: Text('second page'),
+                ),
+                flip: isListType)
           ]),
           Padding(
             padding: EdgeInsets.only(right: 17, bottom: 40),
