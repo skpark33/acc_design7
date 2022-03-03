@@ -6,6 +6,7 @@ import '../../constants/styles.dart';
 import '../../constants/strings.dart';
 import '../../common/util/logger.dart';
 import 'package:acc_design7/common/buttons/basic_button.dart';
+//import 'package:acc_design7/widgets/card_flip.dart';
 import 'page_list.dart';
 import 'page_manager.dart';
 
@@ -18,10 +19,14 @@ class PagesFrame extends StatefulWidget {
 }
 
 class _PageScreenState extends State<PagesFrame> {
-  bool isListType = false;
+  bool isListType = true;
 
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
+    double height = MediaQuery.of(context).size.height;
+    logHolder.log('width=$width, height=$height', level: 6);
+
     return SafeArea(
       child: Container(
         color: MyColors.white,
@@ -39,7 +44,7 @@ class _PageScreenState extends State<PagesFrame> {
                         isListType = !isListType;
                       });
                     },
-                    icon: Icon(isListType ? Icons.grid_view : Icons.list_alt),
+                    icon: Icon(isListType ? Icons.list_alt : Icons.grid_view),
                     color: MyColors.icon,
                     iconSize: MySizes.smallIcon,
                   ),
@@ -57,14 +62,38 @@ class _PageScreenState extends State<PagesFrame> {
               child: Container(
                 padding: EdgeInsets.all(5),
                 //color: MyColors.artBoardBgColor,
-                child: PageSwipList(key: GlobalKey<PageSwipListState>()),
+                child: isListType
+                    ? PageSwipList(key: GlobalKey<PageSwipListState>())
+                    : Container(
+                        color: Colors.red,
+                        width: 310,
+                        height: 500,
+                        child: Text('second page'),
+                      ),
               ),
             ),
+            // TwinCardFlip(
+            //     firstPage: Container(
+            //       color: Colors.blue,
+            //       width: 310,
+            //       height: 500,
+            //       child: Container(
+            //         padding: EdgeInsets.all(5),
+            //         //color: MyColors.artBoardBgColor,
+            //         child: PageSwipList(key: GlobalKey<PageSwipListState>()),
+            //       ),
+            //     ),
+            //     secondPage: Container(
+            //       color: Colors.red,
+            //       width: 310,
+            //       height: 500,
+            //       child: Text('second page'),
+            //     ),
+            //     flip: isListType)
           ]),
           Padding(
             padding: EdgeInsets.only(right: 17, bottom: 40),
-            child:
-                Consumer<PageManager>(builder: (context, pageManager, child) {
+            child: Consumer<PageManager>(builder: (context, pageManager, child) {
               return basicButton(
                   name: MyStrings.pageAdd,
                   iconData: Icons.add,
@@ -78,6 +107,7 @@ class _PageScreenState extends State<PagesFrame> {
         ]),
       ),
     );
+    //});
     // child: SingleChildScrollView(
     //   padding: const EdgeInsets.all(defaultPadding),
     //   child: Container(
