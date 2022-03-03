@@ -122,9 +122,6 @@ class _ArtBoardScreenState extends State<ArtBoardScreen> {
                   ? MyColors.bgColor
                   : pageManagerHolder!.getSelected()!.bgColor.value,
               child: GestureDetector(
-                onTapUp: (details) {
-                  logHolder.log('artboard onTapUp : ${details.localPosition}', level: 6);
-                },
                 onPanDown: (details) {
                   if (pageManagerHolder != null) {
                     accManagerHolder!.setCurrentIndex(-1);

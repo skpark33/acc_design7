@@ -28,14 +28,25 @@ SelectedModel? selectedModelHolder;
 
 class SelectedModel extends ChangeNotifier {
   ContentsModel? _model;
+  final Lock _lock = Lock();
 
-  ContentsModel? getModel() {
-    return _model;
+  Future<ContentsModel?> getModel() async {
+    return await _lock.synchronized<ContentsModel?>(() async {
+      return _model;
+    });
   }
 
-  void setModel(ContentsModel m) {
-    _model = m;
-    notifyListeners();
+  Future<void> setModel(ContentsModel m) async {
+    await _lock.synchronized(() async {
+      _model = m;
+      notifyListeners();
+    });
+  }
+
+  Future<bool> isSelectedModel(ContentsModel m) async {
+    return await _lock.synchronized<bool>(() async {
+      return _model!.key == m.key;
+    });
   }
 }
 
@@ -285,6 +296,7 @@ class PlayManager {
         baseWidget.invalidate();
       }
       logHolder.log('push(${model.key})=${_playList.value.length}');
+      selectedModelHolder!.setModel(model);
       accManagerHolder!.setState();
     });
   }
@@ -456,6 +468,10 @@ class PlayManager {
           await _changeAnimePage();
         } // skpark carousel problem
         accManagerHolder!.resizeMenu(_playList.value[_currentIndex].model!.type);
+        if (pageManagerHolder!.isContents() &&
+            accManagerHolder!.isCurrentIndex(baseWidget.acc!.index)) {
+          selectedModelHolder!.setModel(_playList.value[_currentIndex].model!);
+        }
       }
     });
   }

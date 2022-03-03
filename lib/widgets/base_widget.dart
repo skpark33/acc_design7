@@ -139,6 +139,7 @@ class BaseWidgetState extends State<BaseWidget> {
           }),
 
       //imagePlayer.play(widget._currentModel!),
+      //),
     );
   }
 

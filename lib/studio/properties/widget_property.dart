@@ -3,6 +3,7 @@
 //import 'package:flutter/cupertino.dart';
 //import 'package:flutter/material.dart';
 //import 'package:flutter/cupertino.dart';
+import 'package:acc_design7/studio/pages/page_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter_neumorphic_null_safety/flutter_neumorphic.dart';
@@ -12,6 +13,7 @@ import 'package:acc_design7/acc/acc_manager.dart';
 import 'package:acc_design7/acc/acc_property.dart';
 import 'package:acc_design7/model/pages.dart';
 import 'package:acc_design7/studio/properties/property_selector.dart';
+import 'package:acc_design7/studio/properties/contents_property.dart';
 import 'package:acc_design7/constants/strings.dart';
 import 'package:acc_design7/constants/styles.dart';
 import 'package:acc_design7/model/users.dart';
@@ -387,6 +389,11 @@ class WidgetPropertyState extends State<WidgetProperty> with SingleTickerProvide
                     cornerModel.toggleSelected();
                   });
                 }),
+            divider(),
+            acc.hasContents() && pageManagerHolder!.isContents()
+                ? ContentsProperty(widget.key, widget.selectedPage, widget.isNarrow,
+                    widget.isLandscape, widget.parent)
+                : Container(),
           ],
         );
       }),
@@ -781,7 +788,7 @@ class WidgetPropertyState extends State<WidgetProperty> with SingleTickerProvide
                       child: basicButton(
                         onPressed: () {
                           //acc.setCurrentDynamicSize(true);
-                          acc.fixRatio.set(true);
+                          acc.isFixedRatio.set(true);
                           acc.resizeCurrent();
                           accManagerHolder!.unshowMenu(context);
                           setState(() {});
@@ -792,8 +799,8 @@ class WidgetPropertyState extends State<WidgetProperty> with SingleTickerProvide
                       ),
                     )
                   : Container(),
-              myCheckBox(MyStrings.fixRatio, acc.fixRatio.value, () {
-                acc.fixRatio.set(!acc.fixRatio.value);
+              myCheckBox(MyStrings.isFixedRatio, acc.isFixedRatio.value, () {
+                acc.isFixedRatio.set(!acc.isFixedRatio.value);
                 accManagerHolder!.unshowMenu(context);
                 acc.setState();
                 setState(() {});

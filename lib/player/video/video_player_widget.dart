@@ -128,17 +128,18 @@ class VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     setState(() {});
   }
 
+  Future<void> afterBuild() async {
+    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+      logHolder.log('afterBuild video', level: 6);
+      widget.model!.aspectRatio = widget.wcontroller!.value.aspectRatio;
+      widget.afterBuild();
+    });
+  }
+
   @override
   void initState() {
     super.initState();
-
-    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-      logHolder.log('initState video', level: 6);
-      widget.model!.setState(PlayState.init);
-      //   if (autoStart) {
-      //     logHolder.log('initState play');
-      //     widget.play();
-    });
+    afterBuild();
   }
 
   @override
@@ -161,65 +162,58 @@ class VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     return true;
   }
 
-  void afterBuild() {
-    if (widget.model!.dynamicSize.value) {
-      widget.model!.dynamicSize.set(false);
-      WidgetsBinding.instance!.addPostFrameCallback((_) {
-        logHolder.log("${widget.model!.aspectRatio}-------------------", level: 6);
-        widget.acc.resize(widget.model!.aspectRatio);
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     logHolder.log('VideoPlayerWidgetState', level: 5);
-
-    Size realSize = widget.acc.getRealSize();
-
     // aspectorRatio 는 실제 비디오의  넓이/높이 이다.
-    double videoRatio = widget.wcontroller!.value.aspectRatio;
-    widget.model!.aspectRatio = videoRatio;
-    afterBuild(); // 반드시 aspectorRatio 를 구한뒤에 해야한다.
+    Size outSize = widget.getOuterSize(widget.wcontroller!.value.aspectRatio);
 
-    double outerWidth = realSize.width;
-    double outerHeight = realSize.height;
-
-    if (!widget.acc.sourceRatio.value) {
-      if (videoRatio >= 1.0) {
-        outerWidth = videoRatio * outerWidth;
-        outerHeight = outerWidth * (1.0 / videoRatio);
-      } else {
-        outerHeight = (1.0 / videoRatio) * outerHeight;
-        outerWidth = videoRatio * outerHeight;
-      }
-    }
     return FutureBuilder(
         future: waitInit(),
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
-          return ClipRRect(
-              borderRadius: BorderRadius.only(
-                topRight: Radius.circular(widget.acc.radiusTopRight.value),
-                topLeft: Radius.circular(widget.acc.radiusTopLeft.value),
-                bottomRight: Radius.circular(widget.acc.radiusBottomRight.value),
-                bottomLeft: Radius.circular(widget.acc.radiusBottomLeft.value),
-              ),
-              child: //// widget.wcontroller!.value.isInitialized ?
-                  SizedBox.expand(
-                child: FittedBox(
-                    fit: BoxFit.cover,
-                    child: SizedBox(
-                      //width: realSize.width,
-                      //height: realSize.height,
-                      width: outerWidth,
-                      height: outerHeight,
-                      child: VideoPlayer(widget.wcontroller!, key: ValueKey(widget.model!.url)),
-                      //child: VideoPlayer(controller: widget.wcontroller!),
-                    )),
-              )
-              //: const Text('not init'),
-              );
-          //);
+          return widget.getClipRect(
+            outSize,
+            VideoPlayer(widget.wcontroller!, key: ValueKey(widget.model!.url)),
+          );
+          // return ClipRRect(
+          //   //clipper: MyContentsClipper(),
+          //   borderRadius: BorderRadius.only(
+          //     topRight: Radius.circular(widget.acc.radiusTopRight.value),
+          //     topLeft: Radius.circular(widget.acc.radiusTopLeft.value),
+          //     bottomRight: Radius.circular(widget.acc.radiusBottomRight.value),
+          //     bottomLeft: Radius.circular(widget.acc.radiusBottomLeft.value),
+          //   ),
+          //   child: //// widget.wcontroller!.value.isInitialized ?
+          //       SizedBox.expand(
+          //           child: FittedBox(
+          //     alignment: Alignment.center,
+          //     fit: BoxFit.cover,
+          //     child: SizedBox(
+          //       //width: realSize.width,
+          //       //height: realSize.height,
+          //       width: outSize.width,
+          //       height: outSize.height,
+          //       child: VideoPlayer(widget.wcontroller!, key: ValueKey(widget.model!.url)),
+          //       //child: VideoPlayer(controller: widget.wcontroller!),
+          //     ),
+          //   )),
+
+          //   //: const Text('not init'),
+          // );
         });
+  }
+}
+
+// my clipper example
+class MyContentsClipper extends CustomClipper<RRect> {
+  @override
+  RRect getClip(Size size) {
+    logHolder.log('MyContentsClipper=$size', level: 6);
+    return RRect.fromLTRBR(50, 50, 200, 200, const Radius.circular(20));
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<RRect> oldClipper) {
+    return false;
   }
 }

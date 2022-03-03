@@ -90,7 +90,7 @@ class MyTextStyles {
   static TextStyle get h5 =>
       myTextStyle.copyWith(fontSize: MyFontsSize.s24, fontWeight: FontWeight.w500, height: 36 / 24);
   static TextStyle get h6 => myTextStyle.copyWith(
-      fontSize: MyFontsSize.s20, fontWeight: FontWeight.w500, height: 30 / 20, letterSpacing: 0.15);
+      fontSize: MyFontsSize.s20, fontWeight: FontWeight.w500, height: 1.2, letterSpacing: 0.15);
   static TextStyle get subtitle1 =>
       myTextStyle.copyWith(fontSize: MyFontsSize.s16, height: 24 / 16, letterSpacing: 0.15);
   static TextStyle get subtitle2 =>

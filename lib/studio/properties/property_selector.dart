@@ -5,7 +5,7 @@ import 'package:acc_design7/model/pages.dart';
 import 'package:acc_design7/studio/pages/page_manager.dart';
 import 'package:acc_design7/studio/properties/page_property.dart';
 import 'package:acc_design7/studio/properties/widget_property.dart';
-import 'package:acc_design7/studio/properties/contents_property.dart';
+//import 'package:acc_design7/studio/properties/contents_property.dart';
 import 'package:acc_design7/studio/properties/properties_frame.dart';
 import 'package:acc_design7/common/util/logger.dart';
 
@@ -35,12 +35,12 @@ class PropertySelector extends StatefulWidget {
       logHolder.log("isPage", level: 2);
       return PageProperty(key, selectedPage, isNarrow, isLandscape, parent);
     }
-    if (pageManager.isAcc()) {
+    if (pageManager.isAcc() || pageManager.isContents()) {
       return WidgetProperty(key, selectedPage, isNarrow, isLandscape, parent);
     }
-    if (pageManager.isContents()) {
-      return ContentsProperty(key, selectedPage, isNarrow, isLandscape, parent);
-    }
+    // if (pageManager.isContents()) {
+    //   return ContentsProperty(key, selectedPage, isNarrow, isLandscape, parent);
+    // }
     return NullProperty(key, selectedPage, isNarrow, isLandscape, parent);
   }
 

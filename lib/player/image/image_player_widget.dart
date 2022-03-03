@@ -81,7 +81,7 @@ class ImagePlayerWidgetState extends State<ImagePlayerWidget> {
   }
 
 //Future<Image> _getImageInfo(String url) async {
-  Future<void> _getImageInfo(String url) async {
+  Future<double> _getImageInfo(String url) async {
     var response = await http.get(Uri.parse(url));
 
     final bytes = response.bodyBytes;
@@ -89,27 +89,24 @@ class ImagePlayerWidgetState extends State<ImagePlayerWidget> {
     final FrameInfo frame = await codec.getNextFrame();
     final uiImage = frame.image; // a ui.Image object, not to be confused with the Image widget
 
-    widget.model!.aspectRatio = uiImage.width / uiImage.height;
-    logHolder.log("getImageInfo = ${widget.model!.aspectRatio}", level: 6); // 200, ideally
+    return uiImage.width / uiImage.height;
     // Image _image;
     // _image = Image.memory(bytes);
     // return _image;
   }
 
+  Future<void> afterBuild() async {
+    WidgetsBinding.instance!.addPostFrameCallback((_) async {
+      logHolder.log('afterBuild image', level: 6);
+      widget.model!.aspectRatio = await _getImageInfo(widget.model!.url);
+      widget.afterBuild();
+    });
+  }
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance!.addPostFrameCallback((_) async {
-      await _getImageInfo(widget.model!.url);
-
-      if (widget.model!.dynamicSize.value) {
-        widget.model!.dynamicSize.set(false);
-        WidgetsBinding.instance!.addPostFrameCallback((_) {
-          logHolder.log("${widget.model!.aspectRatio}-------------------", level: 6);
-          widget.acc.resize(widget.model!.aspectRatio);
-        });
-      }
-    });
+    afterBuild();
   }
 
   @override
@@ -118,7 +115,6 @@ class ImagePlayerWidgetState extends State<ImagePlayerWidget> {
     double topRight = widget.acc.radiusTopRight.value;
     double bottomLeft = widget.acc.radiusBottomLeft.value;
     double bottomRight = widget.acc.radiusBottomRight.value;
-
     return Container(
       decoration: BoxDecoration(
           //shape: BoxShape.circle,

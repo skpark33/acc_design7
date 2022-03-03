@@ -80,7 +80,7 @@ class ACCProperty {
   UndoAble<double> get opacity => _opacity;
   UndoAble<bool> get glass => _glass;
   UndoAble<bool> get sourceRatio => _sourceRatio;
-  UndoAble<bool> get fixRatio => _fixRatio;
+  UndoAble<bool> get isFixedRatio => _fixRatio;
 
   //UndoAbleList<ContentsModel> get contents => _contents;
 

@@ -209,8 +209,6 @@ class ACC with ACCProperty {
     double mouseMargin = resizeButtonSize / 2;
     Size marginSize = Size(realSize.width + resizeButtonSize, realSize.height + resizeButtonSize);
 
-    //logHolder.log('showOverlay:$marginSize', level: 6);
-
     return Visibility(
         visible: (visible && !removed.value),
         child: Positioned(
@@ -367,7 +365,9 @@ class ACC with ACCProperty {
                 ),
                 CustomPaint(
                   painter: ResiablePainter(
+                      cursor,
                       isAccSelected, //accManagerHolder!.isCurrentIndex(index),
+                      isFixedRatio.value,
                       isInvisibleColorACC(),
                       bgColor.value,
                       //borderColor.value,
@@ -509,18 +509,28 @@ class ACC with ACCProperty {
     double cx = containerOffset.value.dx;
     double cy = containerOffset.value.dy;
 
-    if (fixRatio.value == true) {
+    bool isLimitW = false;
+    bool isLimitH = false;
+    if (isFixedRatio.value == true) {
       // dx,dy 중 크게 움직인 것에 따라 작게 움직인것의 비율이 결정된다.
       double ratio = w / h;
+      double pageH = page!.height.value.toDouble();
+      double pageW = page!.width.value.toDouble();
 
       if (dx.abs() >= dy.abs()) {
         // x좌표를 끌어당긴 경우
-
         dy = dx / ratio * fixedDirection;
+        if (dy + cy + h > pageH) {
+          // 한계에 부딧쳤기 때문에, 더 이상 값이 변할 수 없다.
+          isLimitH = true;
+        }
       } else {
         // y좌표를 끌어당긴 경우
-
         dx = dy * ratio * fixedDirection;
+        if (dx + cx + w > pageW) {
+          // 한계에 부딧쳤기 때문에, 더 이상 값이 변할 수 없다.
+          isLimitW = true;
+        }
       }
     }
 
@@ -563,6 +573,12 @@ class ACC with ACCProperty {
       i++;
     }
 
+    if (isLimitH && afterSize.height > containerSize.value.height) {
+      return true;
+    }
+    if (isLimitW && afterSize.width > containerSize.value.width) {
+      return true;
+    }
     if (afterSize.width * ratio.width > minAccSize &&
         afterSize.height * ratio.height > minAccSize) {
       _setContainerOffsetAndSize(
@@ -601,7 +617,7 @@ class ACC with ACCProperty {
 
     //newRadius += (dx.abs() + dy.abs()) * pi * direction;
     //newRadius += asin(dy.abs() / sqrt(dx * dx + dy * dy)) * (180 / pi) * direction;
-    //logHolder.log("newRadius=$newRadius", level: 6);
+
     newRadius += getDeltaRadiusPercent(realSize, dx, dy, direction);
 
     if (newRadius < 0) newRadius = 0;

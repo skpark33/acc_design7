@@ -6,12 +6,13 @@ import 'package:provider/provider.dart';
 import 'package:flutter_neumorphic_null_safety/flutter_neumorphic.dart';
 
 //import 'package:acc_design7/model/contents.dart';
-import 'package:acc_design7/common/util/logger.dart';
+//import 'package:acc_design7/common/util/logger.dart';
 import 'package:acc_design7/common/util/textfileds.dart';
 import 'package:acc_design7/model/contents.dart';
 import 'package:acc_design7/player/play_manager.dart';
 import 'package:acc_design7/model/pages.dart';
 import 'package:acc_design7/studio/properties/property_selector.dart';
+
 import 'package:acc_design7/studio/properties/properties_frame.dart';
 import 'package:acc_design7/common/util/my_utils.dart';
 import 'package:acc_design7/constants/strings.dart';
@@ -39,7 +40,7 @@ class ContentsProperty extends PropertySelector {
 }
 
 class ContentsPropertyState extends State<ContentsProperty> with SingleTickerProviderStateMixin {
-  final ScrollController _scrollController = ScrollController(initialScrollOffset: 0.0);
+  //final ScrollController _scrollController = ScrollController(initialScrollOffset: 0.0);
 
   TextEditingController secCon = TextEditingController();
   TextEditingController minCon = TextEditingController();
@@ -50,153 +51,183 @@ class ContentsPropertyState extends State<ContentsProperty> with SingleTickerPro
     super.initState();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scrollbar(
-        thickness: 8.0,
-        scrollbarOrientation: ScrollbarOrientation.left,
-        isAlwaysShown: true,
-        controller: _scrollController,
-        child: Consumer<SelectedModel>(builder: (context, selectedModel, child) {
-          double millisec = selectedModel.getModel()!.playTime.value;
-          if (selectedModel.getModel()!.isVideo()) {
-            millisec = selectedModel.getModel()!.videoPlayTime;
-          }
-          double sec = (millisec / 1000);
-          return ListView(controller: _scrollController, children: [
-            _titleRow(25, 15, 12, 10),
-            divider(),
-            Padding(
-                padding: const EdgeInsets.fromLTRB(25, 5, 5, 10),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      selectedModel.getModel()!.name,
-                      style: MyTextStyles.h6,
-                    ),
-                    smallDivider(height: 8, indent: 0, endIndent: 20),
-                    Text(
-                      '${selectedModel.getModel()!.type}',
-                      style: MyTextStyles.subtitle1,
-                    ),
-                    Text(
-                      selectedModel.getModel()!.size,
-                      style: MyTextStyles.subtitle1,
-                    ),
-                    Text(
-                      'width/height.${(selectedModel.getModel()!.aspectRatio * 100).round() / 100}',
-                      style: MyTextStyles.subtitle2,
-                    ),
-                    selectedModel.getModel()!.type == ContentsType.image
-                        ? Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              smallDivider(height: 8, indent: 0, endIndent: 20),
-                              Row(
-                                children: [
-                                  Text(
-                                    MyStrings.playTime,
-                                    style: MyTextStyles.subtitle1,
-                                  ),
-                                  SizedBox(
-                                    width: 15,
-                                  ),
-                                  myCheckBox(MyStrings.forever, (millisec == playTimeForever), () {
-                                    if (millisec != playTimeForever) {
-                                      selectedModel.getModel()!.reservPlayTime();
-                                      selectedModel.getModel()!.playTime.set(playTimeForever);
-                                    } else {
-                                      selectedModel.getModel()!.resetPlayTime();
-                                    }
-                                    setState(() {});
-                                  }, 8, 2, 0, 2),
-                                ],
-                              ),
-                              Visibility(
-                                visible: millisec != playTimeForever,
-                                child: Row(
-                                  children: [
-                                    myNumberTextField2(
-                                        width: 50,
-                                        height: 84,
-                                        maxValue: 59,
-                                        defaultValue: (sec % 60),
-                                        controller: secCon,
-                                        onEditingComplete: () {
-                                          _updateTime(selectedModel);
-                                        }),
-                                    SizedBox(width: 4),
-                                    Text(
-                                      MyStrings.seconds,
-                                      style: MyTextStyles.subtitle2,
-                                    ),
-                                    SizedBox(width: 10),
-                                    myNumberTextField2(
-                                        width: 50,
-                                        height: 84,
-                                        maxValue: 59,
-                                        defaultValue: (sec % (60 * 60) / 60).floorToDouble(),
-                                        controller: minCon,
-                                        onEditingComplete: () {
-                                          _updateTime(selectedModel);
-                                        }),
-                                    SizedBox(width: 4),
-                                    Text(
-                                      MyStrings.minutes,
-                                      style: MyTextStyles.subtitle2,
-                                    ),
-                                    SizedBox(width: 10),
-                                    myNumberTextField2(
-                                        width: 50,
-                                        height: 84,
-                                        maxValue: 23,
-                                        defaultValue: (sec / (60 * 60)).floorToDouble(),
-                                        controller: hourCon,
-                                        onEditingComplete: () {
-                                          _updateTime(selectedModel);
-                                        }),
-                                    SizedBox(width: 4),
-                                    Text(
-                                      MyStrings.hours,
-                                      style: MyTextStyles.subtitle2,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          )
-                        : Text(
-                            _toTimeString(sec),
-                            style: MyTextStyles.subtitle1,
-                          ),
-                    // Text(
-                    //   'sound.${selectedModel.getModel()!.volume}',
-                    // ),
-                  ],
-                )),
-          ]);
-        }));
+  Future<ContentsModel> waitContents(SelectedModel selectedModel) async {
+    ContentsModel? retval;
+    while (retval == null) {
+      retval = await selectedModel.getModel();
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+    return retval;
   }
 
-  void _updateTime(SelectedModel selectedModel) {
+  @override
+  Widget build(BuildContext context) {
+    //return
+    // Scrollbar(
+    //     thickness: 8.0,
+    //     scrollbarOrientation: ScrollbarOrientation.left,
+    //     isAlwaysShown: true,
+    //     controller: _scrollController,
+    //     child:
+    return Consumer<SelectedModel>(builder: (context, selectedModel, child) {
+      return FutureBuilder(
+          future: waitContents(selectedModel),
+          builder: (BuildContext context, AsyncSnapshot<ContentsModel> snapshot) {
+            if (snapshot.hasData == false) {
+              //해당 부분은 data를 아직 받아 오지 못했을때 실행되는 부분을 의미한다.
+              return emptyImage();
+            }
+            if (snapshot.hasError) {
+              //error가 발생하게 될 경우 반환하게 되는 부분
+              return errMsgWidget(snapshot);
+            }
+
+            ContentsModel model = snapshot.data!;
+
+            double millisec = model.playTime.value;
+            if (model.isVideo()) {
+              millisec = model.videoPlayTime;
+            }
+            double sec = (millisec / 1000);
+            return Column(children: [
+              //  titleRow(25, 15, 12, 10),
+              //  divider(),
+              Padding(
+                  padding: const EdgeInsets.fromLTRB(25, 5, 5, 10),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        model.name,
+                        style: MyTextStyles.h6,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      smallDivider(height: 8, indent: 0, endIndent: 20),
+                      Text(
+                        '${model.type}',
+                        style: MyTextStyles.subtitle1,
+                      ),
+                      Text(
+                        model.size,
+                        style: MyTextStyles.subtitle1,
+                      ),
+                      Text(
+                        'width/height.${(model.aspectRatio * 100).round() / 100}',
+                        style: MyTextStyles.subtitle2,
+                      ),
+                      model.type == ContentsType.image
+                          ? Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                smallDivider(height: 8, indent: 0, endIndent: 20),
+                                Row(
+                                  children: [
+                                    Text(
+                                      MyStrings.playTime,
+                                      style: MyTextStyles.subtitle1,
+                                    ),
+                                    SizedBox(
+                                      width: 15,
+                                    ),
+                                    myCheckBox(MyStrings.forever, (millisec == playTimeForever),
+                                        () {
+                                      if (millisec != playTimeForever) {
+                                        model.reservPlayTime();
+                                        model.playTime.set(playTimeForever);
+                                      } else {
+                                        model.resetPlayTime();
+                                      }
+                                      setState(() {});
+                                    }, 8, 2, 0, 2),
+                                  ],
+                                ),
+                                Visibility(
+                                  visible: millisec != playTimeForever,
+                                  child: Row(
+                                    children: [
+                                      myNumberTextField2(
+                                          width: 50,
+                                          height: 84,
+                                          maxValue: 59,
+                                          defaultValue: (sec % 60),
+                                          controller: secCon,
+                                          onEditingComplete: () {
+                                            _updateTime(model);
+                                          }),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        MyStrings.seconds,
+                                        style: MyTextStyles.subtitle2,
+                                      ),
+                                      SizedBox(width: 10),
+                                      myNumberTextField2(
+                                          width: 50,
+                                          height: 84,
+                                          maxValue: 59,
+                                          defaultValue: (sec % (60 * 60) / 60).floorToDouble(),
+                                          controller: minCon,
+                                          onEditingComplete: () {
+                                            _updateTime(model);
+                                          }),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        MyStrings.minutes,
+                                        style: MyTextStyles.subtitle2,
+                                      ),
+                                      SizedBox(width: 10),
+                                      myNumberTextField2(
+                                          width: 50,
+                                          height: 84,
+                                          maxValue: 23,
+                                          defaultValue: (sec / (60 * 60)).floorToDouble(),
+                                          controller: hourCon,
+                                          onEditingComplete: () {
+                                            _updateTime(model);
+                                          }),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        MyStrings.hours,
+                                        style: MyTextStyles.subtitle2,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Text(
+                              _toTimeString(sec),
+                              style: MyTextStyles.subtitle1,
+                            ),
+                      // Text(
+                      //   'sound.${model.volume}',
+                      // ),
+                    ],
+                  )),
+            ]);
+          });
+
+      //return ListView(controller: _scrollController, children: [
+    });
+    //);
+  }
+
+  void _updateTime(ContentsModel model) {
     setState(() {
       int sec = int.parse(secCon.text);
       int min = int.parse(minCon.text);
       int hour = int.parse(hourCon.text);
-      selectedModel.getModel()!.playTime.set((hour * 60 * 60 + min * 60 + sec) * 1000);
+      model.playTime.set((hour * 60 * 60 + min * 60 + sec) * 1000);
     });
-    logHolder.log('setPlayTime called ${selectedModel.getModel()!.playTime.value / 1000}',
-        level: 6);
   }
 
   String _toTimeString(double sec) {
     return '${(sec / (60 * 60)).floor()} hour ${(sec % (60 * 60) / 60).floor()} min ${(sec % 60).floor()} sec';
   }
 
-  Widget _titleRow(double left, double top, double right, double bottom) {
+  Widget titleRow(double left, double top, double right, double bottom) {
     return Padding(
       padding: EdgeInsets.fromLTRB(left, top, right, bottom),
       child: Text(

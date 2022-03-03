@@ -28,8 +28,10 @@ List<CursorType> radiusList = [
 
 class ResiablePainter extends CustomPainter {
   bool isAccSelected = false;
+  bool isFixedRatio = false;
   bool isInvisibleColorACC = false;
   Color bgColor;
+  final CursorType cursor;
 
   bool resizable = true;
   final Size widgetSize;
@@ -53,9 +55,12 @@ class ResiablePainter extends CustomPainter {
   Paint selectPaint = Paint();
   Paint linePaint = Paint();
   Paint linePaintBg = Paint();
+  Paint fixedPaint = Paint();
 
   ResiablePainter(
+      this.cursor,
       this.isAccSelected,
+      this.isFixedRatio,
       this.isInvisibleColorACC,
       this.bgColor,
       this.resizable,
@@ -75,18 +80,21 @@ class ResiablePainter extends CustomPainter {
     selectPaint.color = MyColors.primaryColor;
     linePaint.color = Colors.white;
     linePaintBg.color = MyColors.accBg;
+    fixedPaint.color = Colors.blue;
 
     bgPaint.style = PaintingStyle.fill;
     fgPaint.style = PaintingStyle.stroke;
     selectPaint.style = PaintingStyle.fill;
     linePaint.style = PaintingStyle.stroke;
     linePaintBg.style = PaintingStyle.stroke;
+    fixedPaint.style = PaintingStyle.stroke;
 
     bgPaint.strokeWidth = 2.0;
     fgPaint.strokeWidth = 2.0;
     selectPaint.strokeWidth = 3.0;
     linePaint.strokeWidth = 2.0;
     linePaintBg.strokeWidth = linePaint.strokeWidth;
+    fixedPaint.strokeWidth = 2.0;
 
     // shader example !!!!
     // ..shader = LinearGradient(
@@ -110,7 +118,6 @@ class ResiablePainter extends CustomPainter {
       return;
     }
 
-    //logHolder.log('paint $size', level: 6);
     double margin = resizeButtonSize / 2 + linePaint.strokeWidth;
     Rect rect = Rect.fromLTWH(
         margin,
@@ -144,7 +151,6 @@ class ResiablePainter extends CustomPainter {
       int i = 0;
       for (Offset center in centerList) {
         drawCircleHandle(canvas, center, resizeButtonSize / 2, isCornerHover[i]);
-
         i++;
       }
     }
@@ -174,9 +180,46 @@ class ResiablePainter extends CustomPainter {
     if (isSelected) {
       canvas.drawCircle(center, radius, selectPaint);
       canvas.drawCircle(center, radius - 2, fgPaint);
+      if (isFixedRatio) drawFixedRatioSymbol(canvas, center, radius, cursor);
     } else {
       canvas.drawCircle(center, radius / 2, bgPaint);
       canvas.drawCircle(center, radius / 2 - 1, fgPaint);
+    }
+  }
+
+  void drawFixedRatioSymbol(Canvas canvas, Offset center, double radius, CursorType cursor) {
+    Offset left = Offset(center.dx - resizeButtonSize / 2, center.dy);
+    Offset right = Offset(center.dx + resizeButtonSize / 2, center.dy);
+    Offset up = Offset(center.dx, center.dy - resizeButtonSize / 2);
+    Offset down = Offset(center.dx, center.dy + resizeButtonSize / 2);
+
+    switch (cursor) {
+      case CursorType.neResize:
+        canvas.drawLine(center, right, fixedPaint);
+        canvas.drawLine(center, down, fixedPaint);
+        break;
+      case CursorType.nwResize:
+        canvas.drawLine(left, center, fixedPaint);
+        canvas.drawLine(center, down, fixedPaint);
+        break;
+      case CursorType.seResize:
+        canvas.drawLine(center, right, fixedPaint);
+        canvas.drawLine(center, up, fixedPaint);
+        break;
+      case CursorType.swResize:
+        canvas.drawLine(left, center, fixedPaint);
+        canvas.drawLine(center, up, fixedPaint);
+        break;
+      case CursorType.ncResize:
+      case CursorType.scResize:
+        canvas.drawLine(left, right, fixedPaint);
+        break;
+      case CursorType.mwResize:
+      case CursorType.meResize:
+        canvas.drawLine(up, down, fixedPaint);
+        break;
+      default:
+        break;
     }
   }
 
