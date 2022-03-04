@@ -71,6 +71,7 @@ dev_dependencies:
   flutter_neumorphic_null_safety: ^3.2.4
   flutter_datetime_picker: ^1.5.1
   http: ^0.13.4
+  flutter_treeview: ^1.0.7+1
   
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

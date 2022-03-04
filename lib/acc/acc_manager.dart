@@ -469,4 +469,14 @@ class ACCManager extends ChangeNotifier {
     }
     return acc.isFullscreen();
   }
+
+  List<ACC> getAccList(int pageId) {
+    List<ACC> retval = [];
+    for (ACC acc in orderMap.values) {
+      if (acc.page!.id == pageId) {
+        retval.add(acc);
+      }
+    }
+    return retval;
+  }
 }

@@ -1,31 +1,39 @@
+import 'dart:ui';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:acc_design7/common/util/logger.dart';
 
+// ignore: must_be_immutable
 class TwinCardFlip extends StatefulWidget {
   final Widget firstPage;
   final Widget secondPage;
   final bool flip;
-  const TwinCardFlip({
+
+  TwinCardFlip({
     Key? key,
     required this.firstPage,
     required this.secondPage,
     required this.flip,
   }) : super(key: key);
 
+  bool isBack = true;
+  double angle = 0;
+
   @override
   _TwinCardFlipState createState() => _TwinCardFlipState();
 }
 
 class _TwinCardFlipState extends State<TwinCardFlip> {
-  bool isBack = true;
-  double angle = 0;
-
   @override
   void initState() {
     super.initState();
   }
 
+  Widget frostedEdged({required Widget child}) {
+    return ClipRRect(
+        //borderRadius: BorderRadius.circular(15.0),
+        child: BackdropFilter(filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0), child: child));
+  }
   // void _flip() {
   //   logHolder.log('card fliped--------------------------------------', level: 6);
   //   setState(() {
@@ -36,47 +44,49 @@ class _TwinCardFlipState extends State<TwinCardFlip> {
   @override
   Widget build(BuildContext context) {
     if (!widget.flip) {
-      angle = 0;
+      widget.angle = 0;
     } else {
-      angle = (angle + pi) % (2 * pi);
+      widget.angle = (widget.angle + pi) % (2 * pi);
     }
-    logHolder.log('angle=$angle-------------------------------------', level: 6);
+    logHolder.log('angle=${widget.flip}, ${widget.angle}-------------------------------------',
+        level: 6);
     return SafeArea(
-        child: Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          GestureDetector(
-            //onTap: _flip,
-            child: TweenAnimationBuilder(
-                tween: Tween<double>(begin: 0, end: angle),
-                duration: const Duration(seconds: 1),
-                builder: (BuildContext context, double val, __) {
-                  if (val >= (pi / 2)) {
-                    isBack = false;
-                  } else {
-                    isBack = true;
-                  }
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            GestureDetector(
+              //onTap: _flip,
+              child: TweenAnimationBuilder(
+                  tween: Tween<double>(begin: 0, end: widget.angle),
+                  duration: const Duration(milliseconds: 500),
+                  builder: (BuildContext context, double val, __) {
+                    if (val >= (pi / 2)) {
+                      widget.isBack = false;
+                    } else {
+                      widget.isBack = true;
+                    }
 
-                  return (Transform(
-                    alignment: Alignment.center,
-                    transform: Matrix4.identity()
-                      ..setEntry(3, 2, 0.001)
-                      ..rotateY(val),
-                    child: isBack
-                        ? Container(
-                            child: widget.firstPage,
-                          )
-                        : Transform(
-                            alignment: Alignment.center,
-                            transform: Matrix4.identity()..rotateY(pi),
-                            child: widget.secondPage,
-                          ),
-                  ));
-                }),
-          ),
-        ],
+                    return (Transform(
+                      alignment: Alignment.center,
+                      transform: Matrix4.identity()
+                        ..setEntry(3, 2, 0.001)
+                        ..rotateY(val),
+                      child: widget.isBack
+                          ? Container(
+                              child: widget.firstPage,
+                            )
+                          : Transform(
+                              alignment: Alignment.center,
+                              transform: Matrix4.identity()..rotateY(pi),
+                              child: widget.secondPage,
+                            ),
+                    ));
+                  }),
+            ),
+          ],
+        ),
       ),
-    ));
+    );
   }
 }

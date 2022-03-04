@@ -297,6 +297,7 @@ class ACC with ACCProperty {
                 if (_validationCheck(false, dx, dy, cursor, isAccSelected, ratio)) {
                   _setContainerOffset(
                       Offset((containerOffset.value.dx + dx), (containerOffset.value.dy + dy)));
+                  accManagerHolder!.notifyAsync();
                 }
               }
               entry!.markNeedsBuild();
@@ -558,7 +559,7 @@ class ACC with ACCProperty {
       Offset(cx, (cy + dy)), //nw
       Offset(cx, cy), //mw
       Offset(cx, cy), //sw
-      Offset((cx + dx), cy), //sc
+      Offset(cx, cy), //sc
       Offset((cx + dx), cy), //se
       Offset((cx + dx), cy), //me
     ];
@@ -583,6 +584,7 @@ class ACC with ACCProperty {
         afterSize.height * ratio.height > minAccSize) {
       _setContainerOffsetAndSize(
           Offset(afterOffset.dx, afterOffset.dy), Size(afterSize.width, afterSize.height));
+      accManagerHolder!.notifyAsync();
     }
     return true;
   }

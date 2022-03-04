@@ -1,9 +1,12 @@
-import 'package:acc_design7/acc/acc_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_treeview/flutter_treeview.dart';
+import 'package:sortedmap/sortedmap.dart';
 
+import 'package:acc_design7/acc/acc_manager.dart';
+import 'package:acc_design7/constants/strings.dart';
 import '../../model/pages.dart';
 import '../../common/undo/undo.dart';
-import 'package:sortedmap/sortedmap.dart';
+import '../../acc/acc.dart';
 
 enum PropertyType {
   page,
@@ -24,6 +27,7 @@ class PageManager extends ChangeNotifier {
   int pageIndex = 0;
   Map<int, PageModel> pageMap = <int, PageModel>{};
   SortedMap<int, PageModel> orderMap = SortedMap<int, PageModel>();
+  List<Node> nodes = [];
 
   PropertyType _propertyType = PropertyType.page;
   PropertyType get propertyType => _propertyType;
@@ -121,5 +125,37 @@ class PageManager extends ChangeNotifier {
 
   void setState() {
     notifyListeners();
+  }
+
+  List<Node> mapToNodes() {
+    //  Node(
+    //       label: 'documents',
+    //       key: 'docs',
+    //       expanded: docsOpen,
+    //       // ignore: dead_code
+    //       icon: docsOpen ? Icons.folder_open : Icons.folder,
+    //       children: [ ]
+    //  );
+    for (PageModel model in orderMap.values) {
+      if (model.isRemoved.value == false) {
+        String pageNo = (model.pageNo.value + 1).toString().padLeft(2, '0');
+        String desc = model.description.value;
+        if (desc.isEmpty) {
+          desc = MyStrings.title + ' $pageNo';
+        }
+        List<ACC> accList = accManagerHolder!.getAccList(model.id);
+        List<Node> accNodes = [];
+        for (ACC acc in accList) {
+          accNodes.add(Node(
+              key: acc.order.value.toString(), label: 'Frame ${acc.order.value}', data: model));
+        }
+        nodes.add(Node(
+            key: model.id.toString(),
+            label: 'Page $pageNo. $desc',
+            data: model,
+            children: accNodes));
+      }
+    }
+    return nodes;
   }
 }

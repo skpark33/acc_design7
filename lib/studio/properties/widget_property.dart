@@ -237,10 +237,10 @@ class WidgetPropertyState extends State<WidgetProperty> with SingleTickerProvide
             _sourceRatioRow(acc, 25, 5, 12, 5),
             divider(),
             sizePosModel.expandArea(
-                // open: acc.sizeActionStart,
-                // closeOthers: () {
-                //   unexpendAll(sizePosModel.title);
-                // },
+                open: acc.sizeActionStart,
+                closeOthers: () {
+                  unexpendAll(sizePosModel.title);
+                },
                 child: _sizePosRow(context, acc),
                 setStateFunction: () {
                   setState(() {
@@ -374,10 +374,10 @@ class WidgetPropertyState extends State<WidgetProperty> with SingleTickerProvide
                 }),
             divider(),
             cornerModel.expandArea(
-                //open: acc.radiusActionStart,
-                // closeOthers: () {
-                //  unexpendAll(cornerModel.title);
-                //},
+                open: acc.radiusActionStart,
+                closeOthers: () {
+                  unexpendAll(cornerModel.title);
+                },
                 child: _cornerRow(context, acc),
                 titleLineWidget: Text(
                   '${acc.radiusTopLeft.value.round()},${acc.radiusTopRight.value.round()},${acc.radiusBottomLeft.value.round()},${acc.radiusBottomRight.value.round()}',
