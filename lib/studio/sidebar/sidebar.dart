@@ -18,8 +18,7 @@ class SideBar extends StatefulWidget {
   _SideBarState createState() => _SideBarState();
 }
 
-class _SideBarState extends State<SideBar>
-    with SingleTickerProviderStateMixin<SideBar> {
+class _SideBarState extends State<SideBar> with SingleTickerProviderStateMixin<SideBar> {
   AnimationController? _animationController;
   StreamController<bool>? isSidebarOpenedStreamController;
   Stream<bool>? isSidebarOpenedStream;
@@ -29,8 +28,7 @@ class _SideBarState extends State<SideBar>
   @override
   void initState() {
     super.initState();
-    _animationController =
-        AnimationController(vsync: this, duration: _animationDuration);
+    _animationController = AnimationController(vsync: this, duration: _animationDuration);
     isSidebarOpenedStreamController = PublishSubject<bool>();
     isSidebarOpenedStream = isSidebarOpenedStreamController!.stream;
     isSidebarOpenedSink = isSidebarOpenedStreamController!.sink;
@@ -77,9 +75,7 @@ class _SideBarState extends State<SideBar>
           top: 0,
           bottom: 0,
           left: isSideBarOpenedAsync.data! ? 0 : -(menuWidth - clipWidth),
-          right: isSideBarOpenedAsync.data!
-              ? screenWidth - menuWidth
-              : screenWidth - clipWidth,
+          right: isSideBarOpenedAsync.data! ? screenWidth - menuWidth : screenWidth - clipWidth,
           //left: isSideBarOpenedAsync.data! ? 0 : -screenWidth,
           //right: isSideBarOpenedAsync.data! ? 0 : 500,
           child: Row(
@@ -102,9 +98,7 @@ class _SideBarState extends State<SideBar>
                       Text(
                         "skpark",
                         style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800),
+                            color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800),
                       ),
                       Text(
                         "skpark33333@gmail.com",
@@ -198,7 +192,7 @@ class _SideBarState extends State<SideBar>
                 ),
               ),
               Align(
-                alignment: const Alignment(0, -0.9),
+                alignment: const Alignment(0, -0.999),
                 child: GestureDetector(
                   onTap: () {
                     onIconPressed();

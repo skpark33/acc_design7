@@ -3,6 +3,7 @@ import 'dart:async';
 //import 'package:acc_design7/acc/acc_property.dart';
 import 'package:flutter/material.dart';
 import 'package:synchronized/synchronized.dart';
+import 'package:flutter_treeview/flutter_treeview.dart';
 //import 'package:uuid/uuid.dart';
 
 import 'package:acc_design7/common/util/logger.dart';
@@ -17,6 +18,8 @@ import 'package:acc_design7/model/contents.dart';
 //import 'package:acc_design7/acc/acc_manager.dart';
 import 'package:acc_design7/widgets/base_widget.dart';
 import 'package:acc_design7/studio/pages/page_manager.dart';
+import 'package:acc_design7/model/pages.dart';
+import 'package:acc_design7/constants/constants.dart';
 
 class CurrentData {
   ContentsType type = ContentsType.free;
@@ -534,5 +537,16 @@ class PlayManager {
 
   List<AbsPlayWidget> getPlayWidgetList() {
     return _playList.value;
+  }
+
+  List<Node> getContentsNodes(PageModel model) {
+    List<Node> conNodes = [];
+    for (AbsPlayWidget playWidget in _playList.value) {
+      conNodes.add(Node(
+          key: '$contentsPrefix${playWidget.model!.key}',
+          label: playWidget.model!.name,
+          data: model));
+    }
+    return conNodes;
   }
 }

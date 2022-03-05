@@ -6,7 +6,6 @@ import 'package:acc_design7/acc/acc_manager.dart';
 import 'package:acc_design7/constants/strings.dart';
 import '../../model/pages.dart';
 import '../../common/undo/undo.dart';
-import '../../acc/acc.dart';
 
 enum PropertyType {
   page,
@@ -143,12 +142,7 @@ class PageManager extends ChangeNotifier {
         if (desc.isEmpty) {
           desc = MyStrings.title + ' $pageNo';
         }
-        List<ACC> accList = accManagerHolder!.getAccList(model.id);
-        List<Node> accNodes = [];
-        for (ACC acc in accList) {
-          accNodes.add(Node(
-              key: acc.order.value.toString(), label: 'Frame ${acc.order.value}', data: model));
-        }
+        List<Node> accNodes = accManagerHolder!.getAccNodes(model);
         nodes.add(Node(
             key: model.id.toString(),
             label: 'Page $pageNo. $desc',

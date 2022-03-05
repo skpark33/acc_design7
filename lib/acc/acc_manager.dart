@@ -1,13 +1,17 @@
 import 'dart:ui' as ui;
 import 'dart:async';
 import 'dart:typed_data';
-import 'package:acc_design7/studio/pages/page_manager.dart';
 
-import '../model/contents.dart';
-import '../model/pages.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:sortedmap/sortedmap.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_treeview/flutter_treeview.dart';
+
+import 'package:acc_design7/studio/pages/page_manager.dart';
+import 'package:acc_design7/constants/constants.dart';
+
+import '../model/contents.dart';
+import '../model/pages.dart';
 
 import '../acc/acc.dart';
 import '../common/undo/undo.dart';
@@ -470,13 +474,30 @@ class ACCManager extends ChangeNotifier {
     return acc.isFullscreen();
   }
 
-  List<ACC> getAccList(int pageId) {
-    List<ACC> retval = [];
+  /*
+List<ACC> accList = accManagerHolder!.getAccList(model.id);
+        List<Node> accNodes = [];
+        for (ACC acc in accList) {
+          String accNo = acc.order.value.toString().padLeft(2, '0');
+          acc.accChild.playManager.getNodes();
+
+          accNodes
+              .add(Node(key: '$accPrefix${acc.order.value}', label: 'Frame $accNo', data: model));
+        }
+        */
+  List<Node> getAccNodes(PageModel model) {
+    List<Node> accNodes = [];
     for (ACC acc in orderMap.values) {
-      if (acc.page!.id == pageId) {
-        retval.add(acc);
+      if (acc.page!.id == model.id) {
+        String accNo = acc.order.value.toString().padLeft(2, '0');
+        List<Node> conNodes = acc.accChild.playManager!.getContentsNodes(model);
+        accNodes.add(Node(
+            key: '$accPrefix${acc.order.value}',
+            label: 'Frame $accNo',
+            data: model,
+            children: conNodes));
       }
     }
-    return retval;
+    return accNodes;
   }
 }

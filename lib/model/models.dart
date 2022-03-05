@@ -1,19 +1,35 @@
 import 'package:flutter/material.dart';
-import '../common/util/logger.dart';
+import 'package:uuid/uuid.dart';
+//import '../common/util/logger.dart';
 
-class ModelChanged extends ChangeNotifier {
-  static int changedPages = -1;
+enum ModelType { page, acc, contents }
 
-  factory ModelChanged.sigleton() {
-    return ModelChanged();
+abstract class AbsModel {
+  String mid = '';
+  GlobalKey key = GlobalKey();
+  final ModelType type;
+
+  AbsModel({required this.type}) {
+    mid = const Uuid().v4(); // random uuid genearate
   }
-
-  ModelChanged() {
-    logHolder.log('PageModelChanged instantiate');
-  }
-
-  void repaintPages(int pageNo) {
-    changedPages = pageNo;
-    notifyListeners();
-  }
+  // AbsModel.create({required this.mid, required this.type}) {
+  //   key = ValueKey(mid);
+  // }
 }
+
+// class ModelChanged extends ChangeNotifier {
+//   static int changedPages = -1;
+
+//   factory ModelChanged.sigleton() {
+//     return ModelChanged();
+//   }
+
+//   ModelChanged() {
+//     logHolder.log('PageModelChanged instantiate');
+//   }
+
+//   void repaintPages(int pageNo) {
+//     changedPages = pageNo;
+//     notifyListeners();
+//   }
+// }

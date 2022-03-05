@@ -78,7 +78,7 @@ class ResiablePainter extends CustomPainter {
     bgPaint.color = MyColors.gray02.withOpacity(.7);
     fgPaint.color = Colors.white;
     selectPaint.color = MyColors.primaryColor;
-    linePaint.color = Colors.white;
+    linePaint.color = MyColors.primaryColor;
     linePaintBg.color = MyColors.accBg;
     fixedPaint.color = Colors.blue;
 
@@ -92,7 +92,7 @@ class ResiablePainter extends CustomPainter {
     bgPaint.strokeWidth = 2.0;
     fgPaint.strokeWidth = 2.0;
     selectPaint.strokeWidth = 3.0;
-    linePaint.strokeWidth = 2.0;
+    linePaint.strokeWidth = 3.0;
     linePaintBg.strokeWidth = linePaint.strokeWidth;
     fixedPaint.strokeWidth = 2.0;
 
