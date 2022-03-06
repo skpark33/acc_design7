@@ -13,5 +13,5 @@ const double magnetic = 4;
 const int maxInteger = (1 << 63);
 const double playTimeForever = -1;
 
-const String accPrefix = 'ACC-';
-const String contentsPrefix = 'CON-';
+const String accPrefix = 'ACC=';
+const String contentsPrefix = 'CON=';

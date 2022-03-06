@@ -126,7 +126,7 @@ class PageManager extends ChangeNotifier {
     notifyListeners();
   }
 
-  List<Node> mapToNodes() {
+  List<Node> toNodes(PageModel? selectedModel) {
     //  Node(
     //       label: 'documents',
     //       key: 'docs',
@@ -142,11 +142,12 @@ class PageManager extends ChangeNotifier {
         if (desc.isEmpty) {
           desc = MyStrings.title + ' $pageNo';
         }
-        List<Node> accNodes = accManagerHolder!.getAccNodes(model);
+        List<Node> accNodes = accManagerHolder!.toNodes(model);
         nodes.add(Node(
             key: model.id.toString(),
             label: 'Page $pageNo. $desc',
             data: model,
+            expanded: (selectedModel != null && model.id == selectedModel.id),
             children: accNodes));
       }
     }

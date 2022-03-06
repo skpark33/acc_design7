@@ -172,6 +172,7 @@ class ACCManager extends ChangeNotifier {
       acc.setDirty(false);
     }
     setState();
+    pageManagerHolder!.setState(); // Tree 순서를 바꾸기 위해
     // List<OverlayEntry> newEntries = [];
     // for (ACC acc in orderMap.values) {
     //   newEntries.add(acc.entry!);
@@ -485,16 +486,17 @@ List<ACC> accList = accManagerHolder!.getAccList(model.id);
               .add(Node(key: '$accPrefix${acc.order.value}', label: 'Frame $accNo', data: model));
         }
         */
-  List<Node> getAccNodes(PageModel model) {
+  List<Node> toNodes(PageModel model) {
     List<Node> accNodes = [];
     for (ACC acc in orderMap.values) {
       if (acc.page!.id == model.id) {
-        String accNo = acc.order.value.toString().padLeft(2, '0');
-        List<Node> conNodes = acc.accChild.playManager!.getContentsNodes(model);
+        String accNo = acc.index.toString().padLeft(2, '0');
+        List<Node> conNodes = acc.accChild.playManager!.toNodes(model);
         accNodes.add(Node(
-            key: '$accPrefix${acc.order.value}',
+            key: '$accPrefix$accNo',
             label: 'Frame $accNo',
             data: model,
+            expanded: accManagerHolder != null && accManagerHolder!.isCurrentIndex(acc.index),
             children: conNodes));
       }
     }

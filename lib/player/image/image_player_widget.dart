@@ -81,13 +81,18 @@ class ImagePlayerWidgetState extends State<ImagePlayerWidget> {
   }
 
 //Future<Image> _getImageInfo(String url) async {
+
   Future<double> _getImageInfo(String url) async {
+    logHolder.log('_getImageInfo', level: 6);
+
     var response = await http.get(Uri.parse(url));
 
     final bytes = response.bodyBytes;
     final Codec codec = await instantiateImageCodec(bytes);
     final FrameInfo frame = await codec.getNextFrame();
     final uiImage = frame.image; // a ui.Image object, not to be confused with the Image widget
+
+    logHolder.log('_getImageInfo end', level: 6);
 
     return uiImage.width / uiImage.height;
     // Image _image;
@@ -100,6 +105,7 @@ class ImagePlayerWidgetState extends State<ImagePlayerWidget> {
       logHolder.log('afterBuild image', level: 6);
       widget.model!.aspectRatio = await _getImageInfo(widget.model!.url);
       widget.afterBuild();
+      logHolder.log('afterBuild image end', level: 6);
     });
   }
 

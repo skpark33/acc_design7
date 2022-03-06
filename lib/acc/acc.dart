@@ -229,18 +229,7 @@ class ACC with ACCProperty {
                 accManagerHolder!.setCurrentIndex(index);
                 return;
               }
-              accChild.playManager!.getCurrentModel().then((model) {
-                if (model != null) {
-                  logHolder.log('Its contents click!!! ${model.key}', level: 5);
-                  selectedModelHolder!.setModel(model);
-                  pageManagerHolder!.setAsContents();
-                  accManagerHolder!.setCurrentIndex(index, setAsAcc: false);
-                } else {
-                  accManagerHolder!.setCurrentIndex(index);
-                  logHolder.log('onPanDown:${details.localPosition}', level: 5);
-                }
-                _showACCMenu(context);
-              });
+              selectContents(context, index);
             },
             // onPanDown: (details) {
             //   logHolder.log("onPanDown", level: 7);
@@ -437,6 +426,35 @@ class ACC with ACCProperty {
             ),
           ),
         ));
+  }
+
+  void selectContents(BuildContext context, int accId, {int contentsIdx = -1}) {
+    if (contentsIdx >= 0) {
+      accChild.playManager!.getModel(contentsIdx).then((model) {
+        if (model != null) {
+          logHolder.log('Its contents click!!! ${model.key}', level: 5);
+          selectedModelHolder!.setModel(model);
+          pageManagerHolder!.setAsContents();
+          accManagerHolder!.setCurrentIndex(accId, setAsAcc: false);
+          accChild.playManager!.next(pause: true, until: contentsIdx);
+        } else {
+          accManagerHolder!.setCurrentIndex(accId);
+        }
+        _showACCMenu(context);
+      });
+    } else {
+      accChild.playManager!.getCurrentModel().then((model) {
+        if (model != null) {
+          logHolder.log('Its contents click!!! ${model.key}', level: 5);
+          selectedModelHolder!.setModel(model);
+          pageManagerHolder!.setAsContents();
+          accManagerHolder!.setCurrentIndex(accId, setAsAcc: false);
+        } else {
+          accManagerHolder!.setCurrentIndex(accId);
+        }
+        _showACCMenu(context);
+      });
+    }
   }
 
   NeumorphicBoxShape _getBoxShape(Size realSize) {

@@ -42,6 +42,7 @@ abstract class AbsPlayWidget extends StatefulWidget {
   }
 
   Future<void> afterBuild() async {
+    if (model == null) return;
     model!.setState(PlayState.init);
     if (model!.dynamicSize.value) {
       model!.dynamicSize.set(false);

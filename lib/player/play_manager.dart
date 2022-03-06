@@ -407,7 +407,7 @@ class PlayManager {
     });
   }
 
-  Future<void> next({bool pause = false}) async {
+  Future<void> next({bool pause = false, int until = -1}) async {
     await _lock.synchronized(() async {
       if (_playList.value.isNotEmpty) {
         int prevIndex = _currentIndex;
@@ -417,7 +417,11 @@ class PlayManager {
             await _playList.value[_currentIndex].pause();
           }
         }
-        _currentIndex++;
+        if (until >= 0) {
+          _currentIndex = until;
+        } else {
+          _currentIndex++;
+        }
         if (_currentIndex >= _playList.value.length) {
           _currentIndex = 0;
         }
@@ -528,8 +532,18 @@ class PlayManager {
   Future<ContentsModel?> getCurrentModel() async {
     ContentsModel? retval;
     await _lock.synchronized(() async {
-      if (currentIndex >= 0) {
-        retval = _playList.value[currentIndex].model;
+      if (_currentIndex >= 0) {
+        retval = _playList.value[_currentIndex].model;
+      }
+    });
+    return retval;
+  }
+
+  Future<ContentsModel?> getModel(int contentsIdx) async {
+    ContentsModel? retval;
+    await _lock.synchronized(() async {
+      if (contentsIdx >= 0 && contentsIdx < _playList.value.length) {
+        retval = _playList.value[contentsIdx].model;
       }
     });
     return retval;
@@ -539,13 +553,18 @@ class PlayManager {
     return _playList.value;
   }
 
-  List<Node> getContentsNodes(PageModel model) {
+  List<Node> toNodes(PageModel model) {
     List<Node> conNodes = [];
+    int idx = 0;
     for (AbsPlayWidget playWidget in _playList.value) {
+      String accNo = baseWidget.acc!.index.toString().padLeft(2, '0');
+      String idxStr = idx.toString().padLeft(2, '0');
       conNodes.add(Node(
-          key: '$contentsPrefix${playWidget.model!.key}',
+          key: '$accPrefix$accNo/$contentsPrefix$idxStr/${playWidget.model!.key}',
           label: playWidget.model!.name,
+          //expanded: (currentIndex == idx),
           data: model));
+      idx++;
     }
     return conNodes;
   }

@@ -36,8 +36,10 @@ class BaseWidget extends StatefulWidget {
   BaseWidgetState createState() => BaseWidgetState();
 
   void invalidate() {
-    //logHolder.log('BaseWidget::invalidate');
-    baseWidgetKey.currentState!.invalidate();
+    if (baseWidgetKey.currentState != null) {
+      logHolder.log('BaseWidget::invalidate');
+      baseWidgetKey.currentState!.invalidate();
+    }
     playManager!.invalidate();
   }
 

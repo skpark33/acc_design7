@@ -102,7 +102,8 @@ class _PageScreenState extends State<PagesFrame> {
                     logHolder.log('item is empty');
                     return Container();
                   }
-                  getSampleNode();
+
+                  getSampleNode(pageManager.getSelected());
 
                   return SizedBox(
                       //color: Colors.blue,
@@ -140,7 +141,7 @@ class _PageScreenState extends State<PagesFrame> {
     // ),
   }
 
-  void getSampleNode() {
+  void getSampleNode(PageModel? selectedModel) {
     //bool docsOpen = true;
 //     _nodes = [
 //       Node(
@@ -208,7 +209,7 @@ class _PageScreenState extends State<PagesFrame> {
       if (_nodes != null) {
         _nodes!.clear();
       }
-      _nodes = pageManagerHolder!.mapToNodes();
+      _nodes = pageManagerHolder!.toNodes(selectedModel);
     } else {
       logHolder.log('pageManagerHolder is not inited', level: 6);
       _nodes = [
