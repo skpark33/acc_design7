@@ -85,8 +85,18 @@ class PageManager extends ChangeNotifier {
     pageIndex++;
   }
 
-  void removePage(int pageIndex) {
-    pageMap[pageIndex]!.setIsRemoved(true);
+  void removePage(int idx) {
+    if (pageMap[idx] == null) {
+      return;
+    }
+    mychangeStack.startTrans();
+    for (PageModel model in pageMap.values) {
+      if (model.pageNo.value > pageMap[idx]!.pageNo.value) {
+        model.pageNo.set(model.pageNo.value - 1);
+      }
+    }
+    pageMap[idx]!.setIsRemoved(true);
+    mychangeStack.endTrans();
   }
 
   changeOrder(int newIndex, int oldIndex) {
