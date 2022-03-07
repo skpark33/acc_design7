@@ -130,7 +130,7 @@ ui.Image? _gridImage;
 Future<ui.Image> getGridImage() {
   if (_gridImage != null) return Future.value(_gridImage!);
   final completer = Completer<ui.Image>();
-  const AssetImage('grid.png')
+  const AssetImage('assets/grid.png')
       .resolve(const ImageConfiguration())
       .addListener(ImageStreamListener((ImageInfo info, bool _) {
     _gridImage = info.image;

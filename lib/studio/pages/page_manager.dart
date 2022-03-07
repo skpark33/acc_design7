@@ -140,7 +140,7 @@ class PageManager extends ChangeNotifier {
         String pageNo = (model.pageNo.value + 1).toString().padLeft(2, '0');
         String desc = model.description.value;
         if (desc.isEmpty) {
-          desc = MyStrings.title + ' $pageNo';
+          desc = MyStrings.title + ' ${model.id + 1}';
         }
         List<Node> accNodes = accManagerHolder!.toNodes(model);
         nodes.add(Node(

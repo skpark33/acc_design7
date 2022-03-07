@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
+//import 'package:uuid/uuid.dart';
 //import '../common/util/logger.dart';
 
 enum ModelType { page, acc, contents }
 
 abstract class AbsModel {
-  String mid = '';
+  int mid = 0;
   GlobalKey key = GlobalKey();
   final ModelType type;
 
   AbsModel({required this.type}) {
-    mid = const Uuid().v4(); // random uuid genearate
+    // random uuid genearate
   }
   // AbsModel.create({required this.mid, required this.type}) {
   //   key = ValueKey(mid);

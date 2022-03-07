@@ -35,7 +35,7 @@ flutter run -d chrome --web-renderer html
 flutter build web --web-renderer html --release --base-href="/accTest0390/"
 
 ## first time after create repository
-cd ../release/accTest0390/web
+cd ../release/accTest0391/web
 echo "# accTest0390" >> README.md
 git init
 git add .
