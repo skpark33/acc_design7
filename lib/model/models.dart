@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
-//import 'package:uuid/uuid.dart';
+import 'package:uuid/uuid.dart';
 //import '../common/util/logger.dart';
+//import '../../constants/constants.dart';
 
 enum ModelType { page, acc, contents }
 
 abstract class AbsModel {
-  int mid = 0;
-  GlobalKey key = GlobalKey();
+  String mid = '';
+  final GlobalKey key = GlobalKey();
   final ModelType type;
 
   AbsModel({required this.type}) {
-    // random uuid genearate
+    if (type == ModelType.page) {
+      mid = "Page=";
+    }
+    mid += const Uuid().v4();
   }
-  // AbsModel.create({required this.mid, required this.type}) {
-  //   key = ValueKey(mid);
-  // }
 }
 
 // class ModelChanged extends ChangeNotifier {
